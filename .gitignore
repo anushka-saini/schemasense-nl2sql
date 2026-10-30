@@ -1,0 +1,12 @@
+# secrets
+.env
+
+# data (csvs are large, db is rebuilt by src/load_db.py)
+data/raw/
+data/olist.db
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
