@@ -1,0 +1,521 @@
+data checks run at 2026-10-30 23:57:42 on olist.db
+
+================================================================================
+C01 customer_id unique in customers? and how many real people (customer_unique_id)
+--------------------------------------------------------------------------------
+SELECT COUNT(*) AS n_rows, COUNT(DISTINCT customer_id) AS n_customer_id,
+               COUNT(DISTINCT customer_unique_id) AS n_customer_unique_id
+        FROM customers
+--------------------------------------------------------------------------------
+ n_rows  n_customer_id  n_customer_unique_id
+  99441          99441                 96096
+
+================================================================================
+C02 is customer_id one-per-order in orders?
+--------------------------------------------------------------------------------
+SELECT COUNT(*) AS n_orders, COUNT(DISTINCT order_id) AS n_order_id,
+               COUNT(DISTINCT customer_id) AS n_customer_id
+        FROM orders
+--------------------------------------------------------------------------------
+ n_orders  n_order_id  n_customer_id
+    99441       99441          99441
+
+================================================================================
+C03 people (customer_unique_id) with more than one order
+--------------------------------------------------------------------------------
+SELECT n_orders, COUNT(*) AS n_people FROM (
+            SELECT c.customer_unique_id, COUNT(*) AS n_orders
+            FROM orders o JOIN customers c ON o.customer_id = c.customer_id
+            GROUP BY c.customer_unique_id)
+        GROUP BY n_orders ORDER BY n_orders
+--------------------------------------------------------------------------------
+ n_orders  n_people
+        1     93099
+        2      2745
+        3       203
+        4        30
+        5         8
+        6         6
+        7         3
+        9         1
+       17         1
+
+================================================================================
+C04 order_status values
+--------------------------------------------------------------------------------
+SELECT order_status, COUNT(*) AS n FROM orders
+        GROUP BY order_status ORDER BY n DESC
+--------------------------------------------------------------------------------
+order_status     n
+   delivered 96478
+     shipped  1107
+    canceled   625
+ unavailable   609
+    invoiced   314
+  processing   301
+     created     5
+    approved     2
+
+================================================================================
+C05 how timestamps are stored (type + sample + range)
+--------------------------------------------------------------------------------
+SELECT typeof(order_purchase_timestamp) AS type, MIN(order_purchase_timestamp) AS min_ts,
+               MAX(order_purchase_timestamp) AS max_ts, COUNT(*) AS n
+        FROM orders GROUP BY 1
+--------------------------------------------------------------------------------
+type              min_ts              max_ts     n
+text 2016-09-04 21:15:19 2018-10-17 17:30:18 99441
+
+================================================================================
+C06 orders per year-month (strftime works on the text dates)
+--------------------------------------------------------------------------------
+SELECT strftime('%Y-%m', order_purchase_timestamp) AS ym, COUNT(*) AS n
+        FROM orders GROUP BY ym ORDER BY ym
+--------------------------------------------------------------------------------
+     ym    n
+2016-09    4
+2016-10  324
+2016-12    1
+2017-01  800
+2017-02 1780
+2017-03 2682
+2017-04 2404
+2017-05 3700
+2017-06 3245
+2017-07 4026
+2017-08 4331
+2017-09 4285
+2017-10 4631
+2017-11 7544
+2017-12 5673
+2018-01 7269
+2018-02 6728
+2018-03 7211
+2018-04 6939
+2018-05 6873
+2018-06 6167
+2018-07 6292
+2018-08 6512
+2018-09   16
+2018-10    4
+
+================================================================================
+C07 null timestamps by status (delivered date is missing for non-delivered orders)
+--------------------------------------------------------------------------------
+SELECT order_status, COUNT(*) AS n,
+               SUM(order_approved_at IS NULL) AS null_approved,
+               SUM(order_delivered_carrier_date IS NULL) AS null_carrier,
+               SUM(order_delivered_customer_date IS NULL) AS null_delivered
+        FROM orders GROUP BY order_status ORDER BY n DESC
+--------------------------------------------------------------------------------
+order_status     n  null_approved  null_carrier  null_delivered
+   delivered 96478             14             2               8
+     shipped  1107              0             0            1107
+    canceled   625            141           550             619
+ unavailable   609              0           609             609
+    invoiced   314              0           314             314
+  processing   301              0           301             301
+     created     5              5             5               5
+    approved     2              0             2               2
+
+================================================================================
+C08 items per order (order_item_id is 1..n inside an order, there is no quantity column)
+--------------------------------------------------------------------------------
+SELECT n_items, COUNT(*) AS n_orders FROM (
+            SELECT order_id, COUNT(*) AS n_items FROM order_items GROUP BY order_id)
+        GROUP BY n_items ORDER BY n_items LIMIT 10
+--------------------------------------------------------------------------------
+ n_items  n_orders
+       1     88863
+       2      7516
+       3      1322
+       4       505
+       5       204
+       6       198
+       7        22
+       8         8
+       9         3
+      10         8
+
+================================================================================
+C09 orders with no rows in order_items, by status
+--------------------------------------------------------------------------------
+SELECT o.order_status, COUNT(*) AS n
+        FROM orders o LEFT JOIN order_items i ON o.order_id = i.order_id
+        WHERE i.order_id IS NULL GROUP BY o.order_status ORDER BY n DESC
+--------------------------------------------------------------------------------
+order_status   n
+ unavailable 603
+    canceled 164
+     created   5
+    invoiced   2
+     shipped   1
+
+================================================================================
+C10 payment rows per order
+--------------------------------------------------------------------------------
+SELECT n_pay, COUNT(*) AS n_orders FROM (
+            SELECT order_id, COUNT(*) AS n_pay FROM order_payments GROUP BY order_id)
+        GROUP BY n_pay ORDER BY n_pay LIMIT 10
+--------------------------------------------------------------------------------
+ n_pay  n_orders
+     1     96479
+     2      2382
+     3       301
+     4       108
+     5        52
+     6        36
+     7        28
+     8        11
+     9         9
+    10         5
+
+================================================================================
+C11 payment_type values
+--------------------------------------------------------------------------------
+SELECT payment_type, COUNT(*) AS n, ROUND(SUM(payment_value), 2) AS total
+        FROM order_payments GROUP BY payment_type ORDER BY n DESC
+--------------------------------------------------------------------------------
+payment_type     n       total
+ credit_card 76795 12542084.19
+      boleto 19784  2869361.27
+     voucher  5775   379436.87
+  debit_card  1529   217989.79
+ not_defined     3        0.00
+
+================================================================================
+C12 pick an example order with several items AND several payment rows
+--------------------------------------------------------------------------------
+SELECT i.order_id, i.n_items, p.n_pay FROM
+            (SELECT order_id, COUNT(*) AS n_items FROM order_items GROUP BY order_id) i
+        JOIN (SELECT order_id, COUNT(*) AS n_pay FROM order_payments GROUP BY order_id) p
+            ON i.order_id = p.order_id
+        WHERE i.n_items >= 2 AND p.n_pay >= 2
+        ORDER BY i.order_id LIMIT 3
+--------------------------------------------------------------------------------
+                        order_id  n_items  n_pay
+03ecec245220b63fd7f68c1737ba99ba        2      2
+03f51c9adce893f63936c5146701aa2f        2      2
+041f09bbcd85d178903f5bb71f11a02e        2      2
+
+================================================================================
+C13 fan-out on that order: items x payments rows, naive sums vs correct sums
+--------------------------------------------------------------------------------
+WITH ex AS (
+            SELECT i.order_id FROM
+                (SELECT order_id, COUNT(*) AS n FROM order_items GROUP BY order_id) i
+            JOIN (SELECT order_id, COUNT(*) AS n FROM order_payments GROUP BY order_id) p
+                ON i.order_id = p.order_id
+            WHERE i.n >= 2 AND p.n >= 2 ORDER BY i.order_id LIMIT 1)
+        SELECT
+            (SELECT order_id FROM ex) AS order_id,
+            (SELECT COUNT(*) FROM order_items WHERE order_id = (SELECT order_id FROM ex)) AS item_rows,
+            (SELECT COUNT(*) FROM order_payments WHERE order_id = (SELECT order_id FROM ex)) AS pay_rows,
+            (SELECT COUNT(*) FROM order_items i JOIN order_payments p ON i.order_id = p.order_id
+              WHERE i.order_id = (SELECT order_id FROM ex)) AS joined_rows,
+            (SELECT ROUND(SUM(price), 2) FROM order_items WHERE order_id = (SELECT order_id FROM ex)) AS true_price_sum,
+            (SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN order_payments p ON i.order_id = p.order_id
+              WHERE i.order_id = (SELECT order_id FROM ex)) AS joined_price_sum,
+            (SELECT ROUND(SUM(payment_value), 2) FROM order_payments WHERE order_id = (SELECT order_id FROM ex)) AS true_pay_sum,
+            (SELECT ROUND(SUM(p.payment_value), 2) FROM order_items i JOIN order_payments p ON i.order_id = p.order_id
+              WHERE i.order_id = (SELECT order_id FROM ex)) AS joined_pay_sum
+--------------------------------------------------------------------------------
+                        order_id  item_rows  pay_rows  joined_rows  true_price_sum  joined_price_sum  true_pay_sum  joined_pay_sum
+03ecec245220b63fd7f68c1737ba99ba          2         2            4           298.9             597.8        375.73          751.46
+
+================================================================================
+C14 the example order's raw rows (items)
+--------------------------------------------------------------------------------
+SELECT order_id, order_item_id, product_id, price, freight_value FROM order_items
+        WHERE order_id = (
+            SELECT i.order_id FROM
+                (SELECT order_id, COUNT(*) AS n FROM order_items GROUP BY order_id) i
+            JOIN (SELECT order_id, COUNT(*) AS n FROM order_payments GROUP BY order_id) p
+                ON i.order_id = p.order_id
+            WHERE i.n >= 2 AND p.n >= 2 ORDER BY i.order_id LIMIT 1)
+--------------------------------------------------------------------------------
+                        order_id  order_item_id                       product_id  price  freight_value
+03ecec245220b63fd7f68c1737ba99ba              1 d8cabd83757ecf48a7d2628dee9135c1  189.0          58.78
+03ecec245220b63fd7f68c1737ba99ba              2 059ca09d32720d9adce3ae12e181339d  109.9          18.05
+
+================================================================================
+C15 the example order's raw rows (payments)
+--------------------------------------------------------------------------------
+SELECT order_id, payment_sequential, payment_type, payment_installments, payment_value
+        FROM order_payments
+        WHERE order_id = (
+            SELECT i.order_id FROM
+                (SELECT order_id, COUNT(*) AS n FROM order_items GROUP BY order_id) i
+            JOIN (SELECT order_id, COUNT(*) AS n FROM order_payments GROUP BY order_id) p
+                ON i.order_id = p.order_id
+            WHERE i.n >= 2 AND p.n >= 2 ORDER BY i.order_id LIMIT 1)
+        ORDER BY payment_sequential
+--------------------------------------------------------------------------------
+                        order_id  payment_sequential payment_type  payment_installments  payment_value
+03ecec245220b63fd7f68c1737ba99ba                   1  credit_card                     2         319.34
+03ecec245220b63fd7f68c1737ba99ba                   2      voucher                     1          56.39
+
+================================================================================
+C16 whole-table fan-out: total payment_value correct vs after joining order_items
+--------------------------------------------------------------------------------
+SELECT
+            (SELECT ROUND(SUM(payment_value), 2) FROM order_payments) AS correct_total,
+            (SELECT ROUND(SUM(p.payment_value), 2) FROM order_payments p
+               JOIN order_items i ON p.order_id = i.order_id) AS joined_total,
+            (SELECT ROUND(SUM(price), 2) FROM order_items) AS correct_item_price_total,
+            (SELECT ROUND(SUM(i.price), 2) FROM order_items i
+               JOIN order_payments p ON p.order_id = i.order_id) AS joined_item_price_total
+--------------------------------------------------------------------------------
+ correct_total  joined_total  correct_item_price_total  joined_item_price_total
+   16008872.12   20308134.71                13591643.7              14209115.34
+
+================================================================================
+C17 does price + freight per order equal payment total per order?
+--------------------------------------------------------------------------------
+WITH a AS (SELECT order_id, SUM(price + freight_value) AS items_total
+                   FROM order_items GROUP BY order_id),
+             b AS (SELECT order_id, SUM(payment_value) AS paid
+                   FROM order_payments GROUP BY order_id)
+        SELECT COUNT(*) AS orders_in_both,
+               SUM(ABS(a.items_total - b.paid) < 0.01) AS match_within_1_cent,
+               SUM(ABS(a.items_total - b.paid) >= 0.01) AS differ
+        FROM a JOIN b ON a.order_id = b.order_id
+--------------------------------------------------------------------------------
+ orders_in_both  match_within_1_cent  differ
+          98665                98285     380
+
+================================================================================
+C18 category names: sample from products (language)
+--------------------------------------------------------------------------------
+SELECT product_category_name, COUNT(*) AS n FROM products
+        GROUP BY product_category_name ORDER BY n DESC LIMIT 8
+--------------------------------------------------------------------------------
+ product_category_name    n
+       cama_mesa_banho 3029
+         esporte_lazer 2867
+      moveis_decoracao 2657
+          beleza_saude 2444
+ utilidades_domesticas 2335
+            automotivo 1900
+informatica_acessorios 1639
+            brinquedos 1411
+
+================================================================================
+C19 translation table sample
+--------------------------------------------------------------------------------
+SELECT * FROM product_category_name_translation ORDER BY product_category_name LIMIT 8
+--------------------------------------------------------------------------------
+    product_category_name product_category_name_english
+agro_industria_e_comercio    agro_industry_and_commerce
+                alimentos                          food
+        alimentos_bebidas                    food_drink
+                    artes                           art
+       artes_e_artesanato         arts_and_craftmanship
+        artigos_de_festas                party_supplies
+         artigos_de_natal            christmas_supplies
+                    audio                         audio
+
+================================================================================
+C20 product categories with no english translation, and products with NULL category
+--------------------------------------------------------------------------------
+SELECT COALESCE(p.product_category_name, '<NULL>') AS category, COUNT(*) AS n_products
+        FROM products p LEFT JOIN product_category_name_translation t
+            ON p.product_category_name = t.product_category_name
+        WHERE t.product_category_name IS NULL
+        GROUP BY 1 ORDER BY n_products DESC
+--------------------------------------------------------------------------------
+                                     category  n_products
+                                       <NULL>         610
+portateis_cozinha_e_preparadores_de_alimentos          10
+                                     pc_gamer           3
+
+================================================================================
+C21 distinct categories in products vs rows in translation table
+--------------------------------------------------------------------------------
+SELECT (SELECT COUNT(DISTINCT product_category_name) FROM products) AS cats_in_products,
+               (SELECT COUNT(*) FROM product_category_name_translation) AS translation_rows,
+               (SELECT COUNT(DISTINCT product_category_name) FROM product_category_name_translation) AS distinct_translated
+--------------------------------------------------------------------------------
+ cats_in_products  translation_rows  distinct_translated
+               73                71                   71
+
+================================================================================
+C22 reviews: is review_id unique? reviews per order
+--------------------------------------------------------------------------------
+SELECT COUNT(*) AS n_rows, COUNT(DISTINCT review_id) AS n_review_id,
+               COUNT(DISTINCT order_id) AS n_orders_with_review
+        FROM order_reviews
+--------------------------------------------------------------------------------
+ n_rows  n_review_id  n_orders_with_review
+  99224        98410                 98673
+
+================================================================================
+C23 orders with more than one review row
+--------------------------------------------------------------------------------
+SELECT n_reviews, COUNT(*) AS n_orders FROM (
+            SELECT order_id, COUNT(*) AS n_reviews FROM order_reviews GROUP BY order_id)
+        GROUP BY n_reviews ORDER BY n_reviews
+--------------------------------------------------------------------------------
+ n_reviews  n_orders
+         1     98126
+         2       543
+         3         4
+
+================================================================================
+C24 review_score distribution and empty comments
+--------------------------------------------------------------------------------
+SELECT review_score, COUNT(*) AS n,
+               SUM(review_comment_message IS NULL) AS no_message
+        FROM order_reviews GROUP BY review_score ORDER BY review_score
+--------------------------------------------------------------------------------
+ review_score     n  no_message
+            1 11424        2679
+            2  3151        1006
+            3  8179        4622
+            4 19142       13166
+            5 57328       36774
+
+================================================================================
+C25 review comment language sample
+--------------------------------------------------------------------------------
+SELECT review_comment_message FROM order_reviews
+        WHERE review_comment_message IS NOT NULL ORDER BY review_id LIMIT 3
+--------------------------------------------------------------------------------
+                                               review_comment_message
+A entrega foi super rápida e o pendente é lindo! Igual a foto mesmo! 
+                 GOSTEI DA CAPINHA DE CELULAR, VEIO COMO EU ESPERAVA.
+              otimo produto. prazo cumprido. sabor tambem muito bom! 
+
+================================================================================
+C26 geolocation: rows per zip prefix (joining on zip fans out)
+--------------------------------------------------------------------------------
+SELECT COUNT(*) AS n_rows, COUNT(DISTINCT geolocation_zip_code_prefix) AS n_prefixes,
+               MAX(cnt) AS max_rows_for_one_prefix FROM (
+            SELECT geolocation_zip_code_prefix, COUNT(*) AS cnt FROM geolocation
+            GROUP BY geolocation_zip_code_prefix) g
+        JOIN geolocation USING (geolocation_zip_code_prefix)
+--------------------------------------------------------------------------------
+ n_rows  n_prefixes  max_rows_for_one_prefix
+1000163       19015                     1146
+
+================================================================================
+C27 zip prefix stored as text with leading zeros
+--------------------------------------------------------------------------------
+SELECT customer_zip_code_prefix, typeof(customer_zip_code_prefix) AS type, length(customer_zip_code_prefix) AS len
+        FROM customers WHERE customer_zip_code_prefix LIKE '0%' ORDER BY customer_zip_code_prefix LIMIT 3
+--------------------------------------------------------------------------------
+customer_zip_code_prefix type  len
+                   01003 text    5
+                   01004 text    5
+                   01004 text    5
+
+================================================================================
+C28 city / state format
+--------------------------------------------------------------------------------
+SELECT customer_city, customer_state, COUNT(*) AS n FROM customers
+        GROUP BY 1, 2 ORDER BY n DESC LIMIT 5
+--------------------------------------------------------------------------------
+ customer_city customer_state     n
+     sao paulo             SP 15540
+rio de janeiro             RJ  6882
+belo horizonte             MG  2773
+      brasilia             DF  2131
+      curitiba             PR  1521
+
+================================================================================
+C29 number of distinct states
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT customer_state) AS customer_states,
+               (SELECT COUNT(DISTINCT seller_state) FROM sellers) AS seller_states
+        FROM customers
+--------------------------------------------------------------------------------
+ customer_states  seller_states
+              27             23
+
+================================================================================
+C30 sellers per order
+--------------------------------------------------------------------------------
+SELECT n_sellers, COUNT(*) AS n_orders FROM (
+            SELECT order_id, COUNT(DISTINCT seller_id) AS n_sellers FROM order_items GROUP BY order_id)
+        GROUP BY n_sellers ORDER BY n_sellers
+--------------------------------------------------------------------------------
+ n_sellers  n_orders
+         1     97388
+         2      1219
+         3        54
+         4         3
+         5         2
+
+================================================================================
+C31 odd payment rows (not_defined type, 0 installments, 0 value)
+--------------------------------------------------------------------------------
+SELECT SUM(payment_type = 'not_defined') AS not_defined,
+               SUM(payment_installments = 0) AS zero_installments,
+               SUM(payment_value = 0) AS zero_value
+        FROM order_payments
+--------------------------------------------------------------------------------
+ not_defined  zero_installments  zero_value
+           3                  2           9
+
+================================================================================
+C32 does every order_items.product_id / seller_id / orders.customer_id have a match?
+--------------------------------------------------------------------------------
+SELECT
+            (SELECT COUNT(*) FROM order_items i LEFT JOIN products p ON i.product_id = p.product_id
+              WHERE p.product_id IS NULL) AS items_no_product,
+            (SELECT COUNT(*) FROM order_items i LEFT JOIN sellers s ON i.seller_id = s.seller_id
+              WHERE s.seller_id IS NULL) AS items_no_seller,
+            (SELECT COUNT(*) FROM orders o LEFT JOIN customers c ON o.customer_id = c.customer_id
+              WHERE c.customer_id IS NULL) AS orders_no_customer,
+            (SELECT COUNT(*) FROM order_payments p LEFT JOIN orders o ON p.order_id = o.order_id
+              WHERE o.order_id IS NULL) AS payments_no_order
+--------------------------------------------------------------------------------
+ items_no_product  items_no_seller  orders_no_customer  payments_no_order
+                0                0                   0                  0
+
+================================================================================
+C33 product_id / seller_id unique in their tables?
+--------------------------------------------------------------------------------
+SELECT (SELECT COUNT(*) - COUNT(DISTINCT product_id) FROM products) AS dup_product_id,
+               (SELECT COUNT(*) - COUNT(DISTINCT seller_id) FROM sellers) AS dup_seller_id
+--------------------------------------------------------------------------------
+ dup_product_id  dup_seller_id
+              0              0
+
+================================================================================
+C34 orders with no payment row
+--------------------------------------------------------------------------------
+SELECT o.order_id, o.order_status FROM orders o
+        LEFT JOIN order_payments p ON o.order_id = p.order_id
+        WHERE p.order_id IS NULL
+--------------------------------------------------------------------------------
+                        order_id order_status
+bfbd0f9bdef84302105ad712db648a6c    delivered
+
+================================================================================
+C35 city names with accents / non-ascii characters (customers, sellers, geolocation)
+--------------------------------------------------------------------------------
+SELECT 'customers' AS tbl, COUNT(DISTINCT customer_city) AS n_cities,
+               COUNT(DISTINCT CASE WHEN customer_city GLOB '*[^ -~]*' THEN customer_city END) AS non_ascii
+        FROM customers
+        UNION ALL
+        SELECT 'sellers', COUNT(DISTINCT seller_city),
+               COUNT(DISTINCT CASE WHEN seller_city GLOB '*[^ -~]*' THEN seller_city END) FROM sellers
+        UNION ALL
+        SELECT 'geolocation', COUNT(DISTINCT geolocation_city),
+               COUNT(DISTINCT CASE WHEN geolocation_city GLOB '*[^ -~]*' THEN geolocation_city END) FROM geolocation
+--------------------------------------------------------------------------------
+        tbl  n_cities  non_ascii
+  customers      4119          0
+    sellers       611          2
+geolocation      8011       2085
+
+================================================================================
+C36 example of the same city spelled two ways in geolocation
+--------------------------------------------------------------------------------
+SELECT geolocation_city, COUNT(*) AS n FROM geolocation
+        WHERE geolocation_city IN ('sao paulo', 'são paulo') GROUP BY 1
+--------------------------------------------------------------------------------
+geolocation_city      n
+       sao paulo 135800
+       são paulo  24918
