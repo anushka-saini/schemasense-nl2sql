@@ -1,0 +1,60 @@
+validator tests run at 2026-10-31 00:03:53
+
+== 1. validator ==
+PASS  expect allow  simple select                                       -> ok
+PASS  expect allow  one trailing semicolon is fine                      -> ok
+PASS  expect allow  lowercase + leading whitespace                      -> ok
+PASS  expect allow  CTE name is accepted as a table                     -> ok
+PASS  expect allow  join with aliases                                   -> ok
+PASS  expect allow  comma join                                          -> ok
+PASS  expect allow  subquery in FROM                                    -> ok
+PASS  expect allow  bad words / ; / -- inside a string literal are ignored  -> ok
+PASS  expect allow  replace() function is not REPLACE INTO              -> ok
+PASS  expect allow  main.table is fine                                  -> ok
+PASS  expect allow  IS DISTINCT FROM is not a table                     -> ok
+PASS  expect allow  escaped quote                                       -> ok
+PASS  expect block  empty                                               -> empty query
+PASS  expect block  insert                                              -> must start with SELECT or WITH, found 'INSERT'
+PASS  expect block  update                                              -> must start with SELECT or WITH, found 'UPDATE'
+PASS  expect block  delete                                              -> must start with SELECT or WITH, found 'DELETE'
+PASS  expect block  drop                                                -> must start with SELECT or WITH, found 'DROP'
+PASS  expect block  alter                                               -> must start with SELECT or WITH, found 'ALTER'
+PASS  expect block  pragma                                              -> must start with SELECT or WITH, found 'PRAGMA'
+PASS  expect block  attach                                              -> must start with SELECT or WITH, found 'ATTACH'
+PASS  expect block  vacuum into a new file                              -> must start with SELECT or WITH, found 'VACUUM'
+PASS  expect block  stacked statements                                  -> more than one statement (stacked queries)
+PASS  expect block  stacked, mixed case                                 -> more than one statement (stacked queries)
+PASS  expect block  stacked with comment                                -> comments are not allowed
+PASS  expect block  line comment hides a filter                         -> comments are not allowed
+PASS  expect block  block comment                                       -> comments are not allowed
+PASS  expect block  quote trick around comment                          -> comments are not allowed
+PASS  expect block  CTE in front of a delete                            -> forbidden keyword: DELETE
+PASS  expect block  CTE in front of an insert                           -> forbidden keyword: INSERT
+PASS  expect block  unclosed quote                                      -> unclosed string quote
+PASS  expect block  table that does not exist                           -> unknown table 'users'
+PASS  expect block  hallucinated table in a join                        -> unknown table 'payments'
+PASS  expect block  system table                                        -> system table 'sqlite_master' is not allowed
+PASS  expect block  pragma as a table function                          -> system table 'pragma_table_info' is not allowed
+PASS  expect block  attached schema                                     -> schema 'other' is not allowed
+PASS  expect block  load_extension                                      -> forbidden keyword: LOAD_EXTENSION
+PASS  expect block  replace into                                        -> must start with SELECT or WITH, found 'REPLACE'
+PASS  expect block  refusal text is not sql                             -> must start with SELECT or WITH, found 'CANNOT_ANSWER'
+PASS  expect block  prose before the sql                                -> must start with SELECT or WITH, found 'Here'
+
+== 2. read-only connection (validator skipped) ==
+PASS  expect block  delete                                              -> DatabaseError: not authorized
+PASS  expect block  drop                                                -> DatabaseError: not authorized
+PASS  expect block  update                                              -> DatabaseError: not authorized
+PASS  expect block  create                                              -> DatabaseError: not authorized
+PASS  expect block  attach a new file                                   -> DatabaseError: not authorized
+PASS  expect block  turn off query_only                                 -> DatabaseError: not authorized
+PASS  expect block  read sqlite_master                                  -> DatabaseError: access to sqlite_master.type is prohibited
+PASS  expect block  stacked                                             -> ProgrammingError: You can only execute one statement at a time.
+PASS  expect block  delete on plain mode=ro (no authorizer)             -> OperationalError: attempt to write a readonly database
+PASS  orders count unchanged (99441 -> 99441), evil.db created: False
+
+== 3. limits ==
+PASS  row limit: got 200 rows, truncated=True
+PASS  endless query stopped: OperationalError: query timed out after 2s after 2.002s
+
+total checks failed: 0
