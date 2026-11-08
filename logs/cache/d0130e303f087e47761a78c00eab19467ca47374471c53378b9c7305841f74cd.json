@@ -1,0 +1,23 @@
+{
+  "key": "d0130e303f087e47761a78c00eab19467ca47374471c53378b9c7305841f74cd",
+  "time": "2026-11-08T14:15:59",
+  "tag": "v0:A07",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What percentage of delivered orders arrived later than the estimated delivery date?\n",
+  "text": "**Assumptions about the schema**\n\n| Table | Columns (relevant to the question) |\n|-------|-------------------------------------|\n| `orders` | `order_id` (PK) <br> `status` (e.g., `'Delivered'`) <br> `estimated_delivery_date` (DATE or DATETIME) <br> `actual_delivery_date` (DATE or DATETIME) |\n\nIf the table uses a different column name for the actual delivery timestamp (e.g., `delivered_at`), just replace `actual_delivery_date` with that name.\n\n---\n\n### Query – percentage of delivered orders that arrived **later** than the estimate\n\n```sql\n/*  Percentage of delivered orders that were late  */\nSELECT\n    ROUND(\n        100.0 *\n        AVG(\n            CASE\n                WHEN actual_delivery_date > estimated_delivery_date THEN 1.0\n                ELSE 0.0\n            END\n        ),\n        2\n    ) AS pct_late_deliveries\nFROM orders\nWHERE\n    -- consider only orders that have actually been delivered\n    actual_delivery_date IS NOT NULL\n    -- (optional) if you also store a status column, you can filter on it:\n    -- AND status = 'Delivered'\n;\n```\n\n**Explanation**\n\n1. **Filter to delivered orders**  \n   `actual_delivery_date IS NOT NULL` (or `status = 'Delivered'`) ensures we only count orders that have been completed.\n\n2. **Identify late deliveries**  \n   The `CASE` expression returns `1.0` when the real delivery date is **after** the estimated date, otherwise `0.0`.\n\n3. **Compute the average**  \n   `AVG()` of those 0/1 values gives the *fraction* of delivered orders that were late.\n\n4. **Convert to a percentage**  \n   Multiply by `100.0` and round to two decimal places with `ROUND(..., 2)`.\n\nThe result column `pct_late_deliveries` will contain a value such as `23.45`, meaning **23.45 %** of delivered orders arrived later than expected.",
+  "reasoning": "We need to write a SQLite query. We need to assume a schema: likely tables orders with fields like order_id, delivered_date, estimated_delivery_date, status maybe. The question: percentage of delivered orders that arrived later than the estimated delivery date. So we need count of delivered orders where actual delivery > estimated, divided by total delivered orders, times 100.\n\nWe need to output percentage maybe as a number with maybe two decimal places.\n\nWrite query:\n\nSELECT \n    ROUND(100.0 * SUM(CASE WHEN actual_delivery_date > estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_late\nFROM orders\nWHERE status = 'Delivered';\n\nIf there is a delivered_date column, we can use that.\n\nAlternatively:\n\nSELECT \n    100.0 * AVG(CASE WHEN delivered_date > estimated_delivery_date THEN 1.0 ELSE 0.0 END) AS pct_late\nFROM orders\nWHERE delivered_date IS NOT NULL;\n\nExplain.\n\nThus answer: Provide query.\n\nLet's produce final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 95,
+    "completion_tokens": 660,
+    "total_tokens": 755
+  },
+  "latency_s": 1.854
+}

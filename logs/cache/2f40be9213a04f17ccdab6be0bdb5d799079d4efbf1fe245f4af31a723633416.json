@@ -1,0 +1,23 @@
+{
+  "key": "2f40be9213a04f17ccdab6be0bdb5d799079d4efbf1fe245f4af31a723633416",
+  "time": "2026-11-08T14:32:45",
+  "tag": "v0:A01",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What was the total amount paid by customers for delivered orders purchased in 2018?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT \n    SUM(p.amount) AS total_amount_paid\nFROM \n    Orders   AS o\nJOIN \n    Payments AS p\n      ON p.order_id = o.order_id\nWHERE \n    o.status = 'Delivered'                     -- only delivered orders\n    AND strftime('%Y', o.order_date) = '2018'  -- orders placed in 2018\n;\n```\n\n**Explanation**\n\n| Clause | Purpose |\n|--------|---------|\n| `FROM Orders AS o` | The table that records each order (its ID, date, status, etc.). |\n| `JOIN Payments AS p ON p.order_id = o.order_id` | Connect each order to the payment(s) made for it. |\n| `WHERE o.status = 'Delivered'` | Keep only orders that were actually delivered. |\n| `AND strftime('%Y', o.order_date) = '2018'` | Restrict to orders whose purchase date falls in the year 2018 (the `strftime` function extracts the year from a date‑time string). |\n| `SUM(p.amount) AS total_amount_paid` | Adds up all the payment amounts that satisfy the conditions, giving the total amount customers paid for those delivered 2018 orders. |\n\n*If your schema uses different column or table names (e.g., `order_date` stored as `order_timestamp`, status values like `DELIVERED`, or a separate `order_status` table), just replace the identifiers accordingly.*",
+  "reasoning": "We need to write a SQLite query. Need to infer schema: likely tables: orders, customers, payments? The question: total amount paid by customers for delivered orders purchased in 2018. So need orders with status delivered, order_date in 2018, sum of payment amount. Possibly join orders and payments. Provide generic query.\n\nAssume tables: Orders(order_id, customer_id, order_date, status), Payments(payment_id, order_id, amount, payment_date). Or maybe OrderDetails. We'll write query using these.\n\nAnswer: SELECT SUM(p.amount) AS total_amount FROM Orders o JOIN Payments p ON o.order_id = p.order_id WHERE o.status = 'Delivered' AND strftime('%Y', o.order_date) = '2018';\n\nIf order_date stored as date. Provide explanation.\n\nLet's produce final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 99,
+    "completion_tokens": 486,
+    "total_tokens": 585
+  },
+  "latency_s": 1.416
+}

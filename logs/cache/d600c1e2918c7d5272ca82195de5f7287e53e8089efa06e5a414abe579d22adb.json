@@ -1,0 +1,23 @@
+{
+  "key": "d600c1e2918c7d5272ca82195de5f7287e53e8089efa06e5a414abe579d22adb",
+  "time": "2026-11-08T14:33:41",
+  "tag": "v1:F06",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What percentage of total item revenue from delivered orders comes from the top 10 sellers?\n",
+  "text": "```sql\nWITH delivered AS (\n    SELECT oi.seller_id, oi.price\n    FROM orders o\n    JOIN order_items oi ON o.order_id = oi.order_id\n    WHERE o.order_status = 'delivered'\n),\nseller_rev AS (\n    SELECT seller_id, SUM(price) AS rev\n    FROM delivered\n    GROUP BY seller_id\n),\ntop10 AS (\n    SELECT rev\n    FROM seller_rev\n    ORDER BY rev DESC\n    LIMIT 10\n),\ntotals AS (\n    SELECT SUM(rev) AS total_rev, (SELECT SUM(rev) FROM top10) AS top10_rev\n    FROM seller_rev\n)\nSELECT (top10_rev / total_rev) * 100.0 AS percentage_of_total_revenue\nFROM totals;\n```\n\nThis query calculates the percentage of total revenue from delivered orders that comes from the top 10 sellers.",
+  "reasoning": "We need to compute total item revenue from delivered orders: delivered orders are those with order_status maybe 'delivered'? The orders table has order_status. We need revenue from order_items: price + freight_value? Usually revenue is price? Might be price. We'll assume revenue = price. So sum of price for delivered orders. Then top 10 sellers by revenue. Then compute percentage of total revenue from those top 10 sellers.\n\nWe need to join orders with order_items on order_id, filter orders where order_status = 'delivered' (or maybe 'delivered' status). Then group by seller_id to sum revenue. Then order by revenue desc limit 10. Then compute sum of revenue for those top 10 sellers. Then compute percentage: (top10_sum / total_sum) * 100.\n\nWe need to produce a single SELECT query. We can use subqueries. Something like:\n\nWITH delivered AS (\n  SELECT oi.seller_id, oi.price\n  FROM orders o\n  JOIN order_items oi ON o.order_id = oi.order_id\n  WHERE o.order_status = 'delivered'\n),\nseller_revenue AS (\n  SELECT seller_id, SUM(price) AS rev\n  FROM delivered\n  GROUP BY seller_id\n),\ntop10 AS (\n  SELECT seller_id, rev\n  FROM seller_revenue\n  ORDER BY rev DESC\n  LIMIT 10\n),\ntotal_rev AS (\n  SELECT SUM(rev) AS total_rev FROM seller_revenue\n),\ntop10_rev AS (\n  SELECT SUM(rev) AS top10_rev FROM top10\n)\nSELECT (top10_rev / total_rev) * 100 AS percentage\nFROM top10_rev, total_rev;\n\nBut SQLite doesn't support division of integers? It will cast to float. Use 1.0 * top10_rev / total_rev * 100.\n\nReturn that query. Then explanation.\n\nLet's produce final answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 386,
+    "completion_tokens": 574,
+    "total_tokens": 960
+  },
+  "latency_s": 1.089
+}

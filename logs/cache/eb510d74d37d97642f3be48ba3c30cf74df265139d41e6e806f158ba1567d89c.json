@@ -1,0 +1,23 @@
+{
+  "key": "eb510d74d37d97642f3be48ba3c30cf74df265139d41e6e806f158ba1567d89c",
+  "time": "2026-11-08T14:15:42",
+  "tag": "v0:S01",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders are in the database?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT COUNT(*) AS total_orders\nFROM orders;\n```",
+  "reasoning": "We need to write a SQLite query that answers \"How many orders are in the database?\" Likely there is a table named orders. So SELECT COUNT(*) FROM orders; Possibly alias. Provide query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 68,
+    "total_tokens": 158
+  },
+  "latency_s": 0.718
+}

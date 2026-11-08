@@ -1,0 +1,23 @@
+{
+  "key": "47ce8d5e5735df0a5e10b4551beacf7858230b0eaf4107aef1e1220f005dc6b9",
+  "time": "2026-11-08T14:40:24",
+  "tag": "v0:R09",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Add a new seller from Curitiba with the id abc123.\n",
+  "text": "**SQLite statement**\n\n```sql\n-- Add a new seller whose id is 'abc123' and whose city is Curitiba\nINSERT INTO sellers (id, city)\nVALUES ('abc123', 'Curitiba');\n```\n\n*Notes*\n\n- Replace `sellers` with the actual name of the table that stores seller records if it differs.\n- If the table has additional columns that are defined as **NOT NULL** (e.g., `name`, `created_at`, etc.), you’ll need to include those columns and provide appropriate values, e.g.:\n\n```sql\nINSERT INTO sellers (id, city, name, created_at)\nVALUES ('abc123', 'Curitiba', 'John Doe', CURRENT_TIMESTAMP);\n```\n\n- If the `id` column is the primary key and already contains a row with `'abc123'`, the statement will fail with a constraint‑violation error. In that case you may want to use `INSERT OR REPLACE` or `INSERT OR IGNORE` depending on the desired behavior.",
+  "reasoning": "We need to write a SQLite query that adds a new seller from Curitiba with id abc123. Likely an INSERT statement. Need to know table name and columns. Not provided. We can assume a table named sellers with columns id, city, maybe other columns. Provide generic query: INSERT INTO sellers (id, city) VALUES ('abc123', 'Curitiba'); If other columns required, we can mention placeholders. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 303,
+    "total_tokens": 397
+  },
+  "latency_s": 1.041
+}

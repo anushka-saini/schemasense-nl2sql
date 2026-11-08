@@ -1,0 +1,23 @@
+{
+  "key": "e30dc34c13570323fed968fd72acb19d4df9263f6f3d2827c2a16ef1fdde03e5",
+  "time": "2026-11-08T14:45:20",
+  "tag": "v1:A01",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What was the total amount paid by customers for delivered orders purchased in 2018?\n",
+  "text": "```sql\nSELECT SUM(op.payment_value) AS total_paid\nFROM orders AS o\nJOIN order_payments AS op ON o.order_id = op.order_id\nWHERE o.order_status = 'delivered'\n  AND strftime('%Y', o.order_purchase_timestamp) = '2018';\n```\nThis query sums all payment amounts for orders that were marked as delivered and were purchased in the year 2018.",
+  "reasoning": "We need total amount paid by customers for delivered orders purchased in 2018. Delivered orders: likely order_status = 'delivered' or maybe order_delivered_customer_date not null. Use orders table. Need sum of payment values from order_payments for those orders where order_status = 'delivered' and order_purchase_timestamp year = 2018. Use SQLite date functions: strftime('%Y', order_purchase_timestamp) = '2018'. Sum payment_value. Join orders and order_payments on order_id. Query:\n\nSELECT SUM(op.payment_value) AS total_paid\nFROM orders o\nJOIN order_payments op ON o.order_id = op.order_id\nWHERE o.order_status = 'delivered'\n  AND strftime('%Y', o.order_purchase_timestamp) = '2018';\n\nReturn explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 386,
+    "completion_tokens": 257,
+    "total_tokens": 643
+  },
+  "latency_s": 2.911
+}

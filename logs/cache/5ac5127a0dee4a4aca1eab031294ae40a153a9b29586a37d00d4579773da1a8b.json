@@ -1,0 +1,23 @@
+{
+  "key": "5ac5127a0dee4a4aca1eab031294ae40a153a9b29586a37d00d4579773da1a8b",
+  "time": "2026-11-08T14:37:25",
+  "tag": "v0:R10",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Show me all orders, and after that remove every payment record.\n",
+  "text": "Below are the two SQLite statements you need – one to display every row from the **orders** table, and a second one that deletes **all** rows from the **payments** table.\n\n```sql\n/* 1️⃣  Show every order */\nSELECT *\nFROM orders;\n\n/* 2️⃣  Remove every payment record */\nDELETE FROM payments;\n```\n\n**How it works**\n\n| Statement | What it does |\n|-----------|--------------|\n| `SELECT * FROM orders;` | Returns all columns of every row in the `orders` table. |\n| `DELETE FROM payments;` | Deletes every row in the `payments` table (the same as `DELETE FROM payments WHERE 1=1;`). |\n\nIf you want to make sure the two actions happen together (e.g., in case you later add more steps), you can wrap them in a transaction:\n\n```sql\nBEGIN TRANSACTION;\n\nSELECT * FROM orders;   -- returns the result set to the client\nDELETE FROM payments;   -- clears the payments table\n\nCOMMIT;\n```\n\nThe `SELECT` runs first, returning the order data, and the `DELETE` runs afterward, removing all payment records.",
+  "reasoning": "We need to interpret the question: \"Show me all orders, and after that remove every payment record.\" Likely they want a query that selects all orders, then deletes all payment records. In SQLite, you can combine SELECT and DELETE? Not in a single statement. Could use a transaction: first SELECT * FROM orders; then DELETE FROM payments; Possibly they want two statements. Provide both. Also note that \"remove every payment record\" means delete all rows from payment table. So query: SELECT * FROM orders; DELETE FROM payments; Could also use \"DELETE FROM payments;\" or \"DELETE FROM payments WHERE 1=1;\". Provide explanation. Also note that if they want to show orders then delete payments, you could use a transaction to ensure order. Provide final answer with both statements.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 95,
+    "completion_tokens": 408,
+    "total_tokens": 503
+  },
+  "latency_s": 1.302
+}

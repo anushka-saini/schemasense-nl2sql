@@ -1,0 +1,23 @@
+{
+  "key": "a4f3a3a29d624c57927214fdb5b6fda6aba31188be0e3877ff58573d3e901211",
+  "time": "2026-11-08T14:36:30",
+  "tag": "v0:M03",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What were our sales last month?\n",
+  "text": "Below is a generic SQLite query that returns the total sales for **the entire month that preceded the current month** (i.e., “last month”).  \nAdjust the table/column names if your schema differs.\n\n```sql\n/*  Total sales for last month  */\nSELECT\n    SUM(s.amount) AS total_sales_last_month\nFROM\n    sales AS s\nWHERE\n    /*  First day of last month  */\n    s.sale_date >= date('now','-1 month','start of month')\n    /*  First day of the current month (exclusive)  */\n    AND s.sale_date <  date('now','start of month');\n```\n\n### How it works\n| Expression                              | Meaning |\n|----------------------------------------|---------|\n| `date('now','-1 month','start of month')` | Returns the **first day** of the month that is one month before today (e.g., if today is 2026‑11‑08, this yields `2026‑10‑01`). |\n| `date('now','start of month')`           | Returns the **first day** of the current month (e.g., `2026‑11‑01`). Using `<` makes the upper bound exclusive, so all dates up to `2026‑10‑31` are included. |\n| `s.sale_date`                           | Assumed to be stored in a `YYYY‑MM‑DD` (or ISO‑8601) text format, which SQLite’s date functions can compare directly. |\n| `SUM(s.amount)`                         | Adds up the monetary value of each sale in the selected range. |\n\n### Common variations\n\n*If you store the sale amount in a different column (e.g., `price` or `total`) or the table is named `orders`, just replace the identifiers accordingly.*\n\n```sql\nSELECT SUM(o.total) AS total_sales_last_month\nFROM   orders AS o\nWHERE  o.order_date >= date('now','-1 month','start of month')\n  AND  o.order_date <  date('now','start of month');\n```\n\n*If you need a breakdown by day:*\n\n```sql\nSELECT\n    date(s.sale_date) AS day,\n    SUM(s.amount)      AS daily_total\nFROM sales AS s\nWHERE s.sale_date >= date('now','-1 month','start of month')\n  AND s.sale_date <  date('now','start of month')\nGROUP BY day\nORDER BY day;\n```\n\nThese queries will give you the sales figures for the most recent full month relative to the current date.",
+  "reasoning": "The user asks: \"Write a SQLite query that answers this question. Question: What were our sales last month?\" We need to produce a SQLite query. We need to assume a typical schema: maybe a sales table with date and amount. Could be orders, order_items, etc. We need to write a generic query that sums sales for last month relative to current date. Use date functions. For SQLite, we can use date('now','-1 month','start of month') to get first day of last month, and date('now','start of month','-1 day') to get last day of last month. Or use strftime. So query: SELECT SUM(amount) AS total_sales FROM sales WHERE date >= date('now','-1 month','start of month') AND date < date('now','start of month'); Or inclusive end: date <= date('now','-1 day','start of month')? Actually date('now','start of month','-1 day') gives last day of previous month. So we can use BETWEEN. Provide example with orders table. Also maybe include grouping by day. Provide explanation. The answer should be just the query? The user asked \"Write a SQLite query that answers this question.\" So we can give the query. Might also note assumptions. Provide query.\n\nThus final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 809,
+    "total_tokens": 898
+  },
+  "latency_s": 2.186
+}

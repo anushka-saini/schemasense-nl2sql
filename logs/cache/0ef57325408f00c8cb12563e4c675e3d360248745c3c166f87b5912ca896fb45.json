@@ -1,0 +1,23 @@
+{
+  "key": "0ef57325408f00c8cb12563e4c675e3d360248745c3c166f87b5912ca896fb45",
+  "time": "2026-11-08T14:32:48",
+  "tag": "v0:A03",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which 5 sellers made the most revenue from delivered orders?\n",
+  "text": "Below is a **single‑statement SQLite query** that returns the five sellers that generated the highest total revenue **only from orders whose status is “delivered.”**  \nThe query works for the two most common schema patterns:\n\n| Pattern | Table(s) & relevant columns |\n|---------|-----------------------------|\n| **A – revenue stored on the order row** | `orders(order_id, seller_id, status, total_amount)` |\n| **B – revenue must be calculated from line‑items** | `orders(order_id, seller_id, status)`  <br> `order_items(order_id, unit_price, quantity)` |\n\nBoth patterns assume a `sellers` table that holds the seller’s name (or any other identifying columns).\n\n---\n\n## 1️⃣ If the **order row already contains the final amount** (`total_amount`)\n\n```sql\nSELECT\n    s.seller_id,\n    s.seller_name,\n    SUM(o.total_amount) AS revenue\nFROM\n    orders  AS o\nJOIN\n    sellers AS s\n      ON s.seller_id = o.seller_id\nWHERE\n    o.status = 'delivered'                -- only delivered orders\nGROUP BY\n    s.seller_id,\n    s.seller_name\nORDER BY\n    revenue DESC\nLIMIT 5;\n```\n\n*Explanation*  \n\n* `SUM(o.total_amount)` adds up the revenue of every delivered order belonging to a seller.  \n* `GROUP BY` collapses the rows per seller.  \n* `ORDER BY revenue DESC` puts the highest‑earning sellers first.  \n* `LIMIT 5` returns only the top five.\n\n---\n\n## 2️⃣ If the **revenue must be computed from line‑items** (`order_items`)\n\n```sql\nSELECT\n    s.seller_id,\n    s.seller_name,\n    SUM(oi.unit_price * oi.quantity) AS revenue\nFROM\n    orders       AS o\nJOIN\n    sellers      AS s\n      ON s.seller_id = o.seller_id\nJOIN\n    order_items  AS oi\n      ON oi.order_id = o.order_id\nWHERE\n    o.status = 'delivered'                -- only delivered orders\nGROUP BY\n    s.seller_id,\n    s.seller_name\nORDER BY\n    revenue DESC\nLIMIT 5;\n```\n\n*Explanation*  \n\n* `oi.unit_price * oi.quantity` gives the line‑item amount; `SUM` aggregates it across all delivered orders for each seller.  \n* The rest of the query (joins, filter, grouping, ordering, limit) works the same way as in the first version.\n\n---\n\n### What to adjust for your own database\n\n| Item | Typical column name | Change if yours differs |\n|------|--------------------|--------------------------|\n| Seller primary key | `seller_id` | replace with your PK column |\n| Seller display column | `seller_name` | replace or add any other columns you want to see |\n| Order status column | `status` | replace with your column that records order state |\n| Delivered status literal | `'delivered'` | replace with the exact value used in your data (e.g., `'DELIVERED'`, `2`, etc.) |\n| Revenue column on orders | `total_amount` | replace with your column that stores the order total |\n| Order‑item price/quantity columns | `unit_price`, `quantity` | replace with your column names |\n\nJust pick the version that matches your schema (or combine both if you have a hybrid design) and run it against your SQLite database. The result set will contain the **seller identifier, seller name, and total delivered‑order revenue**, ordered from highest to lowest, limited to the top five sellers.",
+  "reasoning": "We need to write a SQLite query. We need to assume tables: sellers, orders, order_items maybe. Need revenue from delivered orders. Likely orders table has seller_id, status, total_amount. Or order_items with price*quantity. We need top 5 sellers by sum revenue where order status = 'delivered'. Provide query.\n\nWe'll write generic query:\n\nSELECT s.seller_id, s.seller_name, SUM(o.total_amount) AS revenue\nFROM orders o\nJOIN sellers s ON o.seller_id = s.seller_id\nWHERE o.status = 'delivered'\nGROUP BY s.seller_id, s.seller_name\nORDER BY revenue DESC\nLIMIT 5;\n\nIf revenue from order_items: join order_items and sum price*quantity.\n\nWe'll provide both possibilities.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 934,
+    "total_tokens": 1028
+  },
+  "latency_s": 2.481
+}

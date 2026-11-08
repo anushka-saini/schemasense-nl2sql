@@ -1,0 +1,23 @@
+{
+  "key": "0b3f3fabca170599a9111026158d5b14339a87e65330fdf023374ca24f8a4cc0",
+  "time": "2026-11-08T14:16:22",
+  "tag": "v0:R01",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the name of the product that sold the most?\n",
+  "text": "Here’s a generic SQLite query that returns the **name of the product that has sold the greatest total quantity** (i.e., the “top‑selling” product).  \nIt assumes you have a table that stores product information (e.g., `products`) and a table that records each sale line‑item (e.g., `order_items` or `sales`). Adjust the table/column names to match your schema.\n\n```sql\n/* 1. Sum the quantity sold for each product\n   2. Join to the product table to get the product name\n   3. Order by the total sold descending and keep only the top row\n*/\nSELECT\n    p.product_name,\n    total_sold\nFROM (\n    SELECT\n        product_id,\n        SUM(quantity) AS total_sold\n    FROM order_items          -- <-- replace with your sales/detail table\n    GROUP BY product_id\n) AS s\nJOIN products AS p           -- <-- replace with your product table\n      ON p.product_id = s.product_id\nORDER BY total_sold DESC\nLIMIT 1;                     -- returns the single product with the highest sales\n```\n\n### How it works\n| Step | Explanation |\n|------|-------------|\n| **Inner sub‑query** (`s`) | Groups all rows in the sales/detail table (`order_items`) by `product_id` and computes the total quantity sold for each product (`SUM(quantity)`). |\n| **JOIN** | Links each aggregated total back to the `products` table to retrieve the human‑readable `product_name`. |\n| **ORDER BY … DESC** | Sorts the results so the product with the largest `total_sold` appears first. |\n| **LIMIT 1** | Returns only that top‑selling product. If you want to see ties, you could use `WHERE total_sold = (SELECT MAX(total_sold) FROM …)` instead of `LIMIT 1`. |\n\n### Quick adaptation checklist\n| Your schema element | Replace with |\n|---------------------|--------------|\n| `order_items`       | The table that stores each sale line (e.g., `order_details`, `sales`, `transactions`). |\n| `quantity`          | The column that records how many units were sold in that line. |\n| `product_id`        | The foreign‑key column that links a sale line to a product. |\n| `products`          | The table that holds product master data. |\n| `product_name`      | The column that stores the product’s display name. |\n| `product_id` (in `products`) | The primary‑key column of the product table. |\n\nIf you also need to consider revenue (price × quantity) instead of just quantity, replace `SUM(quantity)` with `SUM(quantity * unit_price)` (or the appropriate price column).",
+  "reasoning": "We need to write a SQLite query that answers: \"What is the name of the product that sold the most?\" We need to assume there are tables like Products, Sales, OrderDetails, etc. The question is generic. Provide a query that selects product name with highest total quantity sold. Could be sum of quantity from OrderDetails join Products. Provide query with ORDER BY DESC LIMIT 1. Also handle ties? Use MAX. Provide generic answer.\n\nThus respond with SQL query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 686,
+    "total_tokens": 780
+  },
+  "latency_s": 2.001
+}

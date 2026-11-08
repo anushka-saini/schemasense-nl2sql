@@ -1,0 +1,23 @@
+{
+  "key": "e7fdd0dbb9bc540dcebe60466415205f87599496b7058d1a063377b2e669e859",
+  "time": "2026-11-08T14:33:47",
+  "tag": "v0:M09",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which month had the most orders?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT \n    strftime('%Y-%m', order_date) AS order_month,   -- e.g. 2023-07\n    COUNT(*)                     AS total_orders\nFROM orders\nGROUP BY order_month\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\n**Explanation**\n\n| Step | What it does |\n|------|--------------|\n| `strftime('%Y-%m', order_date)` | Extracts the year‑month part of the `order_date` (e.g., “2023‑07”). This lets us group all orders that occurred in the same calendar month. |\n| `COUNT(*)` | Counts how many rows (orders) belong to each month. |\n| `GROUP BY order_month` | Aggregates the counts per month. |\n| `ORDER BY total_orders DESC` | Sorts the months from most orders to fewest. |\n| `LIMIT 1` | Returns only the top‑scoring month – the month with the most orders. |\n\n*If you only need the month name (e.g., “July”) you can format it further:*\n\n```sql\nSELECT \n    strftime('%m', order_date)               AS month_number,\n    strftime('%Y', order_date)                AS year,\n    COUNT(*)                                  AS total_orders\nFROM orders\nGROUP BY year, month_number\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\nReplace `orders` and `order_date` with the actual table and column names in your schema if they differ.",
+  "reasoning": "We need to write a SQLite query to answer \"Which month had the most orders?\" We need to assume there is a table with orders, likely with order_date column. We need to group by month and count orders, then order descending limit 1. Provide query. Might need to extract month from date. Use strftime('%Y-%m', order_date) as month. Provide answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 404,
+    "total_tokens": 493
+  },
+  "latency_s": 1.184
+}

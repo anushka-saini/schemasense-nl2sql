@@ -1,0 +1,23 @@
+{
+  "key": "cae39e95158031e6a5c9b5ba66a31382e43b3bc893829b52de79a4b8cb11273f",
+  "time": "2026-11-08T14:45:46",
+  "tag": "v1:A05",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Which 5 product categories have the heaviest products on average? Use English names.\n",
+  "text": "```sql\nSELECT pct.product_category_name_english AS category,\n       AVG(p.product_weight_g) AS avg_weight_g\nFROM products p\nJOIN product_category_name_translation pct\n  ON p.product_category_name = pct.product_category_name\nGROUP BY pct.product_category_name_english\nORDER BY avg_weight_g DESC\nLIMIT 5;\n```\nThis query averages the weight of products for each category, joins to get the English category name, and returns the five categories with the highest average product weight.",
+  "reasoning": "We need to answer: \"Which 5 product categories have the heaviest products on average? Use English names.\"\n\nWe have tables: products(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\n\nproduct_category_name_translation(product_category_name, product_category_name_english)\n\nWe need average weight per category, then order descending, limit 5, and output English names.\n\nSo join products with translation on product_category_name, group by product_category_name_english, compute avg(product_weight_g). Order by avg desc, limit 5.\n\nSQL:\n\nSELECT pct.product_category_name_english AS category, AVG(p.product_weight_g) AS avg_weight_g\nFROM products p\nJOIN product_category_name_translation pct\n  ON p.product_category_name = pct.product_category_name\nGROUP BY pct.product_category_name_english\nORDER BY avg_weight_g DESC\nLIMIT 5;\n\nExplain: This query computes average product weight per category and returns top 5 heaviest categories using English names.\n\nReturn SQL then explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 386,
+    "completion_tokens": 339,
+    "total_tokens": 725
+  },
+  "latency_s": 2.076
+}

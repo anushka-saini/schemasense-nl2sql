@@ -1,0 +1,23 @@
+{
+  "key": "d8bd59a9f08b0b3fafa296a59012090a9954fc093416d1064077917465f30074",
+  "time": "2026-11-08T14:16:02",
+  "tag": "v0:A10",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many customers have placed more than one order?\n",
+  "text": "**SQLite query**\n\n```sql\n/*  Number of customers who have placed more than one order  */\nSELECT COUNT(*) AS customers_with_multiple_orders\nFROM (\n    SELECT customer_id\n    FROM Orders               -- table that stores each order\n    GROUP BY customer_id\n    HAVING COUNT(*) > 1       -- keep only customers with >1 order\n) AS multi_order_customers;\n```\n\n**Explanation**\n\n1. **`FROM Orders`** – assumes an `Orders` table that contains a `customer_id` column referencing the customer who placed the order.  \n2. **`GROUP BY customer_id`** – groups all rows (orders) by each customer.  \n3. **`HAVING COUNT(*) > 1`** – filters the groups to keep only those customers whose order count is greater than one.  \n4. The sub‑query returns one row per qualifying customer (`customer_id`).  \n5. The outer `SELECT COUNT(*)` then counts how many such customers exist, giving the final answer.  \n\nIf you also need to ensure the customer actually exists in a `Customers` table, you can join the sub‑query to that table:\n\n```sql\nSELECT COUNT(*) AS customers_with_multiple_orders\nFROM (\n    SELECT o.customer_id\n    FROM Orders o\n    GROUP BY o.customer_id\n    HAVING COUNT(*) > 1\n) AS multi\nJOIN Customers c ON c.id = multi.customer_id;\n```\n\nBoth versions return the same count, assuming referential integrity is already enforced.",
+  "reasoning": "We need to write a SQLite query. The question: \"How many customers have placed more than one order?\" We need to assume there are tables: likely Customers and Orders, with Orders having a customer_id foreign key. So we need to count distinct customers with count(orders) > 1.\n\nThus query:\n\nSELECT COUNT(*) AS num_customers\nFROM (\n    SELECT customer_id\n    FROM Orders\n    GROUP BY customer_id\n    HAVING COUNT(*) > 1\n) AS sub;\n\nAlternatively join with Customers if needed.\n\nProvide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 92,
+    "completion_tokens": 431,
+    "total_tokens": 523
+  },
+  "latency_s": 1.343
+}

@@ -1,0 +1,23 @@
+{
+  "key": "e58ff616ef8f7128e0ae05cf4b4ad8066b5a07e7e5bda0fa16ee98f7f978fc0f",
+  "time": "2026-11-08T14:32:29",
+  "tag": "v1:J05",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What are the top 5 product categories by number of items sold in delivered orders? Use English category names.\n",
+  "text": "SELECT pct.product_category_name_english AS category,\n       COUNT(*) AS items_sold\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nJOIN products p ON oi.product_id = p.product_id\nJOIN product_category_name_translation pct\n     ON p.product_category_name = pct.product_category_name\nWHERE o.order_status = 'delivered'\nGROUP BY pct.product_category_name_english\nORDER BY items_sold DESC\nLIMIT 5;\n-- This lists the five English product categories that sold the most items in orders marked as delivered.",
+  "reasoning": "We need to answer: top 5 product categories by number of items sold in delivered orders. Use English category names. Schema: product_category_name_translation maps product_category_name to English. order_items has product_id. products has product_category_name. orders has order_status and order_delivered_customer_date maybe indicates delivered. We need delivered orders: order_status maybe 'delivered'? Or check order_delivered_customer_date not null. Use delivered orders: order_status = 'delivered' or order_delivered_customer_date is not null. We'll assume order_status = 'delivered'. So join orders, order_items, products, product_category_name_translation. Count items per category. Order desc, limit 5. Return SELECT. Provide explanation.\n\nSQL:\n\nSELECT pct.product_category_name_english AS category, COUNT(*) AS items_sold\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nJOIN products p ON oi.product_id = p.product_id\nJOIN product_category_name_translation pct ON p.product_category_name = pct.product_category_name\nWHERE o.order_status = 'delivered'\nGROUP BY pct.product_category_name_english\nORDER BY items_sold DESC\nLIMIT 5;\n\nReturn that.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 391,
+    "completion_tokens": 368,
+    "total_tokens": 759
+  },
+  "latency_s": 0.64
+}

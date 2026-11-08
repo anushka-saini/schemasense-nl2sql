@@ -1,0 +1,23 @@
+{
+  "key": "eb940b1fdcd31fd619201423862d2deafcc4b017d4f10ee19568ff5e4ed496d1",
+  "time": "2026-11-08T14:15:56",
+  "tag": "v0:A02",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders were placed in each month of 2017?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT \n    strftime('%Y-%m', order_date) AS month,   -- e.g. 2017-01, 2017-02 …\n    COUNT(*)                     AS order_count\nFROM   orders\nWHERE  strftime('%Y', order_date) = '2017'      -- only the year 2017\nGROUP BY month\nORDER BY month;\n```\n\n**Explanation**\n\n| Part of the query | What it does |\n|-------------------|--------------|\n| `strftime('%Y-%m', order_date)` | Extracts the year‑month part of the `order_date` (assumes the column is stored as a TEXT date in a format SQLite can parse, e.g. `YYYY-MM-DD`). |\n| `WHERE strftime('%Y', order_date) = '2017'` | Limits the rows to those whose year is 2017. |\n| `COUNT(*)` | Counts the number of orders for each month. |\n| `GROUP BY month` | Groups the rows by the extracted month, so you get one row per month. |\n| `ORDER BY month` | Returns the results in chronological order. |\n\nThe result will be a two‑column table:\n\n| month   | order_count |\n|---------|-------------|\n| 2017-01 | … |\n| 2017-02 | … |\n| …       | … |\n| 2017-12 | … |\n\nReplace `orders` and `order_date` with the actual table and column names if they differ in your schema.",
+  "reasoning": "We need to write a SQLite query. The question: \"How many orders were placed in each month of 2017?\" We need to assume there is an orders table with order_date column. Provide query grouping by month. Use strftime. Provide result columns month and order_count. Possibly format month as 'YYYY-MM'. So answer: SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2017' GROUP BY month ORDER BY month; Also handle date stored as TEXT. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 95,
+    "completion_tokens": 451,
+    "total_tokens": 546
+  },
+  "latency_s": 1.463
+}

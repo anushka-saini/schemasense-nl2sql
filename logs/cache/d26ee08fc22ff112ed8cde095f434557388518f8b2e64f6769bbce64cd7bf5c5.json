@@ -1,0 +1,23 @@
+{
+  "key": "d26ee08fc22ff112ed8cde095f434557388518f8b2e64f6769bbce64cd7bf5c5",
+  "time": "2026-11-08T14:16:14",
+  "tag": "v0:M01",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What was the total revenue in 2017?\n",
+  "text": "**Assumptions about the schema**\n\n| Table | Columns (relevant) |\n|-------|--------------------|\n| `sales` | `sale_id` (PK), `sale_date` (TEXT or DATE), `revenue` (NUMERIC) |\n\n* `sale_date` stores the date of each transaction in a format SQLite can parse (e.g., `YYYY‑MM‑DD`).  \n* `revenue` holds the amount earned for that transaction.\n\n---\n\n### SQLite query\n\n```sql\nSELECT\n    SUM(revenue) AS total_revenue_2017\nFROM\n    sales\nWHERE\n    strftime('%Y', sale_date) = '2017';\n```\n\n**Explanation**\n\n1. `strftime('%Y', sale_date)` extracts the four‑digit year from the `sale_date` column.  \n2. The `WHERE` clause keeps only rows whose year equals `'2017'`.  \n3. `SUM(revenue)` adds up the revenue for all those rows, returning the total revenue for the year 2017.  \n\n---\n\n### Variations (if your schema differs)\n\n| Situation | Modified query |\n|-----------|----------------|\n| Date stored as an integer Unix timestamp (`sale_ts`) | `WHERE strftime('%Y', datetime(sale_ts, 'unixepoch')) = '2017'` |\n| Year stored in a separate column (`sale_year`) | `WHERE sale_year = 2017` |\n| Table named `orders` with column `amount` instead of `revenue` | `SELECT SUM(amount) AS total_revenue_2017 FROM orders WHERE strftime('%Y', order_date) = '2017';` |\n| You need the result formatted as currency | `SELECT printf('%.2f', SUM(revenue)) AS total_revenue_2017 FROM sales WHERE strftime('%Y', sale_date) = '2017';` |\n\nReplace the table and column names as needed to match your actual database schema.",
+  "reasoning": "We need to write a SQLite query to answer \"What was the total revenue in 2017?\" We need to assume there is a table with revenue data, maybe sales, orders, etc. Since no schema given, we need to produce a generic query. Could be a table named \"sales\" with columns \"revenue\" and \"date\" or \"order_date\". Provide query using SUM and filter year = 2017. Use strftime to extract year. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 92,
+    "completion_tokens": 511,
+    "total_tokens": 603
+  },
+  "latency_s": 1.475
+}

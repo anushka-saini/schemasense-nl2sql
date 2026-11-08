@@ -1,0 +1,23 @@
+{
+  "key": "2830101102609ae9c94c75d8e4019f91f5b4aff9ea041e95da7d539050587fb3",
+  "time": "2026-11-08T14:45:28",
+  "tag": "v1:A03",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Which 5 sellers made the most revenue from delivered orders?\n",
+  "text": "```sql\nSELECT oi.seller_id,\n       SUM(oi.price + oi.freight_value) AS total_revenue\nFROM orders AS o\nJOIN order_items AS oi ON o.order_id = oi.order_id\nWHERE o.order_status = 'delivered'\nGROUP BY oi.seller_id\nORDER BY total_revenue DESC\nLIMIT 5;\n```\nThis query sums the price and freight for each seller’s items in orders marked as delivered, then returns the five sellers with the highest total revenue.",
+  "reasoning": "We need to answer: \"Which 5 sellers made the most revenue from delivered orders?\" Need to compute revenue per seller from delivered orders. Delivered orders: orders where order_delivered_customer_date is not null? Or order_status = 'delivered'? Probably use order_status = 'delivered' or order_delivered_customer_date not null. Use orders table. Need to join order_items to get price and freight_value? Revenue likely sum of price + freight? Usually revenue = price + freight_value. Use order_items.price + order_items.freight_value per order_item. Need to sum per seller_id for orders that are delivered. So join orders to order_items on order_id, filter orders.order_status = 'delivered' (or order_delivered_customer_date is not null). Then group by seller_id, order by sum descending limit 5. Return seller_id and total revenue.\n\nSQL:\n\nSELECT oi.seller_id,\n       SUM(oi.price + oi.freight_value) AS total_revenue\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nWHERE o.order_status = 'delivered'\nGROUP BY oi.seller_id\nORDER BY total_revenue DESC\nLIMIT 5;\n\nExplanation: List top 5 sellers by total revenue from delivered orders.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 381,
+    "completion_tokens": 371,
+    "total_tokens": 752
+  },
+  "latency_s": 1.412
+}

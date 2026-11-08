@@ -1,0 +1,23 @@
+{
+  "key": "ea6ed88eb118b16c4d017aa030dbfb71c6c0ab91a4a55ad9d402296e96334501",
+  "time": "2026-11-08T14:32:14",
+  "tag": "v0:S04",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What payment types are there and how many payment records does each one have?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT \n    payment_type,                -- the distinct payment type\n    COUNT(*)      AS cnt        -- how many rows use that type\nFROM \n    payments                     -- the table that stores payment records\nGROUP BY \n    payment_type\nORDER BY \n    cnt DESC;                    -- optional: show the most common types first\n```\n\n**Explanation**\n\n- `payment_type` (or whatever the column is called in your schema) holds the kind of payment (e.g., “credit_card”, “cash”, “check”, etc.).\n- `COUNT(*)` tallies the number of rows for each distinct `payment_type`.\n- `GROUP BY payment_type` groups the rows so the count is calculated per type.\n- The optional `ORDER BY cnt DESC` sorts the result so the most frequent payment types appear at the top.",
+  "reasoning": "We need to write a SQLite query that answers: \"What payment types are there and how many payment records does each one have?\" Likely there is a table named payments with a column payment_type (or type). We need to count per type. So SELECT payment_type, COUNT(*) AS count FROM payments GROUP BY payment_type; Possibly order by count desc. Provide query. Also maybe join with other tables? But generic answer: SELECT payment_type, COUNT(*) AS num_records FROM payments GROUP BY payment_type; If column name is type, use that. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 97,
+    "completion_tokens": 298,
+    "total_tokens": 395
+  },
+  "latency_s": 1.104
+}

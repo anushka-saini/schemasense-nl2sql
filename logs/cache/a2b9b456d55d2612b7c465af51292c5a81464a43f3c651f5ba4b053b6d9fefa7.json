@@ -1,0 +1,23 @@
+{
+  "key": "a2b9b456d55d2612b7c465af51292c5a81464a43f3c651f5ba4b053b6d9fefa7",
+  "time": "2026-11-08T14:50:02",
+  "tag": "v1:F08",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: How many orders contain items from more than one seller?\n",
+  "text": "```sql\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n    SELECT order_id\n    FROM order_items\n    GROUP BY order_id\n    HAVING COUNT(DISTINCT seller_id) > 1\n) AS multi_seller_orders;\n```\nCounts the distinct orders that have order items linked to two or more different sellers.",
+  "reasoning": "We need to answer: number of orders that contain items from more than one seller. Schema: order_items has order_id, seller_id. So we need to count distinct order_id where count(distinct seller_id) > 1.\n\nSQL: SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) > 1) AS sub;\n\nReturn explanation.\n\n",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 380,
+    "completion_tokens": 163,
+    "total_tokens": 543
+  },
+  "latency_s": 1.948
+}

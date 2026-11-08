@@ -1,0 +1,23 @@
+{
+  "key": "4210a933ba3008297fe1935fd723f020d148b6cf7967c0d83af3753d56c4ccda",
+  "time": "2026-11-08T14:38:59",
+  "tag": "v0:F04",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which product category (English name) sold the most items in delivered orders that got a 5-star review?\n",
+  "text": "**SQLite query**\n\n```sql\n/* 1️⃣  Filter only delivered orders that received a 5‑star review\n   2️⃣  Join the order items → products → categories\n   3️⃣  Sum the quantity sold per category\n   4️⃣  Return the category (English name) with the highest total quantity   */\nSELECT\n    c.name_en AS category_name,\n    SUM(oi.quantity) AS total_items_sold\nFROM orders AS o\nJOIN reviews   AS r   ON r.order_id   = o.order_id\nJOIN order_items AS oi ON oi.order_id = o.order_id\nJOIN products   AS p   ON p.product_id = oi.product_id\nJOIN categories AS c   ON c.category_id = p.category_id\nWHERE\n    o.status = 'delivered'      -- only delivered orders\n    AND r.rating = 5            -- only 5‑star reviews\nGROUP BY\n    c.category_id, c.name_en\nORDER BY\n    total_items_sold DESC\nLIMIT 1;                         -- the top‑selling category\n```\n\n**Explanation**\n\n| Step | What it does |\n|------|--------------|\n| `JOIN reviews` | Keeps only orders that have a review record. |\n| `WHERE r.rating = 5` | Restricts to 5‑star reviews. |\n| `WHERE o.status = 'delivered'` | Keeps only delivered orders. |\n| `JOIN order_items → products → categories` | Connects each sold line‑item to its product and the product’s category. |\n| `SUM(oi.quantity)` | Counts how many individual items of each category were sold. |\n| `GROUP BY c.category_id, c.name_en` | Aggregates the sum per category. |\n| `ORDER BY … DESC LIMIT 1` | Returns the single category with the highest total items sold. |\n\n*Adjust column/table names if your schema differs (e.g., `order_status` instead of `status`, `rating_star` instead of `rating`, etc.).*",
+  "reasoning": "We need to write a SQLite query. Need to infer schema: likely tables: orders, order_items, products, categories, reviews. Need to join delivered orders with 5-star review, sum quantity per category, order by sum desc limit 1. Provide query.\n\nAssume tables:\n\n- orders: order_id, status (delivered), etc.\n- order_items: order_id, product_id, quantity\n- products: product_id, category_id, name, etc.\n- categories: category_id, name_en (English name)\n- reviews: order_id, rating (1-5)\n\nWe need product category English name sold most items in delivered orders with 5-star review.\n\nSo join orders to reviews (rating=5) and status='delivered', join order_items, products, categories. Group by category name, sum quantity, order by sum desc limit 1.\n\nWrite query.\n\nAlso could use subquery to filter orders.\n\nProvide final answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 104,
+    "completion_tokens": 623,
+    "total_tokens": 727
+  },
+  "latency_s": 1.758
+}

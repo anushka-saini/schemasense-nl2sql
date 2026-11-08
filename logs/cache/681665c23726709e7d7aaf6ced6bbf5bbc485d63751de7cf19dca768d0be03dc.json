@@ -1,0 +1,23 @@
+{
+  "key": "681665c23726709e7d7aaf6ced6bbf5bbc485d63751de7cf19dca768d0be03dc",
+  "time": "2026-11-08T14:33:11",
+  "tag": "v0:F06",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What percentage of total item revenue from delivered orders comes from the top 10 sellers?\n",
+  "text": "**SQLite query**\n\n```sql\n/* 1️⃣  Revenue per seller for *delivered* orders */\nWITH seller_rev AS (\n    SELECT\n        oi.seller_id,\n        SUM(oi.price * oi.quantity) AS rev\n    FROM order_items AS oi\n    JOIN orders AS o\n          ON oi.order_id = o.order_id\n    WHERE o.status = 'delivered'                -- only delivered orders\n    GROUP BY oi.seller_id\n),\n\n/* 2️⃣  Total revenue from all delivered orders */\ntotal_rev AS (\n    SELECT SUM(rev) AS total\n    FROM seller_rev\n),\n\n/* 3️⃣  Revenue contributed by the top‑10 sellers */\ntop10_rev AS (\n    SELECT rev\n    FROM seller_rev\n    ORDER BY rev DESC\n    LIMIT 10\n)\n\n/* 4️⃣  Final percentage */\nSELECT\n    ROUND(100.0 * (SELECT SUM(rev) FROM top10_rev) /\n               (SELECT total   FROM total_rev), 2) AS pct_top10_seller_rev\n;\n```\n\n### What the query does\n\n| Step | Purpose |\n|------|---------|\n| **seller_rev** | Calculates each seller’s revenue (`price × quantity`) **only** for orders whose status is `'delivered'`. |\n| **total_rev**   | Sums the revenue of *all* sellers to get the overall revenue from delivered orders. |\n| **top10_rev**   | Picks the 10 sellers with the highest revenue (ordered descending). |\n| Final `SELECT` | Divides the sum of the top‑10 sellers’ revenue by the total revenue, multiplies by 100, and rounds to two decimal places, yielding the desired percentage. |\n\n*If you also want the seller names, just join `seller_rev` (or `top10_rev`) with a `sellers` table in the CTEs.*",
+  "reasoning": "We need to write a SQLite query. We need to assume tables: likely orders, order_items, sellers, maybe order_status. Need to compute total item revenue from delivered orders, then compute revenue per seller, sort descending, take top 10 sellers, sum their revenue, divide by total revenue, multiply 100.\n\nWe need to write query. Provide explanation. Use common table expressions.\n\nAssume tables: order_items (order_id, seller_id, price, quantity), orders (order_id, status). Delivered status maybe 'delivered'.\n\nRevenue per item = price * quantity.\n\nSo:\n\nWITH delivered_orders AS (\n  SELECT oi.seller_id,\n         SUM(oi.price * oi.quantity) AS seller_rev\n  FROM order_items oi\n  JOIN orders o ON oi.order_id = o.order_id\n  WHERE o.status = 'delivered'\n  GROUP BY oi.seller_id\n),\ntotal_rev AS (\n  SELECT SUM(seller_rev) AS total FROM delivered_orders\n),\ntop10 AS (\n  SELECT seller_rev FROM delivered_orders\n  ORDER BY seller_rev DESC\n  LIMIT 10\n)\nSELECT ROUND(100.0 * (SELECT SUM(seller_rev) FROM top10) / (SELECT total FROM total_rev), 2) AS pct_top10_from_delivered;\n\nWe can also include seller name join.\n\nProvide final answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 99,
+    "completion_tokens": 676,
+    "total_tokens": 775
+  },
+  "latency_s": 1.878
+}

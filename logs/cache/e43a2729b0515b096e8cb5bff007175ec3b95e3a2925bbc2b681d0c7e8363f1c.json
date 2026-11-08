@@ -1,0 +1,23 @@
+{
+  "key": "e43a2729b0515b096e8cb5bff007175ec3b95e3a2925bbc2b681d0c7e8363f1c",
+  "time": "2026-11-08T14:45:59",
+  "tag": "v1:F02",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What is the average review score for orders that contain more than one item?\n",
+  "text": "```sql\nSELECT AVG(review_score) AS avg_review_score\nFROM order_reviews\nWHERE order_id IN (\n    SELECT order_id\n    FROM order_items\n    GROUP BY order_id\n    HAVING COUNT(*) > 1\n);\n```\nThis query computes the average review score for all orders that have more than one item.",
+  "reasoning": "We need average review score for orders that contain more than one item. Need to join order_reviews with order_items to count items per order, filter count >1, then average review_score.\n\nSchema: order_items(order_id,...). order_reviews(review_id, order_id, review_score,...). So query:\n\nSELECT AVG(review_score) FROM order_reviews WHERE order_id IN (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(*) > 1);\n\nThat's one SELECT. Explanation: calculates average review score for orders with more than one item.\n\nReturn SQL then explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 384,
+    "completion_tokens": 192,
+    "total_tokens": 576
+  },
+  "latency_s": 0.741
+}

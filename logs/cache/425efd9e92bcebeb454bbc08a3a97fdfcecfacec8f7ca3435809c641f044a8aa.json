@@ -1,0 +1,23 @@
+{
+  "key": "425efd9e92bcebeb454bbc08a3a97fdfcecfacec8f7ca3435809c641f044a8aa",
+  "time": "2026-11-08T14:33:54",
+  "tag": "v1:F09",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Which 5 customer states have the highest percentage of delivered orders that arrived late?\n",
+  "text": "SELECT c.customer_state,\n       100.0 * SUM(CASE WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*) AS late_percentage\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE o.order_status = 'delivered'\nGROUP BY c.customer_state\nORDER BY late_percentage DESC\nLIMIT 5;\n-- Shows the five states with the highest percentage of delivered orders that arrived after the estimated delivery date.",
+  "reasoning": "We need to compute for each customer state: percentage of delivered orders that arrived late. Delivered orders: orders where order_status maybe 'delivered'? But we need delivered orders that arrived late: delivered orders where order_delivered_customer_date > order_estimated_delivery_date? Late if delivered after estimated. So we need to join orders with customers to get state. Then compute count of delivered orders (order_status='delivered' maybe). But we don't have status values; but we can assume 'delivered' is a status. We need to compute percentage: late / delivered * 100. Then order by descending percentage, limit 5. Use SQLite. Use CASE WHEN order_delivered_customer_date > order_estimated_delivery_date THEN 1 ELSE 0 END. Count delivered orders: sum(case when order_status='delivered' then 1 else 0 end). But we need only delivered orders. So we can filter where order_status='delivered'. Then compute late count / delivered count. Use group by customer_state. Then order by percentage desc limit 5. Provide explanation.\n\nBut we need to ensure we use only schema. Use customers table for state. Join orders on customer_id. Filter order_status='delivered'. Compute late count: sum(case when order_delivered_customer_date > order_estimated_delivery_date then 1 else 0 end). Compute delivered count: count(*). Then percentage = 100.0 * late / delivered. Order by percentage desc limit 5.\n\nReturn SQL and explanation.\n\nLet's craft query:\n\nSELECT c.customer_state,\n       100.0 * SUM(CASE WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*) AS late_percentage\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE o.order_status = 'delivered'\nGROUP BY c.customer_state\nORDER BY late_percentage DESC\nLIMIT 5;\n\nReturn explanation: \"Shows the five states with the highest percentage of delivered orders that arrived after the estimated delivery date.\"\n\nCheck if any other nuance: maybe order_delivered_customer_date can be null for not delivered. But we filter delivered status. Good.\n\nReturn exactly that.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 385,
+    "completion_tokens": 561,
+    "total_tokens": 946
+  },
+  "latency_s": 0.744
+}

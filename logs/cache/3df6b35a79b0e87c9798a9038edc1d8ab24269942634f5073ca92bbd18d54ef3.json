@@ -1,0 +1,23 @@
+{
+  "key": "3df6b35a79b0e87c9798a9038edc1d8ab24269942634f5073ca92bbd18d54ef3",
+  "time": "2026-11-08T14:38:48",
+  "tag": "v0:A08",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the average payment value for each payment type?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT \n    payment_type,\n    AVG(payment_value) AS avg_payment_value\nFROM \n    payments\nGROUP BY \n    payment_type\nORDER BY \n    payment_type;\n```\n\n- **`payments`** – the table that stores each transaction.  \n- **`payment_type`** – column indicating the type of payment (e.g., cash, credit, check, etc.).  \n- **`payment_value`** – column holding the monetary amount of the payment.  \n\nThe query groups the rows by `payment_type` and computes the average (`AVG`) of `payment_value` for each group, returning one row per payment type with its corresponding average payment value.",
+  "reasoning": "We need to write a SQLite query. The question: \"What is the average payment value for each payment type?\" Likely there is a table with payments, maybe columns: payment_type, payment_value, amount, etc. We need to produce a query that groups by payment type and calculates average payment value.\n\nWe need to assume table name, maybe \"payments\". Columns: \"payment_type\", \"payment_value\" or \"amount\". Use AVG.\n\nSo answer: SELECT payment_type, AVG(payment_value) AS average_payment FROM payments GROUP BY payment_type;\n\nIf column names differ, we can mention generic.\n\nThus final answer: Provide query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 93,
+    "completion_tokens": 281,
+    "total_tokens": 374
+  },
+  "latency_s": 1.055
+}

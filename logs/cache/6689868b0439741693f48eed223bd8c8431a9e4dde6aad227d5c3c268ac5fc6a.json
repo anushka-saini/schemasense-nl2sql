@@ -1,0 +1,23 @@
+{
+  "key": "6689868b0439741693f48eed223bd8c8431a9e4dde6aad227d5c3c268ac5fc6a",
+  "time": "2026-11-08T14:37:45",
+  "tag": "v0:S09",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders were placed in 2017?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT COUNT(*) AS orders_in_2017\nFROM   orders\nWHERE  strftime('%Y', order_date) = '2017';\n```\n\n**Explanation**\n\n- `orders` – the table that stores each order.  \n- `order_date` – a column that contains the date (or datetime) the order was placed.  \n- `strftime('%Y', order_date)` extracts the four‑digit year from the date.  \n- The `WHERE` clause keeps only rows whose year is **2017**.  \n- `COUNT(*)` returns the total number of such rows, aliased as `orders_in_2017`.  \n\n*If the date is stored as a Unix timestamp (INTEGER) you can convert it first:*\n\n```sql\nSELECT COUNT(*) AS orders_in_2017\nFROM   orders\nWHERE  strftime('%Y', datetime(order_date, 'unixepoch')) = '2017';\n```\n\nEither version will give you the number of orders placed during the year 2017.",
+  "reasoning": "We need to write a SQLite query. We need to assume a schema? Probably there is an Orders table with order_date column. The question: \"How many orders were placed in 2017?\" So query: SELECT COUNT(*) FROM orders WHERE strftime('%Y', order_date) = '2017'; Or if order_date is stored as integer (timestamp) use date functions. Provide generic answer.\n\nThus final answer: a SQLite query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 92,
+    "completion_tokens": 313,
+    "total_tokens": 405
+  },
+  "latency_s": 1.107
+}

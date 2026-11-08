@@ -1,0 +1,23 @@
+{
+  "key": "5abd87782fc4d2b47e419997124350d09eb684f2368784b3f7265ee33ce3df79",
+  "time": "2026-11-08T14:33:34",
+  "tag": "v0:M06",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Who are our top sellers?\n",
+  "text": "Below is a **generic SQLite query** that will return the “top sellers” – i.e. the salespeople (or stores, partners, etc.) that have generated the most revenue.  \nAdjust the table‑ and column‑names to match the exact schema of your database.\n\n```sql\n/* --------------------------------------------------------------\n   Top Sellers – total sales amount per seller, ordered descending\n   -------------------------------------------------------------- */\nSELECT\n    s.seller_id,                     -- primary key of the seller (adjust name)\n    COALESCE(e.name, s.seller_name) AS seller_name,   -- readable name (optional)\n    SUM(oi.quantity * oi.unit_price) AS total_sales   -- total revenue\nFROM\n    orders          AS o          -- table that records each sale\nJOIN\n    order_items     AS oi ON oi.order_id = o.id\nLEFT JOIN\n    sellers         AS s  ON s.id = o.seller_id          -- the seller entity\nLEFT JOIN\n    employees       AS e  ON e.id = o.seller_id          -- if sellers are employees\nWHERE\n    o.status = 'completed'            -- only count finished orders (optional)\nGROUP BY\n    s.seller_id,\n    seller_name\nORDER BY\n    total_sales DESC;                 -- highest‑earning sellers first\n```\n\n### How it works\n| Step | What it does |\n|------|--------------|\n| **JOIN `orders` → `order_items`** | Pulls every line‑item for each order so we can calculate revenue (`quantity * unit_price`). |\n| **LEFT JOIN `sellers` / `employees`** | Retrieves a human‑readable name for the seller. Use whichever table actually stores your seller information. |\n| **WHERE `o.status = 'completed'`** | (Optional) Filters out cancelled or pending orders so only real sales count. |\n| **GROUP BY seller** | Aggregates all line‑items belonging to the same seller. |\n| **SUM(...) AS total_sales** | Computes the total revenue each seller generated. |\n| **ORDER BY total_sales DESC** | Ranks sellers from highest to lowest revenue. |\n\n### Common tweaks\n| Need | Change |\n|------|--------|\n| **Show only the top N sellers** | Append `LIMIT N` (e.g., `LIMIT 10`). |\n| **Include the number of orders** | Add `COUNT(DISTINCT o.id) AS order_count` to the SELECT list. |\n| **Show sales for a specific period** | Add a date filter, e.g. `AND o.order_date BETWEEN '2024-01-01' AND '2024-12-31'`. |\n| **Use a different revenue definition** | Replace `oi.quantity * oi.unit_price` with the appropriate column (e.g., `oi.line_total` or a discount‑adjusted amount). |\n| **Sellers are stored in a `stores` table** | Replace the `employees` join with `JOIN stores st ON st.id = o.seller_id` and select `st.store_name`. |\n\n---\n\n**Result example**\n\n| seller_id | seller_name   | total_sales |\n|-----------|---------------|-------------|\n| 42        | Alice Johnson | 1 254 300.00 |\n| 7         | Bob Smith     |   987 450.00 |\n| 19        | Carol Lee     |   845 120.00 |\n| …         | …             | …           |\n\nThe first rows of this result set are your **top sellers**. Adjust the `LIMIT` clause if you only need, say, the top 5 or top 10.",
+  "reasoning": "We need to write a SQLite query that answers \"Who are our top sellers?\" We need to infer schema? Probably there is a sales table with seller, amount, etc. The answer should be a generic query: select seller, sum(amount) as total_sales from sales group by seller order by total_sales desc limit N. Could also join with employees table. Provide explanation. Since no schema given, we assume typical tables: orders, order_items, products, employees. Top sellers likely salespeople. So query: SELECT s.seller_id, e.name, SUM(oi.quantity * oi.unit_price) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN employees e ON o.seller_id = e.id GROUP BY s.seller_id ORDER BY total_sales DESC; Limit maybe top 10.\n\nWe'll produce a query with placeholders. Also mention if need to adjust column names.\n\nThus final answer: a SQLite query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 88,
+    "completion_tokens": 952,
+    "total_tokens": 1040
+  },
+  "latency_s": 2.457
+}

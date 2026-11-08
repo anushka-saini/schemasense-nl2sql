@@ -1,0 +1,23 @@
+{
+  "key": "7701e36500a2d4c4db5da69981812d60b7dd873c18db1e94badc098d318d71a2",
+  "time": "2026-11-08T14:36:52",
+  "tag": "v0:M09",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which month had the most orders?\n",
+  "text": "**Assumptions**\n\n| Table | Columns (relevant) |\n|-------|--------------------|\n| `orders` | `order_id` (PK), `order_date` (TEXT or DATE) |\n\n*`order_date`* stores the date (or datetime) of each order in a format SQLite can parse (e.g., `YYYY‑MM‑DD` or an ISO‑8601 timestamp).\n\n---\n\n### SQLite query – month with the highest number of orders\n\n```sql\nSELECT\n    strftime('%Y-%m', order_date) AS order_month,   -- e.g. 2023-07\n    COUNT(*)                     AS total_orders\nFROM orders\nGROUP BY order_month\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\n**Explanation**\n\n1. `strftime('%Y-%m', order_date)` extracts the year‑month part of the date, giving a consistent “month” identifier (e.g., `2023-07`).  \n2. `COUNT(*)` tallies how many rows (orders) fall in each month.  \n3. `GROUP BY` aggregates the counts per month.  \n4. `ORDER BY total_orders DESC` puts the month with the most orders at the top.  \n5. `LIMIT 1` returns only that top month (and its order count).\n\nIf you only need the month name (e.g., “July 2023”) you can format it further:\n\n```sql\nSELECT\n    strftime('%Y-%m', order_date)               AS order_month,\n    strftime('%m', order_date)                  AS month_number,\n    strftime('%Y', order_date)                  AS year,\n    COUNT(*)                                    AS total_orders\nFROM orders\nGROUP BY order_month\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\nOr, for a more readable label:\n\n```sql\nSELECT\n    strftime('%Y-%m', order_date) AS order_month,\n    printf('%s %s',\n           CASE strftime('%m', order_date)\n               WHEN '01' THEN 'January'   WHEN '02' THEN 'February'\n               WHEN '03' THEN 'March'      WHEN '04' THEN 'April'\n               WHEN '05' THEN 'May'        WHEN '06' THEN 'June'\n               WHEN '07' THEN 'July'       WHEN '08' THEN 'August'\n               WHEN '09' THEN 'September' WHEN '10' THEN 'October'\n               WHEN '11' THEN 'November'  WHEN '12' THEN 'December'\n           END,\n           strftime('%Y', order_date)) AS month_name,\n    COUNT(*) AS total_orders\nFROM orders\nGROUP BY order_month\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\nThese queries will return the month (as `YYYY‑MM` or a friendly name) that had the greatest number of orders, together with the count of those orders.",
+  "reasoning": "We need to write a SQLite query to answer \"Which month had the most orders?\" We need to assume there is a table with orders, likely with order_date column. We need to group by month and count orders, then order descending limit 1. Provide query. Might need to extract month from date. Use strftime('%Y-%m', order_date) as month. Provide answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 687,
+    "total_tokens": 776
+  },
+  "latency_s": 1.956
+}

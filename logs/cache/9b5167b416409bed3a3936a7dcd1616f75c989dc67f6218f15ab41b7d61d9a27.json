@@ -1,0 +1,23 @@
+{
+  "key": "9b5167b416409bed3a3936a7dcd1616f75c989dc67f6218f15ab41b7d61d9a27",
+  "time": "2026-11-08T14:33:14",
+  "tag": "v0:F08",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders contain items from more than one seller?\n",
+  "text": "**SQL (SQLite)**  \n\n```sql\n/*  Count the orders that contain items from more than one seller  */\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n        /*  One row per order – keep only those that have >1 distinct seller  */\n        SELECT oi.order_id\n        FROM   order_items oi\n               /*  If the seller is stored on the item record instead of\n                   the order_items row, join to the items table:               */\n               -- JOIN items i ON i.item_id = oi.item_id\n        GROUP BY oi.order_id\n        HAVING COUNT(DISTINCT \n                     /* replace with the correct column name:\n                        - if seller_id is in order_items:  oi.seller_id\n                        - if seller_id is in items:        i.seller_id   */\n                     oi.seller_id) > 1\n     ) AS multi_seller_orders;\n```\n\n### How it works\n1. **Inner query** (`SELECT oi.order_id … GROUP BY oi.order_id …`)  \n   * Groups all rows of `order_items` by `order_id`.  \n   * `COUNT(DISTINCT oi.seller_id)` counts the number of *different* sellers that appear in that order.  \n   * The `HAVING … > 1` filter keeps only those orders that involve **more than one** seller.\n\n2. **Outer query** (`SELECT COUNT(*) …`)  \n   * Counts the distinct `order_id`s returned by the inner query, giving the total number of orders that contain items from multiple sellers.\n\n### Adjustments for your schema\n| Situation | Change needed |\n|-----------|----------------|\n| Seller is stored on the **items** table (`items.seller_id`) | Replace `oi.seller_id` with `i.seller_id` and uncomment the `JOIN items i …` line. |\n| Table/column names differ | Substitute `order_items`, `order_id`, `seller_id` with the actual names used in your database. |\n\nThe result column `orders_with_multiple_sellers` will contain the answer to the question: **how many orders contain items from more than one seller?**",
+  "reasoning": "We need to write a SQLite query. We need to assume some schema: orders, order_items, sellers, etc. The question: \"How many orders contain items from more than one seller?\" So we need to count distinct orders where the number of distinct sellers in that order > 1.\n\nAssume tables: orders (order_id), order_items (order_id, item_id, seller_id maybe), or items table linking to seller. Could be order_items with seller_id. We'll write generic query.\n\nSQL:\n\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n    SELECT oi.order_id\n    FROM order_items oi\n    JOIN items i ON oi.item_id = i.item_id   -- if needed\n    GROUP BY oi.order_id\n    HAVING COUNT(DISTINCT i.seller_id) > 1\n) sub;\n\nIf seller_id directly in order_items:\n\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n    SELECT order_id\n    FROM order_items\n    GROUP BY order_id\n    HAVING COUNT(DISTINCT seller_id) > 1\n) t;\n\nWe'll provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 93,
+    "completion_tokens": 680,
+    "total_tokens": 773
+  },
+  "latency_s": 1.867
+}

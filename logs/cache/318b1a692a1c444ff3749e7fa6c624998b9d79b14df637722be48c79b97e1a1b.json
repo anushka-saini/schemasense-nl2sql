@@ -1,0 +1,23 @@
+{
+  "key": "318b1a692a1c444ff3749e7fa6c624998b9d79b14df637722be48c79b97e1a1b",
+  "time": "2026-11-08T14:34:01",
+  "tag": "v1:M06",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Who are our top sellers?\n",
+  "text": "SELECT s.seller_id, s.seller_city, s.seller_state, SUM(oi.price) AS total_sales\nFROM order_items oi\nJOIN sellers s ON oi.seller_id = s.seller_id\nGROUP BY s.seller_id, s.seller_city, s.seller_state\nORDER BY total_sales DESC\nLIMIT 10;\n-- This lists the top 10 sellers ranked by the total amount of sales they generated.",
+  "reasoning": "We need to answer \"Who are our top sellers?\" We need to interpret top sellers. Likely sellers with most orders or revenue. The schema has orders, order_items, sellers. We can compute total sales per seller: sum of price + freight_value? Or just price. Let's assume top sellers by total revenue (price). We need to join order_items with sellers via seller_id. Then group by seller_id, maybe also seller_city, seller_state. Then order by sum(price) desc limit 10. Provide SELECT query. Also need to output plain English explanation.\n\nWe must use only SELECT. Provide one query. Let's produce:\n\nSELECT s.seller_id, s.seller_city, s.seller_state, SUM(oi.price) AS total_sales\nFROM order_items oi\nJOIN sellers s ON oi.seller_id = s.seller_id\nGROUP BY s.seller_id, s.seller_city, s.seller_state\nORDER BY total_sales DESC\nLIMIT 10;\n\nExplain: This lists the top 10 sellers by total sales amount.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 375,
+    "completion_tokens": 312,
+    "total_tokens": 687
+  },
+  "latency_s": 0.482
+}

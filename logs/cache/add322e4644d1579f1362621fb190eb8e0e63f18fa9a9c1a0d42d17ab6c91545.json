@@ -1,0 +1,23 @@
+{
+  "key": "add322e4644d1579f1362621fb190eb8e0e63f18fa9a9c1a0d42d17ab6c91545",
+  "time": "2026-11-08T14:15:54",
+  "tag": "v0:J10",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which 3 customer states have the most delivered orders?\n",
+  "text": "**Assumptions**  \n- `orders` table holds each order and has at least the columns `order_id`, `customer_id`, and `status`.  \n- `customers` table holds each customer and has at least the columns `customer_id` and `state`.  \n- An order is considered *delivered* when `orders.status = 'delivered'`.\n\n**SQLite query**\n\n```sql\nSELECT\n    c.state,\n    COUNT(*) AS delivered_orders\nFROM\n    orders   AS o\nJOIN\n    customers AS c\n      ON o.customer_id = c.customer_id\nWHERE\n    o.status = 'delivered'               -- only delivered orders\nGROUP BY\n    c.state\nORDER BY\n    delivered_orders DESC                -- most delivered orders first\nLIMIT 3;                                 -- top 3 states\n```\n\n**Explanation**\n\n1. **Join** `orders` to `customers` so we can associate each order with the customer’s state.  \n2. **Filter** to keep only rows where the order’s status is `'delivered'`.  \n3. **Group** by `c.state` and count the rows in each group – this gives the number of delivered orders per state.  \n4. **Order** the result set by that count in descending order, so the states with the highest counts appear first.  \n5. **Limit** the output to the first three rows, which are the three states with the most delivered orders.  ",
+  "reasoning": "We need to write a SQLite query. The question: \"Which 3 customer states have the most delivered orders?\" We need to assume there are tables: maybe orders, customers, maybe order_status, etc. We need to write a query that counts delivered orders per customer state, orders by count descending, limit 3.\n\nAssume tables: orders (order_id, customer_id, status), customers (customer_id, state). Delivered status maybe 'delivered' in status column.\n\nSo query:\n\nSELECT c.state, COUNT(*) AS delivered_orders\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE o.status = 'delivered'\nGROUP BY c.state\nORDER BY delivered_orders DESC\nLIMIT 3;\n\nIf there is an order_status table, join accordingly.\n\nWe can also use subquery.\n\nProvide explanation.\n\nThus final answer: the SQLite query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 93,
+    "completion_tokens": 487,
+    "total_tokens": 580
+  },
+  "latency_s": 1.456
+}

@@ -1,0 +1,23 @@
+{
+  "key": "597395820c2bc28f768c6e602b07647740a82476666e167904f3cbaacc31b350",
+  "time": "2026-11-08T14:37:03",
+  "tag": "v0:R03",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many of our customers are women?\n",
+  "text": "Below is a generic SQLite query that will return the number of customers whose gender is recorded as “female”.  \nAdjust the table‑ and column names to match the exact schema you use in your database.\n\n```sql\n/*  Count of female customers  */\nSELECT COUNT(*) AS female_customer_count\nFROM   customers\nWHERE  LOWER(gender) = 'female';\n```\n\n### How it works\n| Part of the query | What it does |\n|-------------------|--------------|\n| `SELECT COUNT(*)`| Counts the rows that satisfy the condition. |\n| `AS female_customer_count`| Gives the result column a readable name. |\n| `FROM customers`| Specifies the table that holds your customer records. |\n| `WHERE LOWER(gender) = 'female'`| Filters only those rows where the `gender` column (case‑insensitive) equals “female”. If your column stores a single‑character code (e.g., `'F'`), change the condition to `gender = 'F'` (or `LOWER(gender) = 'f'`). |\n\n### Common variations\n\n| Situation | Modified query |\n|-----------|----------------|\n| Gender stored as a single‑letter code (`'F'`/`'M'`) | `WHERE gender = 'F'` |\n| Gender stored as an integer (`1 = female, 0 = male`) | `WHERE gender = 1` |\n| You have a separate `genders` lookup table (e.g., `gender_id` foreign key) | ```sql SELECT COUNT(*) AS female_customer_count FROM customers c JOIN genders g ON c.gender_id = g.id WHERE g.name = 'Female'; ``` |\n| You want to exclude rows where gender is NULL or unknown | Add `AND gender IS NOT NULL` to the `WHERE` clause. |\n| You need the total number of customers as well (to compute a percentage) | ```sql SELECT COUNT(*) AS total_customers, SUM(CASE WHEN LOWER(gender) = 'female' THEN 1 ELSE 0 END) AS female_customers FROM customers; ``` |\n\nJust replace `customers` and `gender` with the actual names used in your schema, run the query, and the single value returned (`female_customer_count`) will be the answer to “How many of our customers are women?”.",
+  "reasoning": "We need to write a SQLite query to answer \"How many of our customers are women?\" We need to assume a table structure. Probably a customers table with gender column. Provide generic query. Could also include case-insensitive. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 534,
+    "total_tokens": 624
+  },
+  "latency_s": 1.668
+}

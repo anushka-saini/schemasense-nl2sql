@@ -1,0 +1,23 @@
+{
+  "key": "bcd0a924d3c5b291e0098423504e594d23dfac6f6322587898b06c265a6ce5c2",
+  "time": "2026-11-08T14:43:32",
+  "tag": "v1:F09",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Which 5 customer states have the highest percentage of delivered orders that arrived late?\n",
+  "text": "```sql\nSELECT \n    c.customer_state,\n    ROUND(100.0 * SUM(CASE \n                         WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date \n                         THEN 1 ELSE 0 END) \n          / COUNT(*), 2) AS late_percentage\nFROM orders AS o\nJOIN customers AS c ON o.customer_id = c.customer_id\nWHERE o.order_delivered_customer_date IS NOT NULL\nGROUP BY c.customer_state\nORDER BY late_percentage DESC\nLIMIT 5;\n```\n\n*This query finds, for each customer state, the share of delivered orders that arrived after the estimated delivery date, ranks the states by that percentage, and returns the top five.*",
+  "reasoning": "We need to write a SQLite SELECT query using given schema. Need to compute for each customer state: percentage of delivered orders that arrived late. Delivered orders: order_status maybe 'delivered'? Or we have dates: order_delivered_customer_date and order_estimated_delivery_date. Late if delivered date > estimated date. Need to consider only orders that have been delivered (i.e., order_delivered_customer_date not null). Compute count of delivered orders per state, count of those delivered late, then percentage = late / total * 100. Then order by percentage desc limit 5. Need to join orders with customers to get state. Use customers.customer_state. Also need to ensure orders have order_delivered_customer_date not null. Late condition: order_delivered_customer_date > order_estimated_delivery_date. Dates are stored as maybe timestamps strings; SQLite can compare lexicographically if ISO format. Use DATE() maybe. Use simple >.\n\nSQL:\n\nSELECT c.customer_state,\n       ROUND(100.0 * SUM(CASE WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*), 2) AS late_percentage\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE o.order_delivered_customer_date IS NOT NULL\nGROUP BY c.customer_state\nORDER BY late_percentage DESC\nLIMIT 5;\n\nReturn explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 385,
+    "completion_tokens": 436,
+    "total_tokens": 821
+  },
+  "latency_s": 1.31
+}

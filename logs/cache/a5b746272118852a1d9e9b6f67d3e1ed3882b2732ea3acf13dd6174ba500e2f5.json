@@ -1,0 +1,23 @@
+{
+  "key": "a5b746272118852a1d9e9b6f67d3e1ed3882b2732ea3acf13dd6174ba500e2f5",
+  "time": "2026-11-08T14:34:03",
+  "tag": "v1:M07",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Are our customers happy?\n",
+  "text": "SELECT\n    AVG(review_score) AS avg_score,\n    COUNT(*) AS total_reviews,\n    SUM(CASE WHEN review_score >= 4 THEN 1 ELSE 0 END) AS positive_reviews,\n    SUM(CASE WHEN review_score >= 4 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS positive_percentage\nFROM order_reviews;\n\nThis shows the average review score and the percentage of reviews with a score of 4 or higher, indicating customer satisfaction.",
+  "reasoning": "We need to answer \"Are our customers happy?\" We need to use the schema. We need to produce a single SQLite SELECT query. We need to interpret \"customers happy\" likely via order_reviews. We can compute average review_score or proportion of positive reviews. We need to produce a query that returns something like average review_score or count of reviews with score >= 4. But the question is ambiguous. We can produce a query that returns average review_score across all orders. That indicates happiness. Or we can compute percentage of reviews with score >= 4. Let's produce a query that returns average review_score and count of reviews. That would answer. But we need to produce a single SELECT query. We can use subquery or aggregate. For example:\n\nSELECT AVG(review_score) AS avg_score, COUNT(*) AS total_reviews, SUM(CASE WHEN review_score >= 4 THEN 1 ELSE 0 END) AS positive_reviews, SUM(CASE WHEN review_score >= 4 THEN 1 ELSE 0 END)*100.0/COUNT(*) AS positive_percentage FROM order_reviews;\n\nThis returns average score, total reviews, positive reviews, positive percentage. That indicates happiness. Provide explanation: \"Shows average review score and percentage of positive reviews.\" That should be fine.\n\nWe must not use any other statements. Provide only the SQL and one-line explanation. Ensure no other text. Let's produce that.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 374,
+    "completion_tokens": 388,
+    "total_tokens": 762
+  },
+  "latency_s": 0.834
+}

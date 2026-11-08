@@ -1,0 +1,23 @@
+{
+  "key": "188edcb96b000532c043509645de3ec08a780eb4a8fbed13e62849d966f2e44c",
+  "time": "2026-11-08T14:36:13",
+  "tag": "v0:F08",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders contain items from more than one seller?\n",
+  "text": "**SQL (SQLite)**  \n\n```sql\n/*  Count the orders that contain items from more than one seller  */\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n        /*  One row per order – keep only those that have >1 distinct seller  */\n        SELECT oi.order_id\n        FROM   order_items oi\n               /*  If the seller is stored on the item record, join to it  */\n               /*  LEFT JOIN items i ON oi.item_id = i.item_id   */\n        GROUP BY oi.order_id\n        HAVING COUNT(DISTINCT oi.seller_id) > 1          -- or i.seller_id if joined\n     ) AS multi_seller_orders;\n```\n\n### How it works\n1. **`order_items`** (or the join between `order_items` and `items`) holds one row per line‑item in an order and includes the seller that supplied that item (`seller_id`).\n2. The inner query groups rows by `order_id` and uses `COUNT(DISTINCT …)` to determine how many **different sellers** appear in each order.\n3. `HAVING COUNT(DISTINCT …) > 1` keeps only those orders that involve **more than one seller**.\n4. The outer query simply counts those qualifying orders, returning a single number (`orders_with_multiple_sellers`).  \n\n*If your schema stores the seller on the `items` table instead of `order_items`, just join `order_items` to `items` and replace `oi.seller_id` with `i.seller_id` in the `COUNT(DISTINCT …)` expression.*",
+  "reasoning": "We need to write a SQLite query. We need to assume some schema: orders, order_items, sellers, etc. The question: \"How many orders contain items from more than one seller?\" So we need to count distinct orders where the number of distinct sellers in that order > 1.\n\nAssume tables: orders (order_id), order_items (order_id, item_id, seller_id maybe), or items table linking to seller. Could be order_items with seller_id. We'll write generic query.\n\nSQL:\n\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n    SELECT oi.order_id\n    FROM order_items oi\n    JOIN items i ON oi.item_id = i.item_id   -- if needed\n    GROUP BY oi.order_id\n    HAVING COUNT(DISTINCT i.seller_id) > 1\n) sub;\n\nIf seller_id directly in order_items:\n\nSELECT COUNT(*) AS orders_with_multiple_sellers\nFROM (\n    SELECT order_id\n    FROM order_items\n    GROUP BY order_id\n    HAVING COUNT(DISTINCT seller_id) > 1\n) t;\n\nWe'll provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 93,
+    "completion_tokens": 571,
+    "total_tokens": 664
+  },
+  "latency_s": 1.645
+}

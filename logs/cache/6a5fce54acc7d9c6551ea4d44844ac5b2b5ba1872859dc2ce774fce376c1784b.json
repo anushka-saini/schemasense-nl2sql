@@ -1,0 +1,23 @@
+{
+  "key": "6a5fce54acc7d9c6551ea4d44844ac5b2b5ba1872859dc2ce774fce376c1784b",
+  "time": "2026-11-08T14:16:28",
+  "tag": "v0:R06",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Delete all canceled orders from the database.\n",
+  "text": "Here’s a straightforward SQLite statement that will remove every order whose status indicates it was cancelled.  \n(Replace the table‑ and column names if yours differ.)\n\n```sql\n-- Delete all cancelled orders\nDELETE FROM orders\nWHERE status = 'canceled';\n```\n\n**Notes**\n\n* `orders` – the table that stores order records.  \n* `status` – a column that records the order’s current state (e.g., `'pending'`, `'shipped'`, `'canceled'`, etc.).  \n* The condition `status = 'canceled'` matches only those rows that are marked as cancelled.\n\nIf you want the operation to be reversible until you commit, you can wrap it in a transaction:\n\n```sql\nBEGIN TRANSACTION;\n\nDELETE FROM orders\nWHERE status = 'canceled';\n\nCOMMIT;   -- or ROLLBACK; if you change your mind\n```\n\nMake sure you have a recent backup or have verified that you really want to purge these rows, as the `DELETE` operation permanently removes them from the database.",
+  "reasoning": "The user asks: \"Write a SQLite query that answers this question. Question: Delete all canceled orders from the database.\"\n\nWe need to produce a SQLite query that deletes all canceled orders. We need to assume a table name, maybe \"orders\" with a status column. Could be \"order_status\" or \"status\". Provide generic query: DELETE FROM orders WHERE status = 'canceled'; Also maybe include transaction. Provide explanation. The user just wants the query. So answer with the SQL.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 323,
+    "total_tokens": 413
+  },
+  "latency_s": 0.927
+}

@@ -1,0 +1,23 @@
+{
+  "key": "192baebddeb1696225de5db40718adc104c27079c0a6805574da38af35ec88c8",
+  "time": "2026-11-08T14:16:12",
+  "tag": "v0:F10",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the average number of items per order for orders paid with a voucher?\n",
+  "text": "**SQLite query**\n\n```sql\n/*  Average number of items per order for orders that were paid with a voucher  */\nSELECT AVG(item_cnt) AS avg_items_per_order\nFROM (\n        /*  Count the items (or total quantity) for each qualifying order  */\n        SELECT  o.order_id,\n                SUM(COALESCE(oi.quantity, 1)) AS item_cnt          -- use quantity if present,\n                                                                   -- otherwise count each row as 1\n        FROM    orders      AS o\n        JOIN    order_items AS oi   ON oi.order_id = o.order_id\n        JOIN    payments    AS p    ON p.order_id = o.order_id\n        WHERE   p.payment_method = 'voucher'                     -- only voucher‑paid orders\n        GROUP BY o.order_id\n) AS per_order;\n```\n\n### How it works\n1. **Identify voucher‑paid orders** – the `WHERE p.payment_method = 'voucher'` clause filters the `payments` table to only those orders that were settled with a voucher.\n2. **Count items per order** – for each qualifying order we sum the `quantity` column from `order_items`.  \n   *If the `order_items` table does not have a `quantity` column, `COALESCE(oi.quantity, 1)` simply treats each row as a single item, effectively doing `COUNT(*)`.*\n3. **Average across orders** – the outer query takes the average (`AVG`) of the per‑order item counts, giving the desired metric.\n\n> **Result column:** `avg_items_per_order` – a single numeric value representing the average number of items in orders that were paid using a voucher.",
+  "reasoning": "We need to write a SQLite query. We need to assume tables: orders, order_items, payments maybe. The question: average number of items per order for orders paid with a voucher. So need to count items per order (sum quantity maybe) and then average across orders where payment method is voucher. Provide query.\n\nAssume tables: orders (order_id, ...), order_items (order_id, product_id, quantity), payments (order_id, payment_method). Payment method 'voucher'.\n\nSo query:\n\nSELECT AVG(item_count) AS avg_items_per_order\nFROM (\n   SELECT o.order_id, SUM(oi.quantity) AS item_count\n   FROM orders o\n   JOIN order_items oi ON o.order_id = oi.order_id\n   JOIN payments p ON o.order_id = p.order_id\n   WHERE p.payment_method = 'voucher'\n   GROUP BY o.order_id\n) sub;\n\nIf quantity not present, count rows: COUNT(*) as item_count.\n\nProvide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 98,
+    "completion_tokens": 553,
+    "total_tokens": 651
+  },
+  "latency_s": 1.543
+}

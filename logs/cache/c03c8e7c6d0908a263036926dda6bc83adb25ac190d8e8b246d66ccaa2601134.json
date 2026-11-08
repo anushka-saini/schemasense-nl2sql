@@ -1,0 +1,23 @@
+{
+  "key": "c03c8e7c6d0908a263036926dda6bc83adb25ac190d8e8b246d66ccaa2601134",
+  "time": "2026-11-08T14:36:25",
+  "tag": "v0:M02",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many customers do we have?\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT COUNT(*) AS customer_count\nFROM   Customers;\n```\n\n**Explanation**\n\n- `Customers` – the table that stores one row per customer (adjust the table name if yours is different, e.g., `customer`, `tbl_customer`, etc.).\n- `COUNT(*)` counts every row in that table, giving the total number of customers.\n- The result column is aliased as `customer_count` for readability.",
+  "reasoning": "We need to write a SQLite query to answer \"How many customers do we have?\" We need to assume a table name, likely \"Customers\" or \"customer\". Provide generic query: SELECT COUNT(*) AS customer_count FROM Customers; Possibly distinct if duplicates. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 156,
+    "total_tokens": 245
+  },
+  "latency_s": 0.8
+}

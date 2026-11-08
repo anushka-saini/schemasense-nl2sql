@@ -1,0 +1,23 @@
+{
+  "key": "3f79cf3266bf5815dc4db2aaf73c6a0d22e6bef7d4838fa29a126687481554de",
+  "time": "2026-11-08T14:37:09",
+  "tag": "v0:R04",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How much did we spend on marketing in 2017?\n",
+  "text": "**Assumptions about the schema**\n\n| Table | Columns (relevant) |\n|-------|--------------------|\n| `expenses` | `expense_id` (PK), `amount` (numeric), `category` (text), `expense_date` (date or datetime) |\n| *(optional)* `categories` | `category_id` (PK), `category_name` (text) |\n\nIf you have a separate `categories` table, just join to it; otherwise the query works directly on the `expenses` table.\n\n---\n\n### SQLite query\n\n```sql\n/*  Total marketing spend for the calendar year 2017  */\nSELECT\n    COALESCE(SUM(e.amount), 0) AS marketing_spend_2017\nFROM\n    expenses AS e\n/* If you store categories in a separate table, uncomment the join:\nJOIN categories AS c\n    ON e.category_id = c.category_id\nWHERE\n    c.category_name = 'Marketing'\n*/\nWHERE\n    e.category = 'Marketing'                     -- or c.category_name = 'Marketing'\n    AND strftime('%Y', e.expense_date) = '2017';\n```\n\n**Explanation**\n\n| Clause | What it does |\n|--------|--------------|\n| `strftime('%Y', e.expense_date) = '2017'` | Extracts the year part of the date (SQLite stores dates as text, numbers, or Julian day). This filters rows to the year 2017. |\n| `e.category = 'Marketing'` | Limits the rows to the marketing expense category. |\n| `SUM(e.amount)` | Adds up all the `amount` values that meet the criteria. |\n| `COALESCE(..., 0)` | Guarantees a result of `0` instead of `NULL` when there are no matching rows. |\n\n---\n\n### Variations you might need\n\n* **Different column names** – replace `amount`, `category`, and `expense_date` with the actual column names in your schema.\n* **Date stored as separate year/month columns** – use `e.year = 2017` (or `e.year = 2017 AND e.month BETWEEN 1 AND 12`).\n* **Multiple marketing‑related categories** – use `e.category IN ('Marketing', 'Digital Marketing', 'Advertising')`.\n* **Currency conversion** – if amounts are stored in different currencies, join to a conversion table and apply the appropriate rate before summing.\n\nFeel free to adapt the query to match the exact structure of your database.",
+  "reasoning": "We need to write a SQLite query. We need to assume some schema. The question: \"How much did we spend on marketing in 2017?\" Likely there is a table of expenses with categories and dates. Could be \"expenses\" with columns: amount, category, date (or expense_date). So we need to sum amount where category = 'Marketing' and year(date) = 2017. SQLite doesn't have YEAR function but can use strftime('%Y', date). So query:\n\nSELECT SUM(amount) AS marketing_spend_2017\nFROM expenses\nWHERE category = 'Marketing'\n  AND strftime('%Y', expense_date) = '2017';\n\nIf amount stored as numeric. Could also join with categories table. Provide generic answer.\n\nThus final answer: Provide query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 689,
+    "total_tokens": 783
+  },
+  "latency_s": 1.903
+}

@@ -1,0 +1,23 @@
+{
+  "key": "2e645ead9e6065f5d37dfecf14b5ae37e3623898997e712ac009385717b2dd87",
+  "time": "2026-11-08T14:37:43",
+  "tag": "v0:S08",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the average review score?\n",
+  "text": "Below is a generic SQLite query that returns the average review score.  \n(It assumes you have a table that stores each review and that the numeric rating column is called **`score`** – you can replace the table and column names with whatever your schema uses.)\n\n```sql\n-- Average review score\nSELECT AVG(score) AS average_score\nFROM   reviews;\n```\n\n**Explanation**\n\n| Part of the query | What it does |\n|-------------------|--------------|\n| `SELECT AVG(score)` | Calculates the arithmetic mean of all non‑NULL values in the `score` column. |\n| `AS average_score`   | Gives the resulting column a readable name. |\n| `FROM reviews`       | Specifies the table that holds the individual review records. |\n\n**Things to adjust for your schema**\n\n| Your schema element | Change it to |\n|---------------------|--------------|\n| Table name          | Replace `reviews` with the actual table that stores the reviews (e.g., `product_reviews`, `movie_ratings`, etc.). |\n| Score column name   | Replace `score` with the column that holds the numeric rating (e.g., `rating`, `review_score`, `stars`, etc.). |\n\nIf you need to filter the average to a subset of rows (e.g., only approved reviews, a specific product, a date range, etc.), just add a `WHERE` clause:\n\n```sql\nSELECT AVG(score) AS average_score\nFROM   reviews\nWHERE  status = 'approved'          -- example filter\n  AND  product_id = 42;             -- another example filter\n```\n\nThat’s all you need to compute the average review score in SQLite.",
+  "reasoning": "The user asks: \"Write a SQLite query that answers this question. Question: What is the average review score?\" We need to assume there is a table with review scores. Probably a table named reviews with a column score or rating. Since not specified, we can give a generic query: SELECT AVG(score) FROM reviews; Also maybe handle nulls. Could also alias as average_score. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 431,
+    "total_tokens": 520
+  },
+  "latency_s": 1.172
+}

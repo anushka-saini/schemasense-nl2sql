@@ -1,0 +1,23 @@
+{
+  "key": "f8445a3550eb9dd65231b69d310f850e6e85c09f394c181c72bea29f6e12a4f0",
+  "time": "2026-11-08T14:36:44",
+  "tag": "v0:M07",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Are our customers happy?\n",
+  "text": "Below is a **single‑statement SQLite query** that gives you a quick, quantitative answer to the business question **“Are our customers happy?”**.  \nIt works with the most common “customer‑feedback” schema – you can adapt the table/column names if yours differ.\n\n```sql\n/* --------------------------------------------------------------\n   Are our customers happy?\n   --------------------------------------------------------------\n   This query returns four key numbers that together tell you\n   how satisfied your customers are:\n\n   1️⃣ total_feedback      – how many feedback entries we have\n   2️⃣ happy_customers    – count of feedback with a “happy” rating\n   3️⃣ avg_rating          – average rating (scale 1‑5, higher = happier)\n   4️⃣ happy_percentage    – % of feedback that is “happy”\n\n   Adjust the rating threshold (here 4) if you consider a different\n   score to be “happy”.\n   -------------------------------------------------------------- */\n\nSELECT\n    COUNT(*)                                            AS total_feedback,\n    SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END)       AS happy_customers,\n    ROUND(AVG(rating), 2)                               AS avg_rating,\n    ROUND(100.0 *\n          SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) /\n          COUNT(*), 2)                                 AS happy_percentage\nFROM feedback;\n```\n\n### How it works\n\n| Column | Meaning |\n|--------|---------|\n| **total_feedback** | Total number of feedback records (the larger this number, the more reliable the metric). |\n| **happy_customers** | Number of feedback entries that we consider “happy”. In the example a rating of **4 or 5** (on a 1‑5 scale) is happy. |\n| **avg_rating** | The mean rating across all responses – a quick gauge of overall sentiment. |\n| **happy_percentage** | The proportion of happy responses (`happy_customers / total_feedback * 100`). A value above, say, **80 %** is usually a strong indicator that customers are happy. |\n\n### Adapting to your schema\n\n| Your schema element | Replace in the query |\n|---------------------|----------------------|\n| Table that stores feedback | `feedback` |\n| Column that holds the numeric rating (1‑5) | `rating` |\n| Different “happy” threshold (e.g., rating ≥ 3) | Change `rating >= 4` to `rating >= 3` (or any value you deem appropriate). |\n| If you store textual sentiment instead of a numeric rating, you can map it on‑the‑fly, e.g.:<br>`CASE WHEN sentiment = 'happy' THEN 5 WHEN sentiment = 'neutral' THEN 3 ELSE 1 END` |\n\n### Example output\n\n| total_feedback | happy_customers | avg_rating | happy_percentage |\n|----------------|-----------------|------------|------------------|\n| 1 237          | 1 012           | 4.31       | 81.78            |\n\nIf the **happy_percentage** is high (e.g., > 80 %) and the **avg_rating** is close to the top of the scale, you can confidently answer **“Yes, our customers are happy.”** Conversely, low numbers would flag a need for deeper investigation.",
+  "reasoning": "We need to write a SQLite query that answers \"Are our customers happy?\" This is vague. Probably need to infer from a database schema. Since not provided, we need to assume typical tables: customers, orders, feedback, satisfaction_score, maybe surveys. The query could compute average satisfaction rating, count of positive feedback, etc. Provide a query that returns a metric indicating happiness.\n\nWe can propose a query that calculates average rating from a feedback table, maybe with rating 1-5. Also count of satisfied customers (rating >=4). Provide result.\n\nWe need to write a SQLite query. Could be something like:\n\nSELECT \n    COUNT(*) AS total_feedback,\n    SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) AS happy_customers,\n    ROUND(AVG(rating),2) AS avg_rating,\n    ROUND(100.0 * SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) / COUNT(*),2) AS happy_percentage\nFROM feedback;\n\nIf there is a customers table with satisfaction column.\n\nWe can also join with orders to see recent purchases.\n\nThus answer: Provide query and explanation.\n\nLet's produce final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 87,
+    "completion_tokens": 928,
+    "total_tokens": 1015
+  },
+  "latency_s": 2.362
+}

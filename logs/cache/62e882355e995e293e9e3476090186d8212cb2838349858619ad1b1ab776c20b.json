@@ -1,0 +1,23 @@
+{
+  "key": "62e882355e995e293e9e3476090186d8212cb2838349858619ad1b1ab776c20b",
+  "time": "2026-11-08T14:39:56",
+  "tag": "v0:M09",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which month had the most orders?\n",
+  "text": "**Assumptions**\n\n| Table | Columns (relevant) |\n|-------|--------------------|\n| `orders` | `order_id` (PK), `order_date` (TEXT or DATE) – the date the order was placed |\n\nIf your schema uses a different table or column name, just replace `orders` and `order_date` accordingly.\n\n---\n\n### SQLite query – month with the highest number of orders\n\n```sql\nSELECT\n    strftime('%Y-%m', order_date) AS order_month,   -- e.g. 2023-07\n    COUNT(*)                     AS total_orders\nFROM orders\nGROUP BY order_month\nORDER BY total_orders DESC\nLIMIT 1;\n```\n\n**Explanation**\n\n1. `strftime('%Y-%m', order_date)` extracts the year‑month part of the date (e.g., `2023-07`).  \n2. `COUNT(*)` tallies how many rows (orders) fall in each month.  \n3. `GROUP BY order_month` aggregates the counts per month.  \n4. `ORDER BY total_orders DESC` sorts the months from most to fewest orders.  \n5. `LIMIT 1` returns only the top‑scoring month – the month that had the most orders.\n\nIf you also want to see ties (multiple months with the same highest count), you can use a window function instead:\n\n```sql\nWITH monthly_counts AS (\n    SELECT\n        strftime('%Y-%m', order_date) AS order_month,\n        COUNT(*) AS total_orders\n    FROM orders\n    GROUP BY order_month\n)\nSELECT order_month, total_orders\nFROM monthly_counts\nWHERE total_orders = (SELECT MAX(total_orders) FROM monthly_counts);\n```\n\nBoth queries will give you the month (or months) with the greatest number of orders.",
+  "reasoning": "We need to write a SQLite query to answer \"Which month had the most orders?\" We need to assume there is a table with orders, likely with order_date column. We need to group by month and count orders, then order descending limit 1. Provide query. Might need to extract month from date. Use strftime('%Y-%m', order_date) as month. Provide answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 460,
+    "total_tokens": 549
+  },
+  "latency_s": 2.154
+}

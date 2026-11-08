@@ -1,0 +1,350 @@
+file,run_id,version,repeat,id,tier,question,status,error,generated_sql,suggested_category,error_category,labelled_by
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,S03,simple,How many orders were canceled?,blocked,comments are not allowed,"/* 1️⃣  Simple case: a single Orders table with a status column */
+SELECT COUNT(*) AS cancelled_orders
+FROM   Orders
+WHERE  status = 'canceled';      -- or 'Cancelled', 'CANCELED', etc.",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,S06,simple,How many sellers are based in the state of Rio de Janeiro?,error,OperationalError: no such column: state,"SELECT COUNT(*) AS seller_count
+FROM sellers
+WHERE state = 'Rio de Janeiro';",hallucinated_column,hallucinated_column,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,J01,join,How many orders were placed by customers in the state of Sao Paulo?,error,OperationalError: no such column: c.state,"SELECT COUNT(*) AS orders_in_sao_paulo
+FROM   orders   AS o
+JOIN   customers AS c
+       ON o.customer_id = c.customer_id
+WHERE  c.state = 'Sao Paulo';",hallucinated_column,hallucinated_column,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,J04,join,How many health and beauty items were sold in delivered orders?,blocked,comments are not allowed,"/* 1. Join the order, order‑item, product and category tables
+   2. Keep only orders that are marked as delivered
+   3. Keep only products that belong to the “Health and Beauty” category
+   4. Sum the quantity of each line‑item (i.e., the number of units sold)   */
+SELECT
+    COALESCE(SUM(oi.quantity), 0) AS health_beauty_units_sold
+FROM
+    orders          AS o
+    JOIN order_items AS oi ON oi.order_id = o.id
+    JOIN products    AS p  ON p.id = oi.product_id
+    JOIN categories  AS c  ON c.id = p.category_id
+WHERE
+    o.status = 'delivered'                -- only delivered orders
+    AND c.name = 'Health and Beauty';     -- health‑and‑beauty category",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,J10,join,Which 3 customer states have the most delivered orders?,blocked,comments are not allowed,"SELECT
+    c.state,
+    COUNT(*) AS delivered_orders
+FROM
+    orders   AS o
+JOIN
+    customers AS c
+      ON o.customer_id = c.customer_id
+WHERE
+    o.status = 'delivered'               -- only delivered orders
+GROUP BY
+    c.state
+ORDER BY
+    delivered_orders DESC                -- most delivered orders first
+LIMIT 3;                                 -- top 3 states",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,A02,aggregation,How many orders were placed in each month of 2017?,blocked,comments are not allowed,"SELECT 
+    strftime('%Y-%m', order_date) AS month,   -- e.g. 2017-01, 2017-02 …
+    COUNT(*)                     AS order_count
+FROM   orders
+WHERE  strftime('%Y', order_date) = '2017'      -- only the year 2017
+GROUP BY month
+ORDER BY month;",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,A07,aggregation,What percentage of delivered orders arrived later than the estimated delivery date?,blocked,comments are not allowed,"/*  Percentage of delivered orders that were late  */
+SELECT
+    ROUND(
+        100.0 *
+        AVG(
+            CASE
+                WHEN actual_delivery_date > estimated_delivery_date THEN 1.0
+                ELSE 0.0
+            END
+        ),
+        2
+    ) AS pct_late_deliveries
+FROM orders
+WHERE
+    -- consider only orders that have actually been delivered
+    actual_delivery_date IS NOT NULL
+    -- (optional) if you also store a status column, you can filter on it:
+    -- AND status = 'Delivered'
+;",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,A10,aggregation,How many customers have placed more than one order?,blocked,comments are not allowed,"/*  Number of customers who have placed more than one order  */
+SELECT COUNT(*) AS customers_with_multiple_orders
+FROM (
+    SELECT customer_id
+    FROM Orders               -- table that stores each order
+    GROUP BY customer_id
+    HAVING COUNT(*) > 1       -- keep only customers with >1 order
+) AS multi_order_customers;",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,F01,fanout,"For delivered orders purchased in 2018, what were the total freight value and the total amount paid?",invalid,unknown table 'payments',"SELECT
+    SUM(o.freight)          AS total_freight,
+    SUM(p.amount)           AS total_amount_paid
+FROM Orders   AS o
+JOIN Payments AS p
+      ON p.order_id = o.order_id
+WHERE o.status = 'Delivered'
+  AND strftime('%Y', o.order_date) = '2018';",hallucinated_column,hallucinated_column,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,F03,fanout,"On average, how much has each customer paid in total across all their delivered orders?",blocked,comments are not allowed,"/*  Average amount paid per customer for all of his/her delivered orders  */
+SELECT AVG(customer_total) AS avg_paid_per_customer
+FROM (
+        SELECT  o.customer_id,
+                SUM(o.total_amount) AS customer_total          -- total paid by this customer
+        FROM    orders AS o
+        WHERE   o.status = 'delivered'                        -- only delivered orders count
+        GROUP BY o.customer_id
+     ) AS per_customer;",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,F07,fanout,Which month in 2017 had the biggest increase in number of orders compared to the previous month?,blocked,comments are not allowed,"/* 1️⃣  Count orders per month in 2017 */
+WITH monthly AS (
+    SELECT 
+        strftime('%Y-%m', order_date) AS month,   -- e.g. '2017-04'
+        COUNT(*)                     AS orders
+    FROM orders
+    WHERE strftime('%Y', order_date) = '2017'      -- only 2017 rows
+    GROUP BY month
+),
+
+/* 2️⃣  Compute the month‑over‑month change */
+diffs AS (
+    SELECT 
+        month,
+        orders,
+        orders - LAG(orders) OVER (ORDER BY month) AS increase   -- change from previous month
+    FROM monthly
+)
+
+/* 3️⃣  Return the month with the biggest increase */
+SELECT 
+    month            AS month_with_biggest_increase,
+    increase
+FROM diffs
+WHERE increase = (SELECT MAX(increase) FROM diffs);",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,F10,fanout,What is the average number of items per order for orders paid with a voucher?,blocked,comments are not allowed,"/*  Average number of items per order for orders that were paid with a voucher  */
+SELECT AVG(item_cnt) AS avg_items_per_order
+FROM (
+        /*  Count the items (or total quantity) for each qualifying order  */
+        SELECT  o.order_id,
+                SUM(COALESCE(oi.quantity, 1)) AS item_cnt          -- use quantity if present,
+                                                                   -- otherwise count each row as 1
+        FROM    orders      AS o
+        JOIN    order_items AS oi   ON oi.order_id = o.order_id
+        JOIN    payments    AS p    ON p.order_id = o.order_id
+        WHERE   p.payment_method = 'voucher'                     -- only voucher‑paid orders
+        GROUP BY o.order_id
+) AS per_order;",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,M01,ambiguous,What was the total revenue in 2017?,invalid,unknown table 'sales',"SELECT
+    SUM(revenue) AS total_revenue_2017
+FROM
+    sales
+WHERE
+    strftime('%Y', sale_date) = '2017';",hallucinated_column,hallucinated_column,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,M04,ambiguous,What is the best-selling product category?,blocked,comments are not allowed,"/*  Best‑selling product category (by total revenue)  */
+SELECT
+    c.category_id,
+    c.category_name,
+    SUM(oi.quantity * oi.unit_price) AS total_revenue          -- total sales value
+    -- If you want to rank by units sold, use: SUM(oi.quantity) AS total_units
+FROM
+    order_items   AS oi          -- each line item on an order
+JOIN
+    products      AS p   ON oi.product_id = p.product_id
+JOIN
+    categories    AS c   ON p.category_id = c.category_id
+GROUP BY
+    c.category_id,
+    c.category_name
+ORDER BY
+    total_revenue DESC           -- change to total_units DESC if using units
+LIMIT 1;                         -- only the top (best‑selling) category",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,M08,ambiguous,How many orders did we sell in Sao Paulo?,blocked,comments are not allowed,"/* If the city is stored in a separate Customers (or Users) table */
+SELECT COUNT(*) AS orders_in_sao_paulo
+FROM   orders      AS o
+JOIN   customers   AS c
+       ON o.customer_id = c.customer_id
+WHERE  c.city = 'Sao Paulo';",over_refusal,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,R01,refuse,What is the name of the product that sold the most?,blocked,comments are not allowed,"/* 1. Sum the quantity sold for each product
+   2. Join to the product table to get the product name
+   3. Order by the total sold descending and keep only the top row
+*/
+SELECT
+    p.product_name,
+    total_sold
+FROM (
+    SELECT
+        product_id,
+        SUM(quantity) AS total_sold
+    FROM order_items          -- <-- replace with your sales/detail table
+    GROUP BY product_id
+) AS s
+JOIN products AS p           -- <-- replace with your product table
+      ON p.product_id = s.product_id
+ORDER BY total_sold DESC
+LIMIT 1;                     -- returns the single product with the highest sales",answered_unanswerable,format_failure,claude draft - team to confirm
+results_v0_dev_20261108-142653.csv,v0_dev_20261108-142653,v0,1,R02,refuse,What is the profit margin for each product category?,blocked,comments are not allowed,"/* --------------------------------------------------------------
+   Profit‑margin per product category
+   --------------------------------------------------------------
+   profit_margin = (total profit) / (total revenue) * 100
+   where
+       total revenue = Σ (order_quantity * sale_price)
+       total profit   = Σ (order_quantity * (sale_price – cost_price))
+   -------------------------------------------------------------- */
+SELECT
+    c.CategoryName,
+    ROUND(
+        CASE 
+            WHEN SUM(od.Quantity * od.UnitPrice) = 0 THEN 0
+            ELSE
+                (SUM(od.Quantity * (od.UnitPrice - p.CostPrice)) * 100.0) /
+                SUM(od.Quantity * od.UnitPrice)
+        END,
+        2
+    ) AS ProfitMargin_Percent
+FROM
+    OrderDetails AS od                -- line items of each order
+    JOIN Products   AS p   ON od.ProductID = p.ProductID
+    JOIN Categories AS c   ON p.CategoryID = c.CategoryID
+GROUP BY
+    c.CategoryID, c.CategoryName
+ORDER BY
+    ProfitMargin_Percent DESC;        -- highest‑margin categories first",answered_unanswerable,format_failure,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,S06,simple,How many sellers are based in the state of Rio de Janeiro?,ok,,"SELECT COUNT(DISTINCT seller_id) AS seller_count
+FROM sellers
+WHERE seller_state = 'Rio de Janeiro';",,wrong_filter_value,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,J01,join,How many orders were placed by customers in the state of Sao Paulo?,ok,,"SELECT COUNT(*) AS num_orders
+FROM orders AS o
+JOIN customers AS c ON o.customer_id = c.customer_id
+WHERE c.customer_state = 'Sao Paulo';",,wrong_filter_value,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,A10,aggregation,How many customers have placed more than one order?,ok,,"SELECT COUNT(*) AS customers_with_multiple_orders
+FROM (
+    SELECT customer_id
+    FROM orders
+    GROUP BY customer_id
+    HAVING COUNT(order_id) > 1
+);",,wrong_grain,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,F01,fanout,"For delivered orders purchased in 2018, what were the total freight value and the total amount paid?",ok,,"SELECT 
+    SUM(oi.freight_value) AS total_freight,
+    SUM(op.payment_value) AS total_paid
+FROM orders o
+JOIN order_items oi      ON o.order_id = oi.order_id
+JOIN order_payments op   ON o.order_id = op.order_id
+WHERE o.order_status = 'delivered'
+  AND strftime('%Y', o.order_purchase_timestamp) = '2018';",fanout_double_count?,fanout_double_count,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,F03,fanout,"On average, how much has each customer paid in total across all their delivered orders?",ok,,"SELECT AVG(customer_total) AS avg_total_paid_per_customer
+FROM (
+    SELECT o.customer_id,
+           SUM(op.payment_value) AS customer_total
+    FROM orders AS o
+    JOIN order_payments AS op
+      ON o.order_id = op.order_id
+    WHERE o.order_status = 'delivered'
+    GROUP BY o.customer_id
+) AS per_customer;",fanout_double_count?,wrong_grain,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,F10,fanout,What is the average number of items per order for orders paid with a voucher?,ok,,"SELECT AVG(item_count) AS avg_items_per_order
+FROM (
+    SELECT oi.order_id, COUNT(*) AS item_count
+    FROM order_items AS oi
+    JOIN order_payments AS op ON oi.order_id = op.order_id
+    WHERE op.payment_type = 'voucher'
+    GROUP BY oi.order_id
+);",fanout_double_count?,fanout_double_count,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,M01,ambiguous,What was the total revenue in 2017?,ok,,"SELECT SUM(op.payment_value) AS total_revenue_2017
+FROM order_payments AS op
+JOIN orders AS o ON op.order_id = o.order_id
+WHERE strftime('%Y', o.order_purchase_timestamp) = '2017';",guessed_on_ambiguity,missing_status_filter,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,M04,ambiguous,What is the best-selling product category?,ok,,"SELECT 
+    p.product_category_name,
+    COUNT(*) AS items_sold
+FROM order_items AS oi
+JOIN products AS p
+    ON oi.product_id = p.product_id
+GROUP BY p.product_category_name
+ORDER BY items_sold DESC
+LIMIT 1;",guessed_on_ambiguity,language_mismatch,claude draft - team to confirm
+results_v1_dev_20261108-142654.csv,v1_dev_20261108-142654,v1,1,M08,ambiguous,How many orders did we sell in Sao Paulo?,ok,,"SELECT COUNT(DISTINCT oi.order_id) AS orders_in_sao_paulo
+FROM order_items AS oi
+JOIN sellers AS s ON oi.seller_id = s.seller_id
+WHERE s.seller_city = 'Sao Paulo';",guessed_on_ambiguity,guessed_on_ambiguity,claude draft - team to confirm
+results_v2_dev_20261108-142808.csv,v2_dev_20261108-142808,v2,1,A10,aggregation,How many customers have placed more than one order?,ok,,"WITH order_counts AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS order_cnt
+    FROM orders
+    GROUP BY customer_id
+)
+SELECT COUNT(DISTINCT c.customer_unique_id) AS customers_multiple_orders
+FROM order_counts oc
+JOIN customers c ON c.customer_id = oc.customer_id
+WHERE oc.order_cnt > 1;",,wrong_grain,claude draft - team to confirm
+results_v2_dev_20261108-142808.csv,v2_dev_20261108-142808,v2,1,R02,refuse,What is the profit margin for each product category?,ok,,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT pct.product_category_name_english AS category,
+       ROUND( (SUM(oi.price) - SUM(oi.freight_value)) * 1.0 /
+              NULLIF(SUM(oi.price), 0), 4) AS profit_margin
+FROM order_items AS oi
+JOIN delivered_orders AS do      ON oi.order_id = do.order_id
+JOIN products AS p               ON oi.product_id = p.product_id
+JOIN product_category_name_translation AS pct
+                                 ON p.product_category_name = pct.product_category_name
+GROUP BY pct.product_category_name_english;",answered_unanswerable,answered_unanswerable,claude draft - team to confirm
+results_v3_dev_20261108-142926.csv,v3_dev_20261108-142926,v3,1,A10,aggregation,How many customers have placed more than one order?,ok,,"WITH cust_orders AS (
+    SELECT customer_id, COUNT(*) AS n_orders
+    FROM orders
+    GROUP BY customer_id
+)
+SELECT COUNT(DISTINCT c.customer_unique_id) AS customers_multiple_orders
+FROM cust_orders co
+JOIN customers c ON co.customer_id = c.customer_id
+WHERE co.n_orders > 1;",,wrong_grain,claude draft - team to confirm
+results_v3_dev_20261108-142926.csv,v3_dev_20261108-142926,v3,1,R02,refuse,What is the profit margin for each product category?,ok,,"WITH delivered_items AS (
+    SELECT oi.price,
+           oi.freight_value,
+           p.product_id,
+           p.product_category_name,
+           o.order_id
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE o.order_status = 'delivered'
+)
+SELECT t.product_category_name_english AS category,
+       ROUND(
+           (SUM(d.price) - SUM(d.freight_value)) * 1.0 /
+           NULLIF(SUM(d.price), 0),
+           4
+       ) AS profit_margin
+FROM delivered_items d
+JOIN product_category_name_translation t
+     ON d.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english
+ORDER BY profit_margin DESC;",answered_unanswerable,answered_unanswerable,claude draft - team to confirm
+results_v4_dev_20261108-143039.csv,v4_dev_20261108-143039,v4,1,A10,aggregation,How many customers have placed more than one order?,ok,,"WITH cust_orders AS (
+    SELECT customer_id, COUNT(*) AS n_orders
+    FROM orders
+    GROUP BY customer_id
+)
+SELECT COUNT(DISTINCT c.customer_unique_id) AS customers_multiple_orders
+FROM cust_orders co
+JOIN customers c ON co.customer_id = c.customer_id
+WHERE co.n_orders > 1;",,wrong_grain,claude draft - team to confirm
+results_v4_dev_20261108-143039.csv,v4_dev_20261108-143039,v4,1,R02,refuse,What is the profit margin for each product category?,ok,,"WITH delivered_items AS (
+    SELECT oi.price,
+           oi.freight_value,
+           p.product_id,
+           p.product_category_name,
+           o.order_id
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE o.order_status = 'delivered'
+)
+SELECT t.product_category_name_english AS category,
+       ROUND(
+           (SUM(d.price) - SUM(d.freight_value)) * 1.0 /
+           NULLIF(SUM(d.price), 0),
+           4
+       ) AS profit_margin
+FROM delivered_items d
+JOIN product_category_name_translation t
+     ON d.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english
+ORDER BY profit_margin DESC;",answered_unanswerable,answered_unanswerable,claude draft - team to confirm

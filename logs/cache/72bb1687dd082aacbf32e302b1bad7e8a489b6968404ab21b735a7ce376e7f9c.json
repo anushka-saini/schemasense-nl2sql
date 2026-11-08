@@ -1,0 +1,23 @@
+{
+  "key": "72bb1687dd082aacbf32e302b1bad7e8a489b6968404ab21b735a7ce376e7f9c",
+  "time": "2026-11-08T14:17:23",
+  "tag": "v1:F07",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: Which month in 2017 had the biggest increase in number of orders compared to the previous month?\n",
+  "text": "**SQL Query**\n\n```sql\nWITH monthly AS (\n    SELECT \n        CAST(strftime('%Y%m', order_purchase_timestamp) AS INTEGER) AS month_id,\n        strftime('%Y-%m', order_purchase_timestamp) AS month,\n        COUNT(*) AS orders_cnt\n    FROM orders\n    WHERE strftime('%Y', order_purchase_timestamp) = '2017'\n    GROUP BY month_id\n),\ndiffs AS (\n    SELECT \n        m.month,\n        m.orders_cnt - COALESCE(p.orders_cnt, 0) AS increase\n    FROM monthly m\n    LEFT JOIN monthly p\n        ON p.month_id = m.month_id - 1\n)\nSELECT month\nFROM diffs\nORDER BY increase DESC\nLIMIT 1;\n```\n\n**Explanation:**  \nThe query counts orders for each month of 2017, computes the increase versus the previous month, and returns the month with the largest increase.",
+  "reasoning": "We need to compute month-wise order counts for 2017, then find month with biggest increase compared to previous month. Use orders table with order_purchase_timestamp. Need to extract year and month. SQLite date functions: strftime('%Y', order_purchase_timestamp). Assume timestamps are in a format recognized.\n\nWe need to compute difference between month count and previous month count, then order by difference desc limit 1. Need to handle month ordering. Use CTE to get month counts, then compute lag using self join.\n\nSQLite doesn't have LAG, but we can self join on month-1. Represent month as integer like YYYYMM. Compute month_id = strftime('%Y%m', order_purchase_timestamp). Then join where month_id = t2.month_id + 1? Since month_id is string, convert to integer.\n\nSo:\n\nWITH monthly AS (\n  SELECT CAST(strftime('%Y%m', order_purchase_timestamp) AS INTEGER) AS month_id,\n         strftime('%Y-%m', order_purchase_timestamp) AS month,\n         COUNT(*) AS orders_cnt\n  FROM orders\n  WHERE strftime('%Y', order_purchase_timestamp) = '2017'\n  GROUP BY month_id\n),\ndiffs AS (\n  SELECT m.month,\n         m.orders_cnt - COALESCE(p.orders_cnt,0) AS increase\n  FROM monthly m\n  LEFT JOIN monthly p ON p.month_id = m.month_id - 1\n)\nSELECT month\nFROM diffs\nORDER BY increase DESC\nLIMIT 1;\n\nReturn explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 389,
+    "completion_tokens": 505,
+    "total_tokens": 894
+  },
+  "latency_s": 1.432
+}

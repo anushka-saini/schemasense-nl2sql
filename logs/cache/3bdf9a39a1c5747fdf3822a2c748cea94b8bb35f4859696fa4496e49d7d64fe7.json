@@ -1,0 +1,23 @@
+{
+  "key": "3bdf9a39a1c5747fdf3822a2c748cea94b8bb35f4859696fa4496e49d7d64fe7",
+  "time": "2026-11-08T14:34:23",
+  "tag": "v0:S02",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many sellers are there?\n",
+  "text": "```sql\n-- If there is a dedicated table that stores sellers\nSELECT COUNT(*) AS seller_count\nFROM sellers;\n```\n\n*If sellers are stored in a generic `users` (or `people`) table with a column indicating their role, you can count them like this:*\n\n```sql\nSELECT COUNT(*) AS seller_count\nFROM users\nWHERE role = 'seller';\n```",
+  "reasoning": "We need to write a SQLite query that answers \"How many sellers are there?\" We need to assume a database schema. Probably there is a table named Sellers or Users with role seller. Since not given, we can propose generic query: SELECT COUNT(*) FROM sellers; Or if sellers are in a table called \"users\" with column \"role\" = 'seller', then SELECT COUNT(*) FROM users WHERE role='seller'; Provide both possibilities. The answer should be just the query. Probably they expect \"SELECT COUNT(*) FROM sellers;\" Provide that.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 88,
+    "completion_tokens": 197,
+    "total_tokens": 285
+  },
+  "latency_s": 0.778
+}

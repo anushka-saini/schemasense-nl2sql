@@ -1,0 +1,23 @@
+{
+  "key": "51c5f70bbfe02ec642a763dccfdf0c22ad187226f2735217c318c8896c77362a",
+  "time": "2026-11-08T14:17:26",
+  "tag": "v1:F10",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What is the average number of items per order for orders paid with a voucher?\n",
+  "text": "```sql\nSELECT AVG(item_count) AS avg_items_per_order\nFROM (\n    SELECT oi.order_id, COUNT(*) AS item_count\n    FROM order_items AS oi\n    JOIN order_payments AS op ON oi.order_id = op.order_id\n    WHERE op.payment_type = 'voucher'\n    GROUP BY oi.order_id\n);\n```\nThis query counts how many items each order contains (only for orders that include a voucher payment) and then returns the average of those counts.",
+  "reasoning": "We need average number of items per order for orders paid with a voucher. Need to join order_payments where payment_type = 'voucher' (assuming voucher). Then count items per order from order_items. Then average across orders.\n\nWe have orders table, order_items, order_payments. Need to consider orders that have a payment_type voucher. There could be multiple payments per order; we need orders where any payment_type = 'voucher'. Use distinct order_id.\n\nCompute number of items per order: count(order_items.order_item_id) per order_id.\n\nThen average of those counts.\n\nSQL: SELECT AVG(item_count) FROM (SELECT oi.order_id, COUNT(*) AS item_count FROM order_items oi JOIN order_payments op ON oi.order_id = op.order_id WHERE op.payment_type = 'voucher' GROUP BY oi.order_id);\n\nReturn that.\n\nExplanation: Calculates average count of items per order where the order had a voucher payment.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 385,
+    "completion_tokens": 295,
+    "total_tokens": 680
+  },
+  "latency_s": 1.251
+}

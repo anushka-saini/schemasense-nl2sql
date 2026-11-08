@@ -1,0 +1,23 @@
+{
+  "key": "078d4ee1509f8d98a3fa5d8d9c348fb6d7b58cd0a026f633b28b20eb3651c707",
+  "time": "2026-11-08T14:34:15",
+  "tag": "v0:R09",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Add a new seller from Curitiba with the id abc123.\n",
+  "text": "Here’s a simple **INSERT** statement that adds a new seller whose primary‑key (or identifier) is `abc123` and whose city is **Curitiba**.  \nAdjust the table name and column list if your schema uses different names or requires additional fields.\n\n```sql\n-- Insert a new seller from Curitiba with id 'abc123'\nINSERT INTO sellers (id, city)\nVALUES ('abc123', 'Curitiba');\n```\n\n**Notes**\n\n| What to check | Details |\n|---------------|---------|\n| **Table name** | If your sellers table is called something else (e.g., `seller`, `tbl_seller`, etc.), replace `sellers` with that name. |\n| **Column names** | Use the exact column names for the primary‑key/identifier and the city field (e.g., `seller_id`, `location`). |\n| **Other NOT NULL columns** | If the table has additional required columns (e.g., `name`, `created_at`), include them in the column list and provide appropriate values, e.g.:<br>`INSERT INTO sellers (id, city, name, created_at) VALUES ('abc123', 'Curitiba', 'John Doe', CURRENT_TIMESTAMP);` |\n| **Data types** | Ensure the values match the column data types (e.g., text/varchar for `id` and `city`). |\n| **Uniqueness** | Verify that `abc123` does not already exist in the `id` column, otherwise the statement will raise a constraint violation. |\n\nRun the statement in your SQLite client (e.g., `sqlite3`, DB Browser for SQLite, or via your application) to add the new seller.",
+  "reasoning": "We need to write a SQLite query that adds a new seller from Curitiba with id abc123. Likely an INSERT statement. Need to know table name and columns. Not provided. Probably table sellers with columns id, city, maybe other fields. We can assume minimal: INSERT INTO sellers (id, city) VALUES ('abc123', 'Curitiba'); If other columns required, we can use placeholders. Provide generic answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 441,
+    "total_tokens": 535
+  },
+  "latency_s": 1.342
+}

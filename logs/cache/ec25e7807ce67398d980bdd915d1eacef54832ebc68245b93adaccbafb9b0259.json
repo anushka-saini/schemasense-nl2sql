@@ -1,0 +1,23 @@
+{
+  "key": "ec25e7807ce67398d980bdd915d1eacef54832ebc68245b93adaccbafb9b0259",
+  "time": "2026-11-08T14:15:44",
+  "tag": "v0:S03",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many orders were canceled?\n",
+  "text": "Below is a generic SQLite query that will return the total number of orders that have been cancelled.  \nAdjust the table‑ and column names to match the exact schema of your database.\n\n```sql\n/* 1️⃣  Simple case: a single Orders table with a status column */\nSELECT COUNT(*) AS cancelled_orders\nFROM   Orders\nWHERE  status = 'canceled';      -- or 'Cancelled', 'CANCELED', etc.\n```\n\nIf your schema uses a numeric flag instead of a text status, use:\n\n```sql\n/* 2️⃣  Flag column (e.g., cancelled = 1) */\nSELECT COUNT(*) AS cancelled_orders\nFROM   Orders\nWHERE  cancelled = 1;\n```\n\n---\n\n### When the status is stored in a separate lookup table\n\nIf you have a normalized design where order status is kept in a related table (e.g., `OrderStatus`), you can join to that table:\n\n```sql\nSELECT COUNT(*) AS cancelled_orders\nFROM   Orders o\nJOIN   OrderStatus s\n       ON o.status_id = s.id\nWHERE  s.name = 'canceled';   -- adjust the exact text/value used for “canceled”\n```\n\n---\n\n### Quick checklist\n\n| Situation | Table / Column you need | Example condition |\n|-----------|------------------------|-------------------|\n| Status stored as text in `Orders` | `Orders.status` | `status = 'canceled'` |\n| Boolean flag in `Orders` | `Orders.cancelled` (0/1) | `cancelled = 1` |\n| Normalized status table | `Orders.status_id` + `OrderStatus.name` | `s.name = 'canceled'` |\n\nReplace the placeholders (`Orders`, `status`, `cancelled`, `OrderStatus`, etc.) with the actual names used in your database, and the query will give you the count of cancelled orders.",
+  "reasoning": "We need to write a SQLite query to answer \"How many orders were canceled?\" We need to assume a typical schema: maybe an Orders table with a status column, or a Cancelled flag. Since not given, we can propose generic query: SELECT COUNT(*) FROM orders WHERE status = 'canceled' or cancelled = 1. Provide both possibilities. Also maybe there is an OrderStatus table. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 88,
+    "completion_tokens": 481,
+    "total_tokens": 569
+  },
+  "latency_s": 1.388
+}

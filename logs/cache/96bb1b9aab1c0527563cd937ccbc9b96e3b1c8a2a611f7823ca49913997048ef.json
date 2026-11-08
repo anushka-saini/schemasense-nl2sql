@@ -1,0 +1,23 @@
+{
+  "key": "96bb1b9aab1c0527563cd937ccbc9b96e3b1c8a2a611f7823ca49913997048ef",
+  "time": "2026-11-08T14:32:46",
+  "tag": "v1:J09",
+  "repeat": 1,
+  "model": "openai/gpt-oss-20b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: How many 1-star reviews were given for orders that were canceled?\n",
+  "text": "SELECT COUNT(*) AS one_star_canceled_reviews\nFROM order_reviews\nJOIN orders ON order_reviews.order_id = orders.order_id\nWHERE review_score = 1\n  AND orders.order_status = 'canceled';\n\nThis counts how many 1‑star reviews were left for orders whose status is “canceled.”",
+  "reasoning": "We need to answer: \"How many 1-star reviews were given for orders that were canceled?\" We have orders table with order_status. We need to count reviews with review_score = 1 and order_status = 'canceled' (assuming status string). We need join orders and order_reviews on order_id. Then filter. Count. Use SQLite SELECT. Return SQL and explanation.\n\nCheck schema: order_reviews has review_score. orders has order_status. So query:\n\nSELECT COUNT(*) AS one_star_canceled_reviews\nFROM order_reviews\nJOIN orders ON order_reviews.order_id = orders.order_id\nWHERE review_score = 1 AND orders.order_status = 'canceled';\n\nReturn that. Explanation: counts 1-star reviews for canceled orders.\n\nLet's produce final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 383,
+    "completion_tokens": 226,
+    "total_tokens": 609
+  },
+  "latency_s": 0.71
+}

@@ -1,0 +1,23 @@
+{
+  "key": "9f9102b8dd9c59f0a728d7ad772e5bab779df5e78359e3a8d49f27375c4dd087",
+  "time": "2026-11-08T14:40:12",
+  "tag": "v0:R04",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How much did we spend on marketing in 2017?\n",
+  "text": "**Assumptions about the schema**\n\n| Table | Columns (relevant to the question) |\n|-------|------------------------------------|\n| `expenses` | `expense_id` (PK) <br> `amount` (numeric) <br> `category` (text) <br> `expense_date` (date or datetime stored in a format SQLite can parse, e.g. `YYYY‑MM‑DD`) |\n\nIf your schema uses a separate `categories` table, just replace the `category = 'Marketing'` filter with the appropriate join.\n\n---\n\n### SQLite query\n\n```sql\nSELECT\n    COALESCE(SUM(amount), 0) AS marketing_spend_2017\nFROM\n    expenses\nWHERE\n    category = 'Marketing'                     -- only marketing expenses\n    AND strftime('%Y', expense_date) = '2017'  -- only the year 2017\n;\n```\n\n**Explanation**\n\n* `strftime('%Y', expense_date)` extracts the four‑digit year from the `expense_date` column.  \n* The `WHERE` clause limits rows to those whose `category` is *Marketing* and whose year is *2017*.  \n* `SUM(amount)` adds up all matching expense amounts.  \n* `COALESCE(..., 0)` ensures the query returns `0` instead of `NULL` when there are no matching rows.  \n\nRun the query against your SQLite database and it will return a single value (`marketing_spend_2017`) representing the total amount spent on marketing in 2017.",
+  "reasoning": "We need to write a SQLite query. We need to assume some schema. The question: \"How much did we spend on marketing in 2017?\" Likely there is a table of expenses with categories and dates. Could be \"expenses\" with columns: amount, category, date (or expense_date). So we need to sum amount where category = 'Marketing' and year(date) = 2017. SQLite doesn't have YEAR function but can use strftime('%Y', date). So query:\n\nSELECT SUM(amount) AS marketing_spend_2017\nFROM expenses\nWHERE category = 'Marketing'\n  AND strftime('%Y', expense_date) = '2017';\n\nIf amount stored as numeric. Could also join with categories table. Provide generic answer.\n\nThus final answer: Provide query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 490,
+    "total_tokens": 584
+  },
+  "latency_s": 1.469
+}

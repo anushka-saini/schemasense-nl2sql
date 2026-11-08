@@ -1,0 +1,23 @@
+{
+  "key": "859de0af9aefcb2d0d638760cfe9541bb4cc8604adc2e21eda3bf23ef086c8be",
+  "time": "2026-11-08T14:35:39",
+  "tag": "v0:A05",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which 5 product categories have the heaviest products on average? Use English names.\n",
+  "text": "**SQLite query**\n\n```sql\nSELECT\n    c.CategoryNameEnglish AS category,\n    AVG(p.Weight)           AS avg_weight_kg\nFROM   Products   AS p\nJOIN   Categories AS c\n       ON p.CategoryID = c.CategoryID\nWHERE  p.Weight IS NOT NULL               -- ignore products without a weight\nGROUP BY c.CategoryNameEnglish\nORDER BY avg_weight_kg DESC\nLIMIT 5;\n```\n\n**Explanation**\n\n| Step | What it does |\n|------|--------------|\n| `JOIN Categories …` | Links each product to its category so we can group by the English category name. |\n| `WHERE p.Weight IS NOT NULL` | Excludes products that don’t have a weight recorded (otherwise they would skew the average). |\n| `GROUP BY c.CategoryNameEnglish` | Calculates one result per category. |\n| `AVG(p.Weight)` | Computes the average weight of the products in that category. |\n| `ORDER BY avg_weight_kg DESC` | Puts the categories with the highest average weight first. |\n| `LIMIT 5` | Returns only the top‑5 categories. |\n\nReplace the table/column names (`Products`, `Categories`, `CategoryID`, `Weight`, `CategoryNameEnglish`) with the actual names used in your schema if they differ. The query will return the five product categories (by their English names) whose products have the greatest average weight.",
+  "reasoning": "We need to write a SQLite query. The question: \"Which 5 product categories have the heaviest products on average? Use English names.\"\n\nWe need to assume there is a database with product categories and product weights. Likely tables: Products (ProductID, CategoryID, Weight, etc.) and Categories (CategoryID, CategoryNameEnglish). Could be \"Category\" table with \"CategoryName\" maybe in multiple languages. Use English names.\n\nWe need to compute average weight per category, order descending, limit 5.\n\nSo query:\n\nSELECT c.CategoryNameEnglish AS category, AVG(p.Weight) AS avg_weight\nFROM Products p\nJOIN Categories c ON p.CategoryID = c.CategoryID\nGROUP BY c.CategoryNameEnglish\nORDER BY avg_weight DESC\nLIMIT 5;\n\nIf weight column named \"WeightKg\" or \"Weight\". Use appropriate.\n\nWe can also handle nulls.\n\nThus answer: Provide query.\n\nLet's produce final.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 99,
+    "completion_tokens": 489,
+    "total_tokens": 588
+  },
+  "latency_s": 1.377
+}

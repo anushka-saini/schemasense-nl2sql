@@ -1,0 +1,23 @@
+{
+  "key": "d133b0a6737c9fe602bda612b014d49f257bb3fd6d12b08df7b91fbf4bbeabc2",
+  "time": "2026-11-08T14:35:18",
+  "tag": "v0:J09",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: How many 1-star reviews were given for orders that were canceled?\n",
+  "text": "```sql\nSELECT COUNT(*) AS one_star_canceled_reviews\nFROM   reviews   AS r\nJOIN   orders    AS o\n       ON r.order_id = o.id\nWHERE  r.rating = 1                -- 1‑star review\n  AND  o.status = 'canceled';     -- order was cancelled\n```",
+  "reasoning": "We need to write a SQLite query. We need to infer schema: likely tables: reviews, orders. Reviews have rating (stars) and order_id. Orders have status maybe 'canceled'. So query: SELECT COUNT(*) FROM reviews r JOIN orders o ON r.order_id = o.id WHERE r.rating = 1 AND o.status = 'canceled'; Might need column names: star_rating, review_stars, order_status, etc. Provide generic answer. Also maybe need to filter where review is for order that was canceled, maybe order_status = 'canceled' or canceled_at not null. Provide query.\n\nWill output just the query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 96,
+    "completion_tokens": 208,
+    "total_tokens": 304
+  },
+  "latency_s": 0.854
+}

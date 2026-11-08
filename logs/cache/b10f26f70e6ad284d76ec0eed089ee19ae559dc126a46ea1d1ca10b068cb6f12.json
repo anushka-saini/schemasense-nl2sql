@@ -1,0 +1,23 @@
+{
+  "key": "b10f26f70e6ad284d76ec0eed089ee19ae559dc126a46ea1d1ca10b068cb6f12",
+  "time": "2026-11-08T14:16:09",
+  "tag": "v0:F07",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Which month in 2017 had the biggest increase in number of orders compared to the previous month?\n",
+  "text": "**SQLite query**\n\n```sql\n/* 1️⃣  Count orders per month in 2017 */\nWITH monthly AS (\n    SELECT \n        strftime('%Y-%m', order_date) AS month,   -- e.g. '2017-04'\n        COUNT(*)                     AS orders\n    FROM orders\n    WHERE strftime('%Y', order_date) = '2017'      -- only 2017 rows\n    GROUP BY month\n),\n\n/* 2️⃣  Compute the month‑over‑month change */\ndiffs AS (\n    SELECT \n        month,\n        orders,\n        orders - LAG(orders) OVER (ORDER BY month) AS increase   -- change from previous month\n    FROM monthly\n)\n\n/* 3️⃣  Return the month with the biggest increase */\nSELECT \n    month            AS month_with_biggest_increase,\n    increase\nFROM diffs\nWHERE increase = (SELECT MAX(increase) FROM diffs);\n```\n\n**Explanation**\n\n1. **`monthly` CTE** – extracts the year‑month part of `order_date` (`strftime('%Y-%m', …)`) and counts how many orders were placed in each month of 2017.\n\n2. **`diffs` CTE** – uses the window function `LAG()` to fetch the order count of the previous month (ordered chronologically) and computes the difference (`increase`). The first month will have `NULL` for `increase`, which is ignored later.\n\n3. The final `SELECT` picks the month whose `increase` equals the maximum increase across all months, giving you the month in 2017 that saw the largest month‑over‑month jump in order volume.",
+  "reasoning": "We need to write a SQLite query. The question: \"Which month in 2017 had the biggest increase in number of orders compared to the previous month?\" We need to assume there is a table with orders, likely with order_date column. We need to compute monthly order counts for 2017, then compute difference with previous month, then find month with max increase.\n\nWe need to output month (maybe as year-month) with biggest increase.\n\nAssume table: orders with order_id, order_date (TEXT or DATE). Use strftime to extract year-month.\n\nQuery steps:\n\n1. Compute monthly counts for 2017: SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS orders FROM orders WHERE strftime('%Y', order_date) = '2017' GROUP BY month.\n\n2. Use window function LAG to get previous month's orders: SELECT month, orders, orders - LAG(orders) OVER (ORDER BY month) AS diff FROM (previous query) AS monthly.\n\n3. Then select month with max diff: SELECT month FROM (the diff query) ORDER BY diff DESC LIMIT 1.\n\nCombine:\n\nWITH monthly AS (\n  SELECT strftime('%Y-%m', order_date) AS month,\n         COUNT(*) AS orders\n  FROM orders\n  WHERE strftime('%Y', order_date) = '2017'\n  GROUP BY month\n),\ndiffs AS (\n  SELECT month,\n         orders,\n         orders - LAG(orders) OVER (ORDER BY month) AS increase\n  FROM monthly\n)\nSELECT month AS month_with_biggest_increase,\n       increase\nFROM diffs\nWHERE increase = (SELECT MAX(increase) FROM diffs);\n\nAlternatively limit 1.\n\nEdge: first month will have NULL diff, ignore.\n\nThus answer. Provide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 102,
+    "completion_tokens": 725,
+    "total_tokens": 827
+  },
+  "latency_s": 1.756
+}

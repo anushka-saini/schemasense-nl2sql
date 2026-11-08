@@ -1,0 +1,23 @@
+{
+  "key": "87ef5d79b6e12edc0c5f03853eda02e55ff603efccc3569b0a21fb419f9d3e58",
+  "time": "2026-11-08T14:40:27",
+  "tag": "v0:R10",
+  "repeat": 3,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Show me all orders, and after that remove every payment record.\n",
+  "text": "Below are the two statements you need – one to **display every order**, and a second one to **delete all rows from the payment table**.  \nRunning them in a transaction guarantees that the delete only happens after the select has been issued (so you won’t lose the data you wanted to see).\n\n```sql\n-- 1️⃣ Show every order\nSELECT *\nFROM orders;\n\n-- 2️⃣ Remove every payment record\nDELETE FROM payments;      -- or: DELETE FROM payments WHERE 1=1;\n```\n\nIf you prefer to execute them together in a single transaction (so the delete is guaranteed to run only after the select has been issued), you can wrap them like this:\n\n```sql\nBEGIN TRANSACTION;\n\n-- Show all orders\nSELECT *\nFROM orders;\n\n-- Delete all payment rows\nDELETE FROM payments;\n\nCOMMIT;\n```\n\n**Notes**\n\n* `SELECT * FROM orders;` returns all columns for every row in the `orders` table.  \n* `DELETE FROM payments;` removes **every** row from the `payments` table.  \n* If you have foreign‑key constraints that reference `payments`, you may need to disable them temporarily (`PRAGMA foreign_keys = OFF;`) or delete dependent rows first.  \n* After the `DELETE`, the `payments` table will be empty but still exists (its schema is unchanged). If you wanted to drop the table entirely, you would use `DROP TABLE payments;` instead.",
+  "reasoning": "We need to interpret the question: \"Show me all orders, and after that remove every payment record.\" Likely they want a query that selects all orders, then deletes all payment records. In SQLite, you can combine SELECT and DELETE? Not in a single statement. Could use a transaction: first SELECT * FROM orders; then DELETE FROM payments; Possibly they want two statements. Provide both. Also note that \"remove every payment record\" means delete all rows from payment table. So query: SELECT * FROM orders; DELETE FROM payments; Could also use \"DELETE FROM payments;\" or \"DELETE FROM payments WHERE 1=1;\". Provide explanation. Also caution about foreign key constraints. Provide transaction. So answer: \n\nBEGIN TRANSACTION;\nSELECT * FROM orders;\nDELETE FROM payments;\nCOMMIT;\n\nBut SELECT inside transaction returns rows. In SQLite you can run separate statements. Provide as separate queries. Also note that if you want to view orders before deletion, you need to run SELECT first. Provide final answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 95,
+    "completion_tokens": 509,
+    "total_tokens": 604
+  },
+  "latency_s": 1.439
+}

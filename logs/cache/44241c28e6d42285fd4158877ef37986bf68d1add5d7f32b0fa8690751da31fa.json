@@ -1,0 +1,23 @@
+{
+  "key": "44241c28e6d42285fd4158877ef37986bf68d1add5d7f32b0fa8690751da31fa",
+  "time": "2026-11-08T14:16:07",
+  "tag": "v0:F03",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: On average, how much has each customer paid in total across all their delivered orders?\n",
+  "text": "**SQLite query**\n\n```sql\n/*  Average amount paid per customer for all of his/her delivered orders  */\nSELECT AVG(customer_total) AS avg_paid_per_customer\nFROM (\n        SELECT  o.customer_id,\n                SUM(o.total_amount) AS customer_total          -- total paid by this customer\n        FROM    orders AS o\n        WHERE   o.status = 'delivered'                        -- only delivered orders count\n        GROUP BY o.customer_id\n     ) AS per_customer;\n```\n\n**Explanation**\n\n1. **Inner query (`per_customer`)**  \n   * Filters the `orders` table to keep only rows whose `status` is `'delivered'`.  \n   * Groups the remaining rows by `customer_id`.  \n   * `SUM(o.total_amount)` adds up the amount of every delivered order for that customer, giving the *total paid* by each customer.\n\n2. **Outer query**  \n   * Takes the list of totals produced by the inner query and computes the arithmetic mean with `AVG()`.  \n   * The result (`avg_paid_per_customer`) is the average amount that a customer has paid across all of his/her delivered orders.  \n\nIf the order amount is stored in a different schema (e.g., you need to sum `price * quantity` from an `order_items` table), replace `SUM(o.total_amount)` with the appropriate aggregation, but the overall structure of the query remains the same.",
+  "reasoning": "We need to write a SQLite query. Need to assume tables: customers, orders, order_items maybe, payments? The question: \"On average, how much has each customer paid in total across all their delivered orders?\" So we need total per customer for delivered orders, then average across customers. So compute sum of order total for each customer where order status = 'delivered', then average of those sums.\n\nAssume tables: Orders (order_id, customer_id, status, total_amount). Or maybe OrderItems with price*quantity. But we can just use orders.total. Provide generic query.\n\nAnswer: SELECT AVG(customer_total) FROM (SELECT customer_id, SUM(total_amount) AS customer_total FROM orders WHERE status='delivered' GROUP BY customer_id) AS sub;.\n\nIf need join with customers: SELECT AVG(total) FROM (SELECT c.customer_id, SUM(o.total_amount) AS total FROM customers c JOIN orders o ON c.customer_id=o.customer_id WHERE o.status='delivered' GROUP BY c.customer_id) t;\n\nWill output average amount.\n\nProvide explanation.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 99,
+    "completion_tokens": 517,
+    "total_tokens": 616
+  },
+  "latency_s": 1.504
+}

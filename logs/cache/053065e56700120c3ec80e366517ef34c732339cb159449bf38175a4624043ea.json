@@ -1,0 +1,23 @@
+{
+  "key": "053065e56700120c3ec80e366517ef34c732339cb159449bf38175a4624043ea",
+  "time": "2026-11-08T14:16:17",
+  "tag": "v0:M04",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the best-selling product category?\n",
+  "text": "Below is a **single‑statement SQLite query** that returns the product category that has generated the most revenue (i.e., the “best‑selling” category).  \nIf you prefer to rank by total units sold instead of revenue, just replace the `revenue` expression with `SUM(oi.quantity)` in the `SELECT` list and the `ORDER BY` clause.\n\n```sql\n/*  Best‑selling product category (by total revenue)  */\nSELECT\n    c.category_id,\n    c.category_name,\n    SUM(oi.quantity * oi.unit_price) AS total_revenue          -- total sales value\n    -- If you want to rank by units sold, use: SUM(oi.quantity) AS total_units\nFROM\n    order_items   AS oi          -- each line item on an order\nJOIN\n    products      AS p   ON oi.product_id = p.product_id\nJOIN\n    categories    AS c   ON p.category_id = c.category_id\nGROUP BY\n    c.category_id,\n    c.category_name\nORDER BY\n    total_revenue DESC           -- change to total_units DESC if using units\nLIMIT 1;                         -- only the top (best‑selling) category\n```\n\n### How it works\n| Step | Explanation |\n|------|-------------|\n| **JOINs** | Connect `order_items` → `products` → `categories` so each line‑item can be associated with its category. |\n| **Aggregation** | `SUM(oi.quantity * oi.unit_price)` computes the total revenue contributed by that category across all orders. (If you care about quantity sold, replace the expression with `SUM(oi.quantity)`.) |\n| **GROUP BY** | Collapses rows to one per category. |\n| **ORDER BY … DESC** | Puts the highest‑selling category first. |\n| **LIMIT 1** | Returns only the top category – the answer to “What is the best‑selling product category?” |\n\n> **Assumptions about the schema** (adjust column names if yours differ):\n> - `order_items(order_item_id, order_id, product_id, quantity, unit_price, …)`\n> - `products(product_id, product_name, category_id, …)`\n> - `categories(category_id, category_name, …)`\n\nIf your schema uses different column names (e.g., `price` instead of `unit_price`, or `cat_id` instead of `category_id`), simply replace the identifiers accordingly. The logic of the query remains the same.",
+  "reasoning": "We need to write a SQLite query to answer \"What is the best-selling product category?\" We need to assume some schema. Probably tables: orders, order_items, products, categories. Best-selling could be by total sales amount or quantity. Provide a generic query.\n\nWe can write something like:\n\nSELECT c.category_name, SUM(oi.quantity * oi.unit_price) AS total_sales\nFROM order_items oi\nJOIN products p ON oi.product_id = p.id\nJOIN categories c ON p.category_id = c.id\nGROUP BY c.category_name\nORDER BY total_sales DESC\nLIMIT 1;\n\nAlternatively if only quantity: SUM(oi.quantity).\n\nWe'll provide both options.\n\nThus answer: a SQLite query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 668,
+    "total_tokens": 758
+  },
+  "latency_s": 1.86
+}

@@ -1,0 +1,23 @@
+{
+  "key": "de492539aa1416567032ad642e83af9e31be1ab59adb125c654d5ca0c4747809",
+  "time": "2026-11-08T14:35:53",
+  "tag": "v0:F02",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: What is the average review score for orders that contain more than one item?\n",
+  "text": "**SQLite query**\n\n```sql\n/*  Average review score for orders that contain more than one item  */\nSELECT AVG(r.review_score) AS avg_review_score\nFROM   Reviews r\nJOIN (\n        SELECT order_id\n        FROM   OrderItems\n        GROUP BY order_id\n        HAVING COUNT(*) > 1          -- orders with > 1 item\n     ) multi_item_orders\n     ON r.order_id = multi_item_orders.order_id;\n```\n\n**Explanation**\n\n1. The inner query (`multi_item_orders`) groups `OrderItems` by `order_id` and keeps only those orders whose item count (`COUNT(*)`) is greater than 1.  \n2. That result set is joined to the `Reviews` table on `order_id` so we consider only the reviews belonging to those multi‑item orders.  \n3. `AVG(r.review_score)` then computes the average of the `review_score` values for the qualifying orders.",
+  "reasoning": "We need to write a SQLite query. We need to assume some schema: orders, order_items, reviews? The question: average review score for orders that contain more than one item. Likely tables: Orders (order_id), OrderItems (order_id, item_id), Reviews (order_id, review_score). So we need to find orders with count(order_items) > 1, then average their review scores.\n\nThus query:\n\nSELECT AVG(r.review_score) AS avg_review_score\nFROM Reviews r\nJOIN (\n    SELECT order_id\n    FROM OrderItems\n    GROUP BY order_id\n    HAVING COUNT(*) > 1\n) oi ON r.order_id = oi.order_id;\n\nAlternatively using subquery.\n\nProvide explanation.\n\nWill output just query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 97,
+    "completion_tokens": 356,
+    "total_tokens": 453
+  },
+  "latency_s": 1.167
+}

@@ -1,0 +1,23 @@
+{
+  "key": "b6c184c34193d790cbe8a2c2227aa39b5713ad45e49aeead6f7d061c45e15385",
+  "time": "2026-11-08T14:36:39",
+  "tag": "v0:M06",
+  "repeat": 2,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "Write a SQLite query that answers this question.\n\nQuestion: Who are our top sellers?\n",
+  "text": "Below is a **generic SQLite query** that will return the “top sellers” – i.e. the salespeople (or stores, partners, etc.) that have generated the most revenue.  \nAdjust the table‑ and column‑names to match the exact schema of your database.\n\n```sql\n/* --------------------------------------------------------------\n   Top Sellers – total sales amount per seller, ordered descending\n   -------------------------------------------------------------- */\nSELECT\n    s.seller_id,                     -- primary key of the seller (adjust name if needed)\n    COALESCE(e.name, s.seller_name) AS seller_name,   -- readable name (optional join)\n    SUM(oi.quantity * oi.unit_price) AS total_sales   -- total revenue generated\nFROM\n    orders          AS o          -- table that records each sale\nJOIN\n    order_items     AS oi ON oi.order_id = o.id\nLEFT JOIN\n    sellers         AS s  ON s.id = o.seller_id          -- the seller of the order\nLEFT JOIN\n    employees       AS e  ON e.id = o.seller_id          -- if sellers are employees\nWHERE\n    o.status = 'completed'            -- (optional) only count finished orders\nGROUP BY\n    s.seller_id,\n    seller_name\nORDER BY\n    total_sales DESC;                 -- highest‑earning sellers first\n```\n\n### How it works\n| Step | What it does |\n|------|--------------|\n| **FROM / JOIN** | Pulls every line‑item (`order_items`) that belongs to a completed order (`orders`). |\n| **LEFT JOIN sellers / employees** | Retrieves the human‑readable name of the seller (you may have a separate `sellers` table, an `employees` table, or store the name directly in `orders`). |\n| **WHERE** | Filters to only count orders that are actually completed (remove or modify this clause if you want to include all orders). |\n| **GROUP BY** | Aggregates all line‑items per seller. |\n| **SUM(oi.quantity * oi.unit_price)** | Calculates the total revenue contributed by each seller. |\n| **ORDER BY total_sales DESC** | Ranks sellers from highest to lowest revenue. |\n| **(Optional) LIMIT N** | Add `LIMIT 10` (or any number) at the end if you only want the top *N* sellers. |\n\n#### Example with a hard limit (top 10 sellers)\n\n```sql\n... \nORDER BY total_sales DESC\nLIMIT 10;\n```\n\n### Adapting to your schema\n| Your schema element | Replace in the query |\n|---------------------|----------------------|\n| Table that stores each sale | `orders` |\n| Primary key of the sale table | `o.id` |\n| Column that identifies the seller | `o.seller_id` |\n| Table that stores seller details (optional) | `sellers` or `employees` |\n| Column for seller’s display name | `e.name` or `s.seller_name` |\n| Table that stores each line‑item | `order_items` |\n| Quantity column | `oi.quantity` |\n| Unit price column | `oi.unit_price` |\n| Order status column (if you filter) | `o.status` |\n\nJust plug the correct identifiers into the template above and you’ll have a ready‑to‑run SQLite query that tells you **who your top sellers are**.",
+  "reasoning": "We need to write a SQLite query that answers \"Who are our top sellers?\" We need to infer schema? Probably there is a sales table with seller, amount, etc. The answer should be a generic query: select seller, sum(amount) as total_sales from sales group by seller order by total_sales desc limit N. Could also join with employees table. Provide explanation. Since no schema given, we assume typical tables: orders, order_items, products, employees. Top sellers likely salespeople. So query: SELECT s.seller_id, e.name, SUM(oi.quantity * oi.unit_price) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id JOIN employees e ON o.seller_id = e.id GROUP BY s.seller_id ORDER BY total_sales DESC; Limit maybe top 10.\n\nWe'll produce a query with placeholders. Also mention if need to adjust column names.\n\nThus final answer: a SQLite query.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 88,
+    "completion_tokens": 898,
+    "total_tokens": 986
+  },
+  "latency_s": 2.509
+}

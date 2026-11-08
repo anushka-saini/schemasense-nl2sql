@@ -1,0 +1,23 @@
+{
+  "key": "eedd0bb961356a33659b50d20cc971ae9fcf4a965e358399d28425a10199840f",
+  "time": "2026-11-08T14:17:06",
+  "tag": "v1:A07",
+  "repeat": 1,
+  "model": "openai/gpt-oss-120b",
+  "settings": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "medium"
+  },
+  "prompt": "You are a SQL assistant for non-technical users. Convert the question into ONE SQLite SELECT query using ONLY the schema below. Never use INSERT, UPDATE, DELETE or DROP. If the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the SQL, then a one-line plain-English explanation.\n\nSchema (table(columns)):\ncustomers(customer_id, customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)\ngeolocation(geolocation_zip_code_prefix, geolocation_lat, geolocation_lng, geolocation_city, geolocation_state)\norder_items(order_id, order_item_id, product_id, seller_id, shipping_limit_date, price, freight_value)\norder_payments(order_id, payment_sequential, payment_type, payment_installments, payment_value)\norder_reviews(review_id, order_id, review_score, review_comment_title, review_comment_message, review_creation_date, review_answer_timestamp)\norders(order_id, customer_id, order_status, order_purchase_timestamp, order_approved_at, order_delivered_carrier_date, order_delivered_customer_date, order_estimated_delivery_date)\nproduct_category_name_translation(product_category_name, product_category_name_english)\nproducts(product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm, product_width_cm)\nsellers(seller_id, seller_zip_code_prefix, seller_city, seller_state)\n\nQuestion: What percentage of delivered orders arrived later than the estimated delivery date?\n",
+  "text": "```sql\nSELECT \n    ROUND(100.0 * SUM(CASE \n                        WHEN order_delivered_customer_date > order_estimated_delivery_date \n                        THEN 1 ELSE 0 \n                     END) / COUNT(*), 2) AS late_delivery_percentage\nFROM orders\nWHERE order_status = 'delivered';\n```\nThis query calculates the percentage of orders marked as delivered whose actual delivery date was later than the estimated delivery date.",
+  "reasoning": "We need to compute percentage of delivered orders that arrived later than estimated delivery date. Delivered orders: probably order_delivered_customer_date not null and order_status maybe 'delivered'? Use orders table. Need count of orders where order_delivered_customer_date > order_estimated_delivery_date. Percentage = (late_count / total_delivered) * 100.\n\nSQL: SELECT ROUND(100.0 * SUM(CASE WHEN order_delivered_customer_date > order_estimated_delivery_date THEN 1 ELSE 0 END) / COUNT(*), 2) AS late_percentage FROM orders WHERE order_delivered_customer_date IS NOT NULL;\n\nBut ensure only delivered orders: maybe order_status = 'delivered'. Use that.\n\nThus final answer.",
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 382,
+    "completion_tokens": 243,
+    "total_tokens": 625
+  },
+  "latency_s": 1.128
+}
