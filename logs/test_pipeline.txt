@@ -1,0 +1,51 @@
+pipeline tests run at 2026-11-08 14:02:31
+
+== 1. parse() ==
+PASS  fenced sql + explanation                                   
+PASS  prose before fence, bold label                             
+PASS  no fence, blank line then text                             
+PASS  no fence, explanation right after                          
+PASS  plain refusal                                              
+PASS  bold refusal + reason                                      
+PASS  refusal inside a fence                                     
+PASS  refusal at the end                                         
+PASS  no sql, no refusal                                         
+PASS  empty reply                                                
+
+== 2. build_prompt ==
+PASS  v0 has the question and no empty slots                     87 chars
+PASS  v1 has the question and no empty slots                     1,454 chars
+PASS  v2 has the question and no empty slots                     4,114 chars
+PASS  v3 has the question and no empty slots                     6,023 chars
+PASS  v4 has the question and no empty slots                     6,023 chars
+PASS  v0 has no schema                                           
+PASS  v1 has table/column names, not CREATE TABLE                
+PASS  v2 has CREATE TABLE + business rules, no examples          
+PASS  v3 = v2 text + examples                                    
+PASS  v4 prompt is identical to v3 (only the repair loop differs) 
+PASS  slots inside the question are not filled again             
+
+== 3. v3 example SQL runs on olist.db ==
+PASS  v3 has 4 SQL examples (+1 CANNOT_ANSWER example)           found 4
+PASS  example: SELECT c.customer_state, COUNT(DISTINCT c.customer [{'customer_state': 'SP', 'customers': 40302}, {'customer_state': 'RJ', 'customers': 12384}, {'customer_state': 'MG', 'customers': 11259}]
+PASS  example: WITH items AS (                                   [{'avg_items': 1.14, 'avg_paid': 159.86}]
+PASS  example: SELECT COUNT(*) AS products                       [{'products': 753}]
+PASS  example: SELECT ROUND(AVG(julianday(order_delivered_custome [{'avg_days': 16.3}]
+
+== 4. run_question() with scripted replies ==
+PASS  v4: sql error -> repaired on retry 1                       status=ok retries=1 calls=2 tags=['v4:T1', 'v4-r1:T1']
+PASS  v4: unknown table -> repaired                              status=ok retries=1 calls=2 tags=['v4:T1', 'v4-r1:T1']
+PASS  v4: empty result -> repaired                               status=ok retries=1 calls=2 tags=['v4:T1', 'v4-r1:T1']
+PASS  v4: no sql in reply -> repaired                            status=ok retries=1 calls=2 tags=['v4:T1', 'v4-r1:T1']
+PASS  v4: still broken after 2 repairs -> stops                  status=error retries=2 calls=3 tags=['v4:T1', 'v4-r1:T1', 'v4-r2:T1']
+PASS  v4: DROP is blocked, never repaired                        status=blocked retries=0 calls=1 tags=['v4:T1']
+PASS  v4: stacked delete is blocked, never repaired              status=blocked retries=0 calls=1 tags=['v4:T1']
+PASS  v4: refusal is final                                       status=refused retries=0 calls=1 tags=['v4:T1']
+PASS  v3: no repair loop                                         status=error retries=0 calls=1 tags=['v3:T1']
+PASS  v1: good sql runs                                          status=ok retries=0 calls=1 tags=['v1:T1']
+PASS  llm failure is reported, no crash                          status=llm_error retries=0 calls=1 tags=['v4:T1']
+PASS  repair prompt = original prompt + bad sql + sqlite error   
+PASS  final rows and explanation come from the repaired answer   n=96478
+PASS  steps list includes Repair when used                       
+
+total checks failed: 0
