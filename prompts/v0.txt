@@ -1,0 +1,3 @@
+Write a SQLite query that answers this question.
+
+Question: {question}

@@ -1,0 +1,10 @@
+{prompt}
+
+Your previous answer was this SQL:
+```sql
+{sql}
+```
+
+Problem: {error}
+
+Fix the query. Use only the tables and columns in the schema and follow the business rules. If you are sure the question cannot be answered from the schema, reply exactly: CANNOT_ANSWER. Return the corrected SQL, then a one-line plain-English explanation.
