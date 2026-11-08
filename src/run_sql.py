@@ -32,7 +32,17 @@ def connect(db=config.DB):
 
 def run(sql, limit=config.ROW_LIMIT, timeout=config.SQL_TIMEOUT, db=config.DB):
     """returns dict: ok, df, error, truncated, seconds.
-    limit=None means fetch every row (used for gold queries in scoring)"""
+    limit=None means fetch every row (used for gold queries in scoring)
+    retries a couple of times if the file is briefly locked (onedrive / antivirus)"""
+    for attempt in range(3):
+        r = run_once(sql, limit, timeout, db)
+        if r["ok"] or not any(w in r["error"] for w in ("locked", "unable to open")):
+            return r
+        time.sleep(0.5)
+    return r
+
+
+def run_once(sql, limit, timeout, db):
     t0 = time.time()
     con = None
     try:

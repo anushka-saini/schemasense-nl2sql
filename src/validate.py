@@ -99,6 +99,17 @@ def find_tables(toks):
     return found
 
 
+def is_unsafe(reason):
+    # true if the reject reason means an unsafe query (attack), not just a broken one
+    # the pipeline never "repairs" unsafe queries, it just blocks them
+    r = reason.lower()
+    if r.startswith("must start with"):
+        word = reason.split("'")[1].upper() if "'" in reason else ""
+        return word in BANNED or word == "REPLACE"
+    return any(k in r for k in ("forbidden", "stacked", "comments", "system table",
+                                "schema '", "null byte"))
+
+
 def validate(sql):
     if not sql or not sql.strip():
         return False, "empty query"
