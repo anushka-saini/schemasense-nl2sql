@@ -1,0 +1,97 @@
+gold check run at 2026-11-08 13:26:44
+
+S01  1 row(s)  [[99441.0]]
+S02  1 row(s)  [[3095.0]]
+S03  1 row(s)  [[625.0]]
+S04  5 row(s)  [['boleto', 19784.0], ['credit_card', 76795.0], ['debit_card', 1529.0], ['not_defined', 3.0], ['voucher', 5775.0]]
+S05  1 row(s)  [[6735.0]]
+S06  1 row(s)  [[171.0]]
+S07  1 row(s)  [[610.0]]
+S08  1 row(s)  [[4.09]]
+S09  1 row(s)  [[45101.0]]
+S10  1 row(s)  [[1465.0]]
+J01  1 row(s)  [[41746.0]]
+J02  1 row(s)  [['SP']]
+J03  1 row(s)  [[3.87]]
+J04  1 row(s)  [[9465.0]]
+J05  5 row(s)  [['bed_bath_table'], ['health_beauty'], ['sports_leisure'], ['furniture_decor'], ['computers_accessories']]
+J06  1 row(s)  [['credit_card']]
+J07  1 row(s)  [[95.0]]
+J08  1 row(s)  [[22.72]]
+       alt1: 1 row(s) [[22.63]]
+J09  1 row(s)  [[422.0]]
+J10  3 row(s)  [['SP'], ['RJ'], ['MG']]
+A01  1 row(s)  [[8452975.2]]
+A02  12 row(s)  [['2017-01', 800.0], ['2017-02', 1780.0], ['2017-03', 2682.0], ['2017-04', 2404.0], ['2017-05', 3700.0], ['...']]
+       alt1: 12 row(s) [['01', 800.0], ['02', 1780.0], ['03', 2682.0], ['04', 2404.0], ['05', 3700.0]]
+A03  5 row(s)  [['4869f7a5dfa277a7dca6462dcf3b52b2'], ['53243585a1d6dc2643021fd1853d8905'], ['4a3ca9315b744ce9f8e9374361493884'], ['fa1c13f2614d7b5c4749cbc52fecda94'], ['7c67e1448b00f6e969d365cea6b010ab']]
+A04  1 row(s)  [[3.51]]
+A05  5 row(s)  [['furniture_mattress_and_upholstery'], ['office_furniture'], ['kitchen_dining_laundry_garden_furniture'], ['furniture_bedroom'], ['home_appliances_2']]
+A06  5 row(s)  [[1.0, 11424.0], [2.0, 3151.0], [3.0, 8179.0], [4.0, 19142.0], [5.0, 57328.0]]
+A07  1 row(s)  [[8.11]]
+       alt1: 1 row(s) [[6.77]]
+A08  5 row(s)  [['boleto', 145.03], ['credit_card', 163.32], ['debit_card', 142.57], ['not_defined', 0.0], ['voucher', 65.7]]
+A09  1 row(s)  [['computers']]
+       alt1: 1 row(s) [['computers']]  (same as gold)
+A10  1 row(s)  [[2997.0]]
+F01  1 row(s)  [[1233459.65, 8452975.2]]
+F02  1 row(s)  [[3.6]]
+F03  1 row(s)  [[165.2]]
+F04  1 row(s)  [['health_beauty']]
+F05  3 row(s)  [['2016', 267.0, 40470.98, 46586.33], ['2017', 43428.0, 5962902.01, 6922900.24], ['2018', 52783.0, 7218125.12, 8452975.2]]
+F06  1 row(s)  [[13.27]]
+F07  1 row(s)  [['2017-11']]
+       alt1: 1 row(s) [['11']]
+F08  1 row(s)  [[1278.0]]
+F09  5 row(s)  [['AL'], ['MA'], ['PI'], ['CE'], ['SE']]
+F10  1 row(s)  [[1.1]]
+M01  1 row(s)  [[5962902.01]]
+       alt1: 1 row(s) [[6922900.24]]
+       alt2: 1 row(s) [[6921535.24]]
+M02  1 row(s)  [[96096.0]]
+M03  1 row(s)  [[838576.64]]
+       alt1: 1 row(s) [[985414.28]]
+M04  1 row(s)  [['bed_bath_table']]
+       alt1: 1 row(s) [['health_beauty']]
+M05  1 row(s)  [[32951.0]]
+       alt1: 1 row(s) [[32216.0]]
+       alt2: 1 row(s) [[110197.0]]
+M06  10 row(s)  [['4869f7a5dfa277a7dca6462dcf3b52b2'], ['53243585a1d6dc2643021fd1853d8905'], ['4a3ca9315b744ce9f8e9374361493884'], ['fa1c13f2614d7b5c4749cbc52fecda94'], ['7c67e1448b00f6e969d365cea6b010ab'], ['...']]
+       alt1: 10 row(s) [['6560211a19b47992c3666cc44a7e94c0'], ['4a3ca9315b744ce9f8e9374361493884'], ['1f50f920176fa81dab994f9023523100'], ['cc419e0650a3c5ba77189a1882b7556a'], ['da8622b14eb17ae2831f4ac5b9dab84a']]
+       alt2: 5 row(s) [['4869f7a5dfa277a7dca6462dcf3b52b2'], ['53243585a1d6dc2643021fd1853d8905'], ['4a3ca9315b744ce9f8e9374361493884'], ['fa1c13f2614d7b5c4749cbc52fecda94'], ['7c67e1448b00f6e969d365cea6b010ab']]
+       alt3: 5 row(s) [['6560211a19b47992c3666cc44a7e94c0'], ['4a3ca9315b744ce9f8e9374361493884'], ['1f50f920176fa81dab994f9023523100'], ['cc419e0650a3c5ba77189a1882b7556a'], ['da8622b14eb17ae2831f4ac5b9dab84a']]
+M07  1 row(s)  [[4.09]]
+       alt1: 1 row(s) [[77.07]]
+M08  1 row(s)  [[40501.0]]
+       alt1: 1 row(s) [[15045.0]]
+M09  1 row(s)  [['2017-11']]
+       alt1: 1 row(s) [['08']]
+M10  1 row(s)  [['credit_card']]
+       alt1: 1 row(s) [['credit_card']]  (same as gold)
+R01  REFUSE
+R02  REFUSE
+R03  REFUSE
+R04  REFUSE
+R05  REFUSE
+R06  REFUSE
+R07  REFUSE
+R08  REFUSE
+R09  REFUSE
+R10  REFUSE
+
+== overlap with v3 worked examples (word overlap >= 0.5) ==
+WARNING J10 (0.50) 'Which 3 customer states have the most delivered orders?'  ~  example 'Which 3 states have the most customers?'
+WARNING F10 (0.64) 'What is the average number of items per order for orders paid with a voucher?'  ~  example 'For delivered orders, what is the average number of items and the average amount paid per order?'
+
+== split ==
+simple       dev  3   test  7
+join         dev  3   test  7
+aggregation  dev  3   test  7
+fanout       dev  4   test  6
+ambiguous    dev  3   test  7
+refuse       dev  4   test  6
+total        dev 20   test 40
+verified: 0 of 60
+
+== gold queries that error or return nothing ==
+none
