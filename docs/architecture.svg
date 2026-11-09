@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 380" width="960" height="380" role="img" aria-labelledby="t d" font-family="Segoe UI, IBM Plex Sans, system-ui, sans-serif">
+  <title id="t">SchemaSense pipeline</title>
+  <desc id="d">A question and the live schema are filled into prompt version N. The model reply is parsed into SQL or a refusal. The SQL goes through the validator and then a read-only connection. Unsafe SQL is blocked, CANNOT_ANSWER becomes a refusal, a good query returns rows. In v4 only, invalid SQL, a SQLite error or zero rows go back to the model with the error, at most twice.</desc>
+  <style>
+    .box { fill: var(--panel, #ffffff); stroke: var(--line, #b9c2cc); stroke-width: 1.5; }
+    .key { fill: var(--panel, #ffffff); stroke: var(--accent, #2a78d6); stroke-width: 2; }
+    .end { fill: var(--track, #eef1f4); stroke: var(--line, #b9c2cc); stroke-width: 1.5; }
+    .loop { fill: var(--panel, #ffffff); stroke: var(--accent, #2a78d6); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .h { fill: var(--fg, #1b1f24); font-size: 14px; font-weight: 600; }
+    .s { fill: var(--muted, #5b6672); font-size: 11.5px; }
+    .lab { fill: var(--muted, #5b6672); font-size: 11px; }
+    .ln { stroke: var(--muted, #5b6672); stroke-width: 1.5; fill: none; }
+    .lnl { stroke: var(--accent, #2a78d6); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+    .ah { fill: var(--muted, #5b6672); }
+    .ahl { fill: var(--accent, #2a78d6); }
+    @media (prefers-color-scheme: dark) {
+      .box, .key, .loop { fill: var(--panel, #171b21); }
+      .end { fill: var(--track, #252b33); }
+      .h { fill: var(--fg, #e6e8eb); }
+      .s, .lab { fill: var(--muted, #9aa3ad); }
+      .ln { stroke: var(--muted, #9aa3ad); } .ah { fill: var(--muted, #9aa3ad); }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahl" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+
+  <!-- inputs -->
+  <rect class="box" x="10" y="72" width="130" height="58" rx="8"/>
+  <text class="h" x="75" y="97" text-anchor="middle">Question</text>
+  <text class="s" x="75" y="116" text-anchor="middle">plain English</text>
+  <rect class="box" x="10" y="182" width="130" height="58" rx="8"/>
+  <text class="h" x="75" y="207" text-anchor="middle">Schema context</text>
+  <text class="s" x="75" y="226" text-anchor="middle">read live, schema.py</text>
+
+  <!-- main row -->
+  <rect class="box" x="170" y="116" width="140" height="80" rx="8"/>
+  <text class="h" x="240" y="142" text-anchor="middle">Prompt vN</text>
+  <text class="s" x="240" y="161" text-anchor="middle">rules + examples</text>
+  <text class="s" x="240" y="178" text-anchor="middle">prompts/vN.txt</text>
+
+  <rect class="key" x="330" y="116" width="140" height="80" rx="8"/>
+  <text class="h" x="400" y="142" text-anchor="middle">Model</text>
+  <text class="s" x="400" y="161" text-anchor="middle">gpt-oss-120b, Groq</text>
+  <text class="s" x="400" y="178" text-anchor="middle">temp 0 · cached</text>
+
+  <rect class="box" x="490" y="116" width="140" height="80" rx="8"/>
+  <text class="h" x="560" y="142" text-anchor="middle">Parse reply</text>
+  <text class="s" x="560" y="161" text-anchor="middle">SQL + explanation</text>
+  <text class="s" x="560" y="178" text-anchor="middle">or CANNOT_ANSWER</text>
+
+  <rect class="key" x="650" y="116" width="140" height="80" rx="8"/>
+  <text class="h" x="720" y="142" text-anchor="middle">Validator</text>
+  <text class="s" x="720" y="161" text-anchor="middle">one SELECT / WITH</text>
+  <text class="s" x="720" y="178" text-anchor="middle">known tables only</text>
+
+  <rect class="key" x="810" y="116" width="140" height="80" rx="8"/>
+  <text class="h" x="880" y="142" text-anchor="middle">Read-only run</text>
+  <text class="s" x="880" y="161" text-anchor="middle">mode=ro · authorizer</text>
+  <text class="s" x="880" y="178" text-anchor="middle">200 rows · 10 s</text>
+
+  <!-- input arrows -->
+  <path class="ln" d="M140,101 H155 V146 H168" marker-end="url(#a)"/>
+  <path class="ln" d="M140,211 H155 V166 H168" marker-end="url(#a)"/>
+  <!-- main arrows -->
+  <path class="ln" d="M310,156 H328" marker-end="url(#a)"/>
+  <path class="ln" d="M470,156 H488" marker-end="url(#a)"/>
+  <path class="ln" d="M630,156 H648" marker-end="url(#a)"/>
+  <path class="ln" d="M790,156 H808" marker-end="url(#a)"/>
+
+  <!-- repair loop (v4 only) -->
+  <rect class="loop" x="300" y="10" width="200" height="50" rx="8"/>
+  <text class="h" x="400" y="31" text-anchor="middle">Repair (v4 only)</text>
+  <text class="s" x="400" y="49" text-anchor="middle">prompt + bad SQL + error, max 2</text>
+  <path class="lnl" d="M720,116 V35 H502" marker-end="url(#al)"/>
+  <path class="lnl" d="M880,116 V35 H720"/>
+  <path class="lnl" d="M400,60 V114" marker-end="url(#al)"/>
+  <text class="lab" x="610" y="28" text-anchor="middle">invalid SQL · SQLite error · 0 rows</text>
+
+  <!-- outputs -->
+  <rect class="end" x="490" y="270" width="140" height="56" rx="8"/>
+  <text class="h" x="560" y="294" text-anchor="middle">Refusal</text>
+  <text class="s" x="560" y="312" text-anchor="middle">"can't answer that"</text>
+  <rect class="end" x="650" y="270" width="140" height="56" rx="8"/>
+  <text class="h" x="720" y="294" text-anchor="middle">Blocked</text>
+  <text class="s" x="720" y="312" text-anchor="middle">reason shown, not run</text>
+  <rect class="end" x="810" y="270" width="140" height="56" rx="8"/>
+  <text class="h" x="880" y="294" text-anchor="middle">Result</text>
+  <text class="s" x="880" y="312" text-anchor="middle">rows + explanation</text>
+  <path class="ln" d="M560,196 V268" marker-end="url(#a)"/>
+  <path class="ln" d="M720,196 V268" marker-end="url(#a)"/>
+  <path class="ln" d="M880,196 V268" marker-end="url(#a)"/>
+  <text class="lab" x="566" y="236">CANNOT_ANSWER</text>
+  <text class="lab" x="726" y="236">unsafe</text>
+  <text class="lab" x="886" y="236">rows</text>
+
+  <text class="s" x="10" y="366">Every version runs the same validator and read-only connection. Only the prompt text changes from v0 to v3; v4 adds the repair loop.</text>
+</svg>
