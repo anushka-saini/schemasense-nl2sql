@@ -1,0 +1,7 @@
+version,model,questions,repeats,accuracy,boot_lo,boot_hi,majority_acc,wilson_lo,wilson_hi,repeat_min,repeat_max,unstable_questions,run_id
+v0,openai/gpt-oss-120b,20,1,15.0,0.0,30.0,15.0,5.2,36.0,15.0,15.0,0,v0_dev_20261108-142653
+v1,openai/gpt-oss-120b,20,1,55.0,35.0,75.0,55.0,34.2,74.2,55.0,55.0,0,v1_dev_20261108-142654
+v2,openai/gpt-oss-120b,20,1,90.0,75.0,100.0,90.0,69.9,97.2,90.0,90.0,0,v2_dev_20261108-142808
+v3,openai/gpt-oss-120b,20,1,90.0,75.0,100.0,90.0,69.9,97.2,90.0,90.0,0,v3_dev_20261108-142926
+v4,openai/gpt-oss-120b,20,1,90.0,75.0,100.0,90.0,69.9,97.2,90.0,90.0,0,v4_dev_20261108-143039
+v0 (lenient extractor),openai/gpt-oss-120b,20,1,15.0,0.0,30.0,15.0,5.2,36.0,15.0,15.0,0,v0_dev_lenient_20261109-000131
