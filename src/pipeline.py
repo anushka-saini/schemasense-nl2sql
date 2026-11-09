@@ -69,6 +69,83 @@ def parse(text):
     return sql, clean_expl(expl), False
 
 
+# ---------- lenient extractor (analysis only, never used by the app or the normal eval) ----------
+# used to give v0 a fairer baseline: v0 was never told the answer format, so it writes markdown,
+# prose and -- comments around its sql. the lenient extractor:
+#   1. takes the first ``` block that has sql in it (or the whole reply if there is no block)
+#   2. drops -- and /* */ comments (outside quotes)
+#   3. takes the FIRST statement: from the first line that starts with a sql keyword up to the first ;
+# a write statement is kept as it is (so the validator still blocks it). we do NOT skip ahead to a
+# later SELECT, because then "UPDATE ...; -- check with: SELECT ..." would look like a safe answer.
+STMT_START = re.compile(r"^[ \t]*(SELECT|WITH|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|PRAGMA|ATTACH|DETACH|REPLACE|VACUUM)\b",
+                        re.I | re.M)
+SQL_WORD = re.compile(r"\b(SELECT|WITH|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|PRAGMA|ATTACH)\b", re.I)
+
+
+def strip_comments(sql):
+    # walk the text so a -- inside 'a string' is kept
+    out, i, q = [], 0, None
+    while i < len(sql):
+        ch = sql[i]
+        if q:
+            out.append(ch)
+            if ch == q:
+                q = None
+            i += 1
+        elif ch in ("'", '"'):
+            q = ch
+            out.append(ch)
+            i += 1
+        elif sql.startswith("--", i):
+            j = sql.find("\n", i)
+            i = len(sql) if j == -1 else j
+        elif sql.startswith("/*", i):
+            j = sql.find("*/", i + 2)
+            i = len(sql) if j == -1 else j + 2
+        else:
+            out.append(ch)
+            i += 1
+    return "".join(out)
+
+
+def first_statement(sql):
+    # cut at the first ; that is not inside quotes
+    q = None
+    for i, ch in enumerate(sql):
+        if q:
+            if ch == q:
+                q = None
+        elif ch in ("'", '"'):
+            q = ch
+        elif ch == ";":
+            return sql[:i]
+    return sql
+
+
+def lenient_parse(text):
+    """like parse(), but forgiving about format. returns (sql, explanation, refused)"""
+    sql0, expl, refused = parse(text)
+    if refused:
+        return sql0, expl, refused
+    t = (text or "").strip()
+    blocks = [b for b in FENCE.findall(t) if SQL_WORD.search(b)]
+    if blocks:
+        body = strip_comments(blocks[0])
+        m = STMT_START.search(body)
+        sql = first_statement(body[m.start():]) if m else ""
+    else:
+        body = strip_comments(t)
+        m = STMT_START.search(body)
+        if not m:
+            return "", expl, False
+        lines = body[m.start():].splitlines()
+        end = 0
+        while end < len(lines) and lines[end].strip():  # no fence: stop at the first blank line
+            end += 1
+        sql = first_statement("\n".join(lines[:end]))
+    return sql.strip(), expl, False
+
+
 def check_and_run(sql):
     """validator + read-only run. returns (status, problem, result)
     also used by the app for hand-edited sql"""
@@ -126,7 +203,9 @@ def make_steps(out, last):
     return steps
 
 
-def run_question(question, version="v4", qid="", repeat=1, offline=False):
+def run_question(question, version="v4", qid="", repeat=1, offline=False, lenient=False):
+    # lenient=True swaps in lenient_parse (only for the v0 baseline analysis, see above)
+    reader = lenient_parse if lenient else parse
     prompt = build(version, question)
     out = {"question": question, "version": version, "qid": qid, "repeat": repeat,
            "prompt": prompt, "sql": "", "rows": None, "status": "", "error": "",
@@ -146,7 +225,7 @@ def run_question(question, version="v4", qid="", repeat=1, offline=False):
         out["tokens"] += r["total_tokens"] or 0
         out["cached"] = out["cached"] and r["cached"]
 
-        sql, expl, refused = parse(r["text"])
+        sql, expl, refused = reader(r["text"])
         if refused:
             status, problem, res = "refused", "", None
         else:

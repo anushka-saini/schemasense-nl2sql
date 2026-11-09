@@ -1,4 +1,4 @@
-pipeline tests run at 2026-11-08 14:02:31
+pipeline tests run at 2026-11-09 13:11:10
 
 == 1. parse() ==
 PASS  fenced sql + explanation                                   
@@ -47,5 +47,14 @@ PASS  llm failure is reported, no crash                          status=llm_erro
 PASS  repair prompt = original prompt + bad sql + sqlite error   
 PASS  final rows and explanation come from the repaired answer   n=96478
 PASS  steps list includes Repair when used                       
+
+== 5. lenient_parse() ==
+PASS  comments and trailing ; removed inside a fence             'SELECT COUNT(*) \nFROM orders'
+PASS  strict parse() is unchanged (keeps the comment)            
+PASS  a write is kept, not swapped for a later SELECT            
+PASS  -- and ; inside quotes are kept, second statement dropped  
+PASS  prose before and after removed                             
+PASS  CANNOT_ANSWER still a refusal                              
+PASS  no sql -> empty                                            
 
 total checks failed: 0

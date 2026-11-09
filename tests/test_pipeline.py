@@ -126,6 +126,20 @@ check(o["rows"].iloc[0, 0] == 96478 and o["explanation"] == "Counts delivered or
 check([s["name"] for s in o["steps"]] == ["Prompt built", "SQL generated", "Validated", "Executed", "Repair", "Explained"],
       "steps list includes Repair when used")
 
+# ---------- 5. lenient extractor (v0 baseline analysis only) ----------
+lines += ["", "== 5. lenient_parse() =="]
+lp = pipeline.lenient_parse
+FENCED = "Here:\n```sql\n-- count orders\nSELECT COUNT(*) -- all\nFROM orders; -- done\n```\nExplanation: counts"
+check(lp(FENCED)[0] == "SELECT COUNT(*) \nFROM orders", "comments and trailing ; removed inside a fence", repr(lp(FENCED)[0]))
+check(pipeline.parse(FENCED)[0].startswith("-- count"), "strict parse() is unchanged (keeps the comment)")
+WRITE_THEN_READ = "```sql\n-- change\nUPDATE orders SET order_status = 'x';\n```\ncheck:\n```sql\nSELECT * FROM orders;\n```"
+check(lp(WRITE_THEN_READ)[0].startswith("UPDATE"), "a write is kept, not swapped for a later SELECT")
+check(lp("SELECT 1 WHERE 'a--b' = 'a--b'; SELECT 2")[0] == "SELECT 1 WHERE 'a--b' = 'a--b'",
+      "-- and ; inside quotes are kept, second statement dropped")
+check(lp("Sure, use\n\nSELECT a\nFROM t\n\nThis returns a.")[0] == "SELECT a\nFROM t", "prose before and after removed")
+check(lp("CANNOT_ANSWER\nno email column")[2] is True, "CANNOT_ANSWER still a refusal")
+check(lp("no sql here")[0] == "", "no sql -> empty")
+
 lines += ["", f"total checks failed: {fails}"]
 out = "\n".join(lines)
 print(out)
