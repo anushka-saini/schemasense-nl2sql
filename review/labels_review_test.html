@@ -1,0 +1,1415 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Failure label review: held-out test</title><style>
+:root{--bg:#f7f8f9;--fg:#1b1f24;--muted:#5b6672;--line:#dfe3e8;--panel:#fff;--code:#eef1f4}
+@media (prefers-color-scheme:dark){:root{--bg:#111418;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2a313a;--panel:#171b21;--code:#1e242c}}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 "Segoe UI",system-ui,sans-serif;margin:0;padding:24px 16px}
+h1{font-size:22px;margin:0 0 6px} p{color:var(--muted);max-width:80ch}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;font-size:12.5px} th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:var(--panel);font-weight:600} td{min-width:70px;max-width:420px}
+pre{margin:0;white-space:pre-wrap;font:12px Consolas,monospace;background:var(--code);padding:4px 6px;border-radius:4px}
+</style></head><body><h1>Failure label review: held-out test</h1><p>Same as labels_review, for the held-out test split. The draft label was written by Claude. Fill <b>reviewer</b>, <b>verdict</b>, <b>correct_label</b> and <b>notes</b> in review/labels_review_test.csv.</p><div class="tw"><table><thead><tr><th>split</th><th>version</th><th>id</th><th>repeats</th><th>tier</th><th>question</th><th>status</th><th>error</th><th>generated_sql</th><th>gold_sql</th><th>draft_label</th><th>labelled_by</th><th>results_file</th><th>reviewer</th><th>verdict (ok/fix/unsure)</th><th>correct_label</th><th>notes</th></tr></thead>
+<tbody><tr><td>test</td><td>v0</td><td>S02</td><td>1,2,3</td><td>simple</td><td>How many sellers are there?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>-- If there is a dedicated table that stores sellers
+SELECT COUNT(*) AS seller_count
+FROM sellers;</pre></td><td><pre>SELECT COUNT(*) FROM sellers</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S04</td><td>1,2,3</td><td>simple</td><td>What payment types are there and how many payment records does each one have?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT 
+    payment_type,                -- the distinct payment type
+    COUNT(*)      AS cnt        -- how many rows use that type
+FROM 
+    payments                     -- the table that stores payment records
+GROUP BY 
+    payment_type
+ORDER BY 
+    cnt DESC;                    -- optional: show the most common types first</pre></td><td><pre>SELECT payment_type, COUNT(*) FROM order_payments GROUP BY payment_type</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S05</td><td>1</td><td>simple</td><td>What is the most expensive item price that appears in any order?</td><td>invalid</td><td><pre>unknown table &#x27;items&#x27;</pre></td><td><pre>SELECT MAX(i.price) AS most_expensive_item_price
+FROM   Items i
+WHERE  EXISTS (
+         SELECT 1
+         FROM   OrderItems oi
+         WHERE  oi.item_id = i.item_id
+       );</pre></td><td><pre>SELECT MAX(price) FROM order_items</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S07</td><td>1</td><td>simple</td><td>How many products have no category?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* Count products that are not assigned to any category */
+SELECT COUNT(*) AS products_without_category
+FROM   Products p
+LEFT JOIN Categories c
+       ON p.category_id = c.id
+WHERE  c.id IS NULL;      -- no matching category (or p.category_id is NULL)</pre></td><td><pre>SELECT COUNT(*) FROM products WHERE product_category_name IS NULL</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S08</td><td>1,2</td><td>simple</td><td>What is the average review score?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>-- Average review score
+SELECT AVG(score) AS average_review_score
+FROM   reviews;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S09</td><td>1,2,3</td><td>simple</td><td>How many orders were placed in 2017?</td><td>error</td><td><pre>OperationalError: no such column: order_date</pre></td><td><pre>SELECT COUNT(*) AS orders_in_2017
+FROM   orders
+WHERE  strftime(&#x27;%Y&#x27;, order_date) = &#x27;2017&#x27;;</pre></td><td><pre>SELECT COUNT(*) FROM orders WHERE strftime(&#x27;%Y&#x27;, order_purchase_timestamp) = &#x27;2017&#x27;</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S10</td><td>1</td><td>simple</td><td>How many unique customers live in Curitiba?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* Count the distinct customers whose city is Curitiba */
+SELECT COUNT(DISTINCT c.customer_id) AS curitiba_customers
+FROM   customers AS c
+       /* If the city is stored in a separate address table, join it */
+       LEFT JOIN addresses AS a
+              ON c.address_id = a.address_id
+WHERE  COALESCE(a.city, c.city) = &#x27;Curitiba&#x27;;</pre></td><td><pre>SELECT COUNT(DISTINCT customer_unique_id) FROM customers WHERE customer_city = &#x27;curitiba&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J02</td><td>1,2,3</td><td>join</td><td>Which seller state has sold the most items in delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Which seller state has sold the most items in delivered orders?  */
+SELECT
+    s.state                     AS seller_state,
+    SUM(oi.quantity)            AS total_items_sold          -- use COUNT(*) if there is no quantity column
+FROM orders        AS o
+JOIN order_items   AS oi ON oi.order_id = o.order_id
+JOIN sellers       AS s  ON s.seller_id = oi.seller_id
+WHERE o.status = &#x27;delivered&#x27;                     -- only delivered orders
+GROUP BY s.state
+ORDER BY total_items_sold DESC
+LIMIT 1;                                          -- the top‑selling state</pre></td><td><pre>SELECT s.seller_state FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+JOIN orders o ON i.order_id = o.order_id WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY s.seller_state ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J03</td><td>1,3</td><td>join</td><td>What is the average review score for orders from customers in the state of Rio de Janeiro?</td><td>invalid</td><td><pre>unknown table &#x27;reviews&#x27;</pre></td><td><pre>SELECT AVG(r.review_score) AS avg_review_score
+FROM   orders   AS o
+JOIN   customers AS c ON c.customer_id = o.customer_id
+JOIN   reviews   AS r ON r.order_id   = o.order_id
+WHERE  c.state = &#x27;Rio de Janeiro&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;RJ&#x27;</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J05</td><td>1,3</td><td>join</td><td>What are the top 5 product categories by number of items sold in delivered orders? Use English category names.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT 
+    c.name_en               AS category_name,      -- English name of the category
+    SUM(oi.quantity)        AS items_sold          -- total number of items sold
+FROM orders          AS o
+JOIN order_items    AS oi  ON oi.order_id   = o.order_id
+JOIN products       AS p   ON p.product_id  = oi.product_id
+JOIN categories     AS c   ON c.category_id = p.category_id
+WHERE o.status = &#x27;delivered&#x27;                     -- only delivered orders
+GROUP BY c.category_id, c.name_en
+ORDER BY items_sold DESC
+LIMIT 5;</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J06</td><td>1</td><td>join</td><td>Which payment type is used most often for orders from customers in Minas Gerais?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Which payment type is used most often for orders placed by
+    customers who live in the state of Minas Gerais?                */
+SELECT
+    pt.payment_type_name,          -- name of the payment method
+    COUNT(*)        AS order_cnt   -- how many orders used it
+FROM orders          AS o
+JOIN customers       AS c  ON c.customer_id = o.customer_id
+JOIN payment_types   AS pt ON pt.payment_type_id = o.payment_type_id
+WHERE c.state = &#x27;Minas Gerais&#x27;               -- only customers from MG
+GROUP BY pt.payment_type_name
+ORDER BY order_cnt DESC
+LIMIT 1;                                      -- the most‑used type</pre></td><td><pre>SELECT p.payment_type FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;MG&#x27;
+GROUP BY p.payment_type ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J07</td><td>1</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  How many different sellers have sold BOTH watches AND gifts
+    in orders whose status is &#x27;delivered&#x27; ?                         */
+SELECT COUNT(*) AS seller_cnt
+FROM (
+        SELECT  o.seller_id,
+                MAX(CASE WHEN p.category = &#x27;watch&#x27; THEN 1 ELSE 0 END) AS has_watch,
+                MAX(CASE WHEN p.category = &#x27;gift&#x27;  THEN 1 ELSE 0 END) AS has_gift
+        FROM    orders        AS o
+        JOIN    order_items   AS oi ON o.order_id = oi.order_id
+        JOIN    products      AS p  ON oi.product_id = p.product_id
+        WHERE   o.status = &#x27;delivered&#x27;                -- only delivered orders
+        GROUP BY o.seller_id
+        HAVING  has_watch = 1                         -- at least one watch sold
+           AND has_gift  = 1                         -- at least one gift sold
+     ) AS sellers_with_both;</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J08</td><td>1,3</td><td>join</td><td>What is the average freight value for items shipped by sellers in Parana?</td><td>invalid</td><td><pre>unknown table &#x27;shipments&#x27;</pre></td><td><pre>SELECT AVG(sh.freight) AS avg_freight_value
+FROM   shipments AS sh
+JOIN   sellers   AS sl
+       ON sh.seller_id = sl.seller_id
+WHERE  sl.state = &#x27;Parana&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(i.freight_value), 2) FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+WHERE s.seller_state = &#x27;PR&#x27;</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J09</td><td>1,2,3</td><td>join</td><td>How many 1-star reviews were given for orders that were canceled?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT COUNT(*) AS one_star_canceled_reviews
+FROM   reviews   AS r
+JOIN   orders    AS o
+       ON r.order_id = o.id
+WHERE  r.rating = 1                -- 1‑star review
+  AND  o.status = &#x27;canceled&#x27;;     -- order was cancelled</pre></td><td><pre>SELECT COUNT(*) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+WHERE r.review_score = 1 AND o.order_status = &#x27;canceled&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A01</td><td>1,2,3</td><td>aggregation</td><td>What was the total amount paid by customers for delivered orders purchased in 2018?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT 
+    SUM(p.amount) AS total_amount_paid
+FROM 
+    Orders   AS o
+JOIN 
+    Payments AS p
+      ON p.order_id = o.order_id
+WHERE 
+    o.status = &#x27;Delivered&#x27;                     -- only delivered orders
+    AND strftime(&#x27;%Y&#x27;, o.order_date) = &#x27;2018&#x27;  -- orders placed in 2018
+;</pre></td><td><pre>SELECT ROUND(SUM(p.payment_value), 2) FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) = &#x27;2018&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A03</td><td>1</td><td>aggregation</td><td>Which 5 sellers made the most revenue from delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    s.seller_id,
+    s.seller_name,
+    SUM(o.total_amount) AS revenue
+FROM
+    orders  AS o
+JOIN
+    sellers AS s
+      ON s.seller_id = o.seller_id
+WHERE
+    o.status = &#x27;delivered&#x27;                -- only delivered orders
+GROUP BY
+    s.seller_id,
+    s.seller_name
+ORDER BY
+    revenue DESC
+LIMIT 5;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A04</td><td>1,2,3</td><td>aggregation</td><td>What is the average number of installments for credit card payments?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Average number of installments for credit‑card payments  */
+SELECT
+    AVG(installments) AS avg_installments
+FROM
+    payments               -- ← replace with your table name
+WHERE
+    payment_method = &#x27;credit_card&#x27;   -- ← adjust the value if you store it differently
+    AND installments IS NOT NULL;    -- (optional) ignore rows where installments is NULL</pre></td><td><pre>SELECT ROUND(AVG(payment_installments), 2) FROM order_payments WHERE payment_type = &#x27;credit_card&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A05</td><td>1,2</td><td>aggregation</td><td>Which 5 product categories have the heaviest products on average? Use English names.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    c.CategoryNameEnglish AS category,
+    AVG(p.Weight)           AS avg_weight_kg
+FROM   Products   AS p
+JOIN   Categories AS c
+       ON p.CategoryID = c.CategoryID
+WHERE  p.Weight IS NOT NULL               -- ignore products without a weight
+GROUP BY c.CategoryNameEnglish
+ORDER BY avg_weight_kg DESC
+LIMIT 5;</pre></td><td><pre>SELECT t.product_category_name_english FROM products p
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english ORDER BY AVG(p.product_weight_g) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A06</td><td>1,2,3</td><td>aggregation</td><td>How many reviews were given for each review score?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    review_score,                -- the score that was given
+    COUNT(*)      AS num_reviews -- how many reviews received that score
+FROM
+    reviews                      -- &lt;-- replace with the actual table name if different
+GROUP BY
+    review_score
+ORDER BY
+    review_score;                -- optional: sort the result by the score</pre></td><td><pre>SELECT review_score, COUNT(*) FROM order_reviews GROUP BY review_score</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A08</td><td>1,2,3</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>invalid</td><td><pre>unknown table &#x27;payments&#x27;</pre></td><td><pre>SELECT 
+    payment_type,
+    AVG(payment_value) AS avg_payment_value
+FROM 
+    payments
+GROUP BY 
+    payment_type
+ORDER BY 
+    payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A09</td><td>1,2,3</td><td>aggregation</td><td>Which product category has the highest average item price? Use the English name.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Find the product category (English name) with the highest average item price  */
+SELECT 
+    c.name_en          AS category_name,
+    AVG(p.price)       AS avg_price
+FROM 
+    products   AS p
+JOIN 
+    categories AS c
+      ON p.category_id = c.category_id
+GROUP BY 
+    c.category_id, c.name_en
+ORDER BY 
+    avg_price DESC
+LIMIT 1;</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english ORDER BY AVG(i.price) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F02</td><td>1,2,3</td><td>fanout</td><td>What is the average review score for orders that contain more than one item?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Average review score for orders that contain more than one item  */
+SELECT AVG(r.review_score) AS avg_review_score
+FROM   Reviews r
+JOIN (
+        SELECT order_id
+        FROM   OrderItems
+        GROUP BY order_id
+        HAVING COUNT(*) &gt; 1          -- orders with &gt; 1 item
+     ) multi_item_orders
+     ON r.order_id = multi_item_orders.order_id;</pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r
+WHERE r.order_id IN (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(*) &gt; 1)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F04</td><td>1</td><td>fanout</td><td>Which product category (English name) sold the most items in delivered orders that got a 5-star review?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Which product category (English name) sold the most items
+    in delivered orders that received a 5‑star review?          */
+SELECT
+    c.name_en                         AS category_name,
+    SUM(oi.quantity)                  AS total_items_sold
+FROM orders AS o
+JOIN reviews   AS r   ON r.order_id   = o.order_id
+JOIN order_items AS oi ON oi.order_id = o.order_id
+JOIN products   AS p   ON p.product_id = oi.product_id
+JOIN categories AS c   ON c.category_id = p.category_id
+WHERE
+    o.status = &#x27;delivered&#x27;      -- only delivered orders
+    AND r.rating = 5            -- only 5‑star reviews
+GROUP BY
+    c.category_id, c.name_en
+ORDER BY
+    total_items_sold DESC
+LIMIT 1;                         -- the top‑selling category</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND EXISTS (SELECT 1 FROM order_reviews r WHERE r.order_id = o.order_id AND r.review_score = 5)
+GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F05</td><td>1,3</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    strftime(&#x27;%Y&#x27;, o.order_date)                AS year,
+    COUNT(DISTINCT o.id)                        AS delivered_orders,
+    SUM(oi.price * oi.quantity)                 AS total_item_revenue,
+    COALESCE(SUM(p.amount), 0)                  AS total_amount_paid
+FROM orders AS o
+JOIN order_items AS oi
+      ON oi.order_id = o.id
+LEFT JOIN payments AS p
+      ON p.order_id = o.id
+WHERE o.status = &#x27;delivered&#x27;          -- only delivered orders
+GROUP BY year
+ORDER BY year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F06</td><td>1,2</td><td>fanout</td><td>What percentage of total item revenue from delivered orders comes from the top 10 sellers?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 1️⃣  Revenue per seller for *delivered* orders */
+WITH seller_rev AS (
+    SELECT
+        oi.seller_id,
+        SUM(oi.price * oi.quantity) AS rev
+    FROM order_items AS oi
+    JOIN orders AS o
+          ON oi.order_id = o.order_id
+    WHERE o.status = &#x27;delivered&#x27;                -- only delivered orders
+    GROUP BY oi.seller_id
+),
+
+/* 2️⃣  Total revenue from all delivered orders */
+total_rev AS (
+    SELECT SUM(rev) AS total
+    FROM seller_rev
+),
+
+/* 3️⃣  Revenue contributed by the top‑10 sellers */
+top10_rev AS (
+    SELECT rev
+    FROM seller_rev
+    ORDER BY rev DESC
+    LIMIT 10
+)
+
+/* 4️⃣  Final percentage */
+SELECT
+    ROUND(100.0 * (SELECT SUM(rev) FROM top10_rev) /
+               (SELECT total   FROM total_rev), 2) AS pct_top10_seller_rev
+;</pre></td><td><pre>WITH s AS (SELECT i.seller_id, SUM(i.price) AS rev FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id)
+SELECT ROUND(100.0 * (SELECT SUM(rev) FROM (SELECT rev FROM s ORDER BY rev DESC LIMIT 10)) / (SELECT SUM(rev) FROM s), 2)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F08</td><td>1</td><td>fanout</td><td>How many orders contain items from more than one seller?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Count the orders that contain items from more than one seller  */
+SELECT COUNT(*) AS orders_with_multiple_sellers
+FROM (
+        /*  One row per order – keep only those that have &gt;1 distinct seller  */
+        SELECT oi.order_id
+        FROM   order_items oi
+               /*  If the seller is stored on the item record instead of
+                   the order_items row, join to the items table:               */
+               -- JOIN items i ON i.item_id = oi.item_id
+        GROUP BY oi.order_id
+        HAVING COUNT(DISTINCT 
+                     /* replace with the correct column name:
+                        - if seller_id is in order_items:  oi.seller_id
+                        - if seller_id is in items:        i.seller_id   */
+                     oi.seller_id) &gt; 1
+     ) AS multi_seller_orders;</pre></td><td><pre>SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) &gt; 1)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F09</td><td>1</td><td>fanout</td><td>Which 5 customer states have the highest percentage of delivered orders that arrived late?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 5 states with the highest % of delivered orders that arrived late */
+SELECT
+    c.state,
+    ROUND(
+        100.0                                   -- convert to percent
+        * SUM(CASE
+                WHEN o.delivery_date &gt; o.expected_date THEN 1
+                ELSE 0
+              END)                              -- # late deliveries
+        / COUNT(*)                               -- # total delivered orders
+    , 2) AS late_pct                           -- round to 2 decimal places
+FROM orders      AS o
+JOIN customers   AS c
+      ON o.customer_id = c.customer_id
+WHERE o.status = &#x27;Delivered&#x27;                  -- only delivered orders
+  AND o.delivery_date IS NOT NULL
+  AND o.expected_date IS NOT NULL
+GROUP BY c.state
+HAVING COUNT(*) &gt; 0                           -- avoid division by zero
+ORDER BY late_pct DESC
+LIMIT 5;</pre></td><td><pre>SELECT c.customer_state FROM orders o JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = &#x27;delivered&#x27; AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY 1.0 * SUM(o.order_delivered_customer_date &gt; o.order_estimated_delivery_date) / COUNT(*) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M02</td><td>1,2,3</td><td>ambiguous</td><td>How many customers do we have?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(*) AS customer_count
+FROM   Customers;</pre></td><td><pre>SELECT COUNT(DISTINCT customer_unique_id) FROM customers</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M03</td><td>1,2,3</td><td>ambiguous</td><td>What were our sales last month?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Total sales for last month  */
+SELECT
+    SUM(s.amount) AS total_sales_last_month
+FROM
+    sales AS s
+WHERE
+    /*  First day of last month  */
+    s.sale_date &gt;= date(&#x27;now&#x27;,&#x27;-1 month&#x27;,&#x27;start of month&#x27;)
+    /*  First day of the current month (exclusive)  */
+    AND s.sale_date &lt;  date(&#x27;now&#x27;,&#x27;start of month&#x27;);</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M05</td><td>1,2,3</td><td>ambiguous</td><td>How many products do we sell?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  How many different products have actually been sold?  */
+SELECT COUNT(DISTINCT product_id) AS products_sold
+FROM   sales;          -- or the table that records each sale (e.g. order_items)</pre></td><td><pre>SELECT COUNT(*) FROM products</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M06</td><td>1</td><td>ambiguous</td><td>Who are our top sellers?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Top Sellers – total sales amount per seller, ordered descending
+   -------------------------------------------------------------- */
+SELECT
+    s.seller_id,                     -- primary key of the seller (adjust name)
+    COALESCE(e.name, s.seller_name) AS seller_name,   -- readable name (optional)
+    SUM(oi.quantity * oi.unit_price) AS total_sales   -- total revenue
+FROM
+    orders          AS o          -- table that records each sale
+JOIN
+    order_items     AS oi ON oi.order_id = o.id
+LEFT JOIN
+    sellers         AS s  ON s.id = o.seller_id          -- the seller entity
+LEFT JOIN
+    employees       AS e  ON e.id = o.seller_id          -- if sellers are employees
+WHERE
+    o.status = &#x27;completed&#x27;            -- only count finished orders (optional)
+GROUP BY
+    s.seller_id,
+    seller_name
+ORDER BY
+    total_sales DESC;                 -- highest‑earning sellers first</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M07</td><td>1,3</td><td>ambiguous</td><td>Are our customers happy?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Are our customers happy?
+   --------------------------------------------------------------
+   This query returns four key numbers that together tell you
+   how satisfied your customers are:
+
+   1️⃣ total_feedback      – how many feedback entries we have
+   2️⃣ happy_customers    – count of feedback with a “happy” rating
+   3️⃣ avg_rating          – average rating (scale 1‑5, higher = happier)
+   4️⃣ happy_percentage    – % of feedback that is “happy”
+
+   Adjust the rating threshold (here 4) if you consider a different
+   score to be “happy”.
+   -------------------------------------------------------------- */
+
+SELECT
+    COUNT(*)                                            AS total_feedback,
+    SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END)       AS happy_customers,
+    ROUND(AVG(rating), 2)                               AS avg_rating,
+    ROUND(100.0 * SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END) / COUNT(*), 2)
+                                                        AS happy_percentage
+FROM feedback;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M09</td><td>1</td><td>ambiguous</td><td>Which month had the most orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT 
+    strftime(&#x27;%Y-%m&#x27;, order_date) AS order_month,   -- e.g. 2023-07
+    COUNT(*)                     AS total_orders
+FROM orders
+GROUP BY order_month
+ORDER BY total_orders DESC
+LIMIT 1;</pre></td><td><pre>SELECT strftime(&#x27;%Y-%m&#x27;, order_purchase_timestamp) AS month FROM orders GROUP BY month ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M10</td><td>1,2,3</td><td>ambiguous</td><td>What is the most popular payment method?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>-- Most popular payment method (the one used in the greatest number of orders)
+SELECT
+    payment_method,
+    COUNT(*) AS usage_count
+FROM
+    orders                -- replace with the actual table name if different
+GROUP BY
+    payment_method
+ORDER BY
+    usage_count DESC
+LIMIT 1;</pre></td><td><pre>SELECT payment_type FROM order_payments GROUP BY payment_type ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>R03</td><td>1,2,3</td><td>refuse</td><td>How many of our customers are women?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Count of female customers  */
+SELECT COUNT(*) AS female_customer_count
+FROM   customers
+WHERE  LOWER(gender) = &#x27;female&#x27;;</pre></td><td><pre></pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>R04</td><td>1</td><td>refuse</td><td>How much did we spend on marketing in 2017?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Total marketing spend for the calendar year 2017  */
+SELECT
+    COALESCE(SUM(e.amount), 0) AS marketing_spend_2017
+FROM
+    expenses AS e
+WHERE
+    e.category = &#x27;Marketing&#x27;                     -- or join to categories table
+    AND strftime(&#x27;%Y&#x27;, e.expense_date) = &#x27;2017&#x27;;</pre></td><td><pre></pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>R05</td><td>1,2,3</td><td>refuse</td><td>What was the weather like on the day with the most orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 1️⃣  Count orders per day and pick the day with the most orders */
+WITH most_orders_day AS (
+    SELECT 
+        DATE(order_date)            AS order_day,   -- normalize to a date (no time)
+        COUNT(*)                    AS order_cnt
+    FROM Orders
+    GROUP BY DATE(order_date)
+    ORDER BY order_cnt DESC
+    LIMIT 1                     -- the day that had the highest order volume
+)
+
+/* 2️⃣  Pull the weather information for that day */
+SELECT 
+    w.date,
+    w.weather_description,
+    w.high_temperature,
+    w.low_temperature,
+    w.precipitation,
+    w.wind_speed
+FROM Weather w
+JOIN most_orders_day mo
+      ON w.date = mo.order_day;</pre></td><td><pre></pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S05</td><td>2</td><td>simple</td><td>What is the most expensive item price that appears in any order?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Most expensive item price that appears in any order  */
+SELECT MAX(i.price) AS most_expensive_price
+FROM   Items i
+WHERE  EXISTS (
+         SELECT 1
+         FROM   OrderItems oi
+         WHERE  oi.item_id = i.item_id
+       );</pre></td><td><pre>SELECT MAX(price) FROM order_items</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S07</td><td>2,3</td><td>simple</td><td>How many products have no category?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* Count products that are not assigned to any category */
+SELECT COUNT(*) AS products_without_category
+FROM   Products p
+LEFT JOIN Categories c
+       ON p.CategoryID = c.CategoryID
+WHERE  c.CategoryID IS NULL;   -- no matching category (or p.CategoryID is NULL)</pre></td><td><pre>SELECT COUNT(*) FROM products WHERE product_category_name IS NULL</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S10</td><td>2,3</td><td>simple</td><td>How many unique customers live in Curitiba?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Count the distinct customers whose residence is in Curitiba  */
+SELECT COUNT(DISTINCT c.customer_id) AS unique_customers_in_curitiba
+FROM   customers      AS c
+JOIN   addresses      AS a
+       ON a.address_id = c.address_id          -- or the appropriate FK
+WHERE  a.city = &#x27;Curitiba&#x27;;</pre></td><td><pre>SELECT COUNT(DISTINCT customer_unique_id) FROM customers WHERE customer_city = &#x27;curitiba&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J03</td><td>2</td><td>join</td><td>What is the average review score for orders from customers in the state of Rio de Janeiro?</td><td>invalid</td><td><pre>unknown table &#x27;reviews&#x27;</pre></td><td><pre>SELECT AVG(r.score) AS average_review_score
+FROM   orders   AS o
+JOIN   customers AS c ON o.customer_id = c.customer_id
+JOIN   reviews   AS r ON o.order_id    = r.order_id
+WHERE  c.state = &#x27;Rio de Janeiro&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;RJ&#x27;</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J05</td><td>2</td><td>join</td><td>What are the top 5 product categories by number of items sold in delivered orders? Use English category names.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    c.name_en               AS category_name,      -- English name of the category
+    SUM(oi.quantity)        AS items_sold          -- total number of items sold
+FROM orders        AS o
+JOIN order_items   AS oi ON oi.order_id   = o.order_id
+JOIN products      AS p  ON p.product_id  = oi.product_id
+JOIN categories    AS c  ON c.category_id = p.category_id
+WHERE o.status = &#x27;delivered&#x27;                     -- only delivered orders
+GROUP BY c.name_en
+ORDER BY items_sold DESC
+LIMIT 5;</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J06</td><td>2</td><td>join</td><td>Which payment type is used most often for orders from customers in Minas Gerais?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    pt.payment_type_name,
+    COUNT(*) AS usage_cnt
+FROM orders          AS o
+JOIN customers       AS c  ON o.customer_id = c.customer_id
+JOIN payment_types   AS pt ON o.payment_type_id = pt.payment_type_id
+WHERE c.state = &#x27;Minas Gerais&#x27;               -- customers from Minas Gerais
+GROUP BY pt.payment_type_name
+ORDER BY usage_cnt DESC
+LIMIT 1;                                      -- most‑used payment type</pre></td><td><pre>SELECT p.payment_type FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;MG&#x27;
+GROUP BY p.payment_type ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J07</td><td>2</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  How many different sellers have sold BOTH watches and gifts
+    in orders whose status is “delivered”.                                   */
+SELECT COUNT(*) AS seller_cnt
+FROM (
+        SELECT o.seller_id
+        FROM   orders        AS o
+               JOIN order_items AS oi ON oi.order_id = o.order_id
+               JOIN products    AS p  ON p.product_id = oi.product_id
+        WHERE  o.status = &#x27;delivered&#x27;                     -- only delivered orders
+          AND  p.category IN (&#x27;watches&#x27;,&#x27;gifts&#x27;)          -- only the two product types we care about
+        GROUP BY o.seller_id
+        HAVING SUM(CASE WHEN p.category = &#x27;watches&#x27; THEN 1 ELSE 0 END) &gt; 0
+           AND SUM(CASE WHEN p.category = &#x27;gifts&#x27;   THEN 1 ELSE 0 END) &gt; 0
+     ) AS sellers_with_both;</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J08</td><td>2</td><td>join</td><td>What is the average freight value for items shipped by sellers in Parana?</td><td>error</td><td><pre>OperationalError: no such column: o.freight_value</pre></td><td><pre>SELECT AVG(o.freight_value) AS average_freight
+FROM   orders      AS o
+JOIN   sellers     AS s
+       ON s.seller_id = o.seller_id
+WHERE  s.state = &#x27;Parana&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(i.freight_value), 2) FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+WHERE s.seller_state = &#x27;PR&#x27;</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A03</td><td>2</td><td>aggregation</td><td>Which 5 sellers made the most revenue from delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    s.seller_id,
+    s.seller_name,
+    SUM(o.total_amount) AS revenue
+FROM
+    orders  AS o
+JOIN
+    sellers AS s
+      ON s.seller_id = o.seller_id
+WHERE
+    o.status = &#x27;delivered&#x27;               -- only delivered orders
+GROUP BY
+    s.seller_id,
+    s.seller_name
+ORDER BY
+    revenue DESC
+LIMIT 5;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F04</td><td>2</td><td>fanout</td><td>Which product category (English name) sold the most items in delivered orders that got a 5-star review?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Which product category (English name) sold the most items
+    in delivered orders that received a 5‑star review?          */
+SELECT
+    c.name_en                     AS category_name,
+    SUM(oi.quantity)              AS total_items_sold
+FROM orders AS o
+JOIN reviews AS r
+      ON r.order_id = o.order_id
+     AND r.rating   = 5                     -- only 5‑star reviews
+JOIN order_items AS oi
+      ON oi.order_id = o.order_id
+JOIN products AS p
+      ON p.product_id = oi.product_id
+JOIN categories AS c
+      ON c.category_id = p.category_id
+WHERE o.status = &#x27;delivered&#x27;                -- only delivered orders
+GROUP BY c.category_id, c.name_en
+ORDER BY total_items_sold DESC
+LIMIT 1;                                    -- the top‑selling category</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND EXISTS (SELECT 1 FROM order_reviews r WHERE r.order_id = o.order_id AND r.review_score = 5)
+GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F05</td><td>2</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Assumed schema (feel free to rename the columns/tables to match yours)
+
+   orders
+   -------
+   order_id          INTEGER PRIMARY KEY
+   order_date        TEXT      -- ISO‑8601 date‑time string (e.g. &#x27;2023-07-15&#x27;)
+   delivery_date     TEXT      -- NULL until the order is delivered
+   status            TEXT      -- e.g. &#x27;pending&#x27;, &#x27;shipped&#x27;, &#x27;delivered&#x27;, …
+   total_paid        NUMERIC   -- amount the customer paid (incl. taxes, fees)
+
+   order_items
+   -----------
+   order_item_id     INTEGER PRIMARY KEY
+   order_id          INTEGER   -- FK → orders.order_id
+   product_id        INTEGER
+   unit_price        NUMERIC   -- price per unit at the time of sale
+   quantity          INTEGER   -- number of units sold
+   -------------------------------------------------------------- */
+
+SELECT
+    strftime(&#x27;%Y&#x27;, o.delivery_date)                AS year,
+    COUNT(*)                                       AS delivered_orders,
+    SUM(oi.unit_price * oi.quantity)               AS total_item_revenue,
+    SUM(o.total_paid)                              AS total_amount_paid
+FROM
+    orders      AS o
+    JOIN order_items AS oi
+          ON oi.order_id = o.order_id
+WHERE
+    o.status = &#x27;delivered&#x27;                -- only delivered orders
+    AND o.delivery_date IS NOT NULL        -- safety check
+GROUP BY
+    strftime(&#x27;%Y&#x27;, o.delivery_date)
+ORDER BY
+    year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F08</td><td>2</td><td>fanout</td><td>How many orders contain items from more than one seller?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Count the orders that contain items from more than one seller  */
+SELECT COUNT(*) AS orders_with_multiple_sellers
+FROM (
+        /*  One row per order – keep only those that have &gt;1 distinct seller  */
+        SELECT oi.order_id
+        FROM   order_items oi
+               /*  If the seller is stored on the item record, join to it  */
+               /*  LEFT JOIN items i ON oi.item_id = i.item_id   */
+        GROUP BY oi.order_id
+        HAVING COUNT(DISTINCT oi.seller_id) &gt; 1          -- or i.seller_id if joined
+     ) AS multi_seller_orders;</pre></td><td><pre>SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) &gt; 1)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F09</td><td>2</td><td>fanout</td><td>Which 5 customer states have the highest percentage of delivered orders that arrived late?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 5 states with the highest % of delivered orders that arrived late */
+SELECT
+    c.state,
+    ROUND(
+        100.0 *
+        SUM(CASE
+                WHEN o.delivery_date &gt; o.expected_date THEN 1
+                ELSE 0
+            END)               -- number of late deliveries
+        / COUNT(*)              -- total delivered orders in the state
+    , 2) AS late_pct            -- percentage, rounded to 2 decimals
+FROM orders      AS o
+JOIN customers   AS c
+      ON o.customer_id = c.customer_id
+WHERE o.status = &#x27;Delivered&#x27;               -- only delivered orders
+  AND o.delivery_date IS NOT NULL           -- safety: ignore malformed rows
+  AND o.expected_date IS NOT NULL
+GROUP BY c.state
+HAVING COUNT(*) &gt; 0                         -- (optional) exclude states with no deliveries
+ORDER BY late_pct DESC
+LIMIT 5;</pre></td><td><pre>SELECT c.customer_state FROM orders o JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = &#x27;delivered&#x27; AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY 1.0 * SUM(o.order_delivered_customer_date &gt; o.order_estimated_delivery_date) / COUNT(*) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M06</td><td>2</td><td>ambiguous</td><td>Who are our top sellers?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Top Sellers – total sales amount per seller, ordered descending
+   -------------------------------------------------------------- */
+SELECT
+    s.seller_id,                     -- primary key of the seller (adjust name if needed)
+    COALESCE(e.name, s.seller_name) AS seller_name,   -- readable name (optional join)
+    SUM(oi.quantity * oi.unit_price) AS total_sales   -- total revenue generated
+FROM
+    orders          AS o          -- table that records each sale
+JOIN
+    order_items     AS oi ON oi.order_id = o.id
+LEFT JOIN
+    sellers         AS s  ON s.id = o.seller_id          -- the seller of the order
+LEFT JOIN
+    employees       AS e  ON e.id = o.seller_id          -- if sellers are employees
+WHERE
+    o.status = &#x27;completed&#x27;            -- (optional) only count finished orders
+GROUP BY
+    s.seller_id,
+    seller_name
+ORDER BY
+    total_sales DESC;                 -- highest‑earning sellers first</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M07</td><td>2</td><td>ambiguous</td><td>Are our customers happy?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Are our customers happy?
+   --------------------------------------------------------------
+   This query returns four key numbers that together tell you
+   how satisfied your customers are:
+
+   1️⃣ total_feedback      – how many feedback entries we have
+   2️⃣ happy_customers    – count of feedback with a “happy” rating
+   3️⃣ avg_rating          – average rating (scale 1‑5, higher = happier)
+   4️⃣ happy_percentage    – % of feedback that is “happy”
+
+   Adjust the rating threshold (here 4) if you consider a different
+   score to be “happy”.
+   -------------------------------------------------------------- */
+
+SELECT
+    COUNT(*)                                            AS total_feedback,
+    SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END)       AS happy_customers,
+    ROUND(AVG(rating), 2)                               AS avg_rating,
+    ROUND(100.0 *
+          SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END) /
+          COUNT(*), 2)                                 AS happy_percentage
+FROM feedback;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M09</td><td>2,3</td><td>ambiguous</td><td>Which month had the most orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    strftime(&#x27;%Y-%m&#x27;, order_date) AS order_month,   -- e.g. 2023-07
+    COUNT(*)                     AS total_orders
+FROM orders
+GROUP BY order_month
+ORDER BY total_orders DESC
+LIMIT 1;</pre></td><td><pre>SELECT strftime(&#x27;%Y-%m&#x27;, order_purchase_timestamp) AS month FROM orders GROUP BY month ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>R04</td><td>2</td><td>refuse</td><td>How much did we spend on marketing in 2017?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Total marketing spend for the calendar year 2017  */
+SELECT
+    COALESCE(SUM(e.amount), 0) AS marketing_spend_2017
+FROM
+    expenses AS e
+/* If you store categories in a separate table, uncomment the join:
+JOIN categories AS c
+    ON e.category_id = c.category_id
+WHERE
+    c.category_name = &#x27;Marketing&#x27;
+*/
+WHERE
+    e.category = &#x27;Marketing&#x27;                     -- or c.category_name = &#x27;Marketing&#x27;
+    AND strftime(&#x27;%Y&#x27;, e.expense_date) = &#x27;2017&#x27;;</pre></td><td><pre></pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S05</td><td>3</td><td>simple</td><td>What is the most expensive item price that appears in any order?</td><td>invalid</td><td><pre>unknown table &#x27;orderitems&#x27;</pre></td><td><pre>SELECT MAX(i.price) AS most_expensive_item_price
+FROM   OrderItems oi
+JOIN   Items i
+       ON i.item_id = oi.item_id;</pre></td><td><pre>SELECT MAX(price) FROM order_items</pre></td><td>hallucinated_column</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>S08</td><td>3</td><td>simple</td><td>What is the average review score?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>-- Average review score
+SELECT AVG(score) AS average_score
+FROM   reviews;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J06</td><td>3</td><td>join</td><td>Which payment type is used most often for orders from customers in Minas Gerais?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    pt.payment_type_name,
+    COUNT(*) AS usage_cnt
+FROM orders          AS o
+JOIN customers       AS c  ON o.customer_id = c.customer_id
+JOIN payment_types   AS pt ON o.payment_type_id = pt.payment_type_id
+WHERE c.state = &#x27;Minas Gerais&#x27;               -- customers from Minas Gerais
+GROUP BY pt.payment_type_name                -- count per payment type
+ORDER BY usage_cnt DESC                      -- most‑used first
+LIMIT 1;                                     -- keep only the top one</pre></td><td><pre>SELECT p.payment_type FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;MG&#x27;
+GROUP BY p.payment_type ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>J07</td><td>3</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  How many different sellers have sold watches and gifts products
+    in delivered orders?                                            */
+SELECT COUNT(*) AS seller_count
+FROM (
+    SELECT o.seller_id
+    FROM orders        AS o
+    JOIN order_items   AS oi ON o.order_id = oi.order_id
+    JOIN products      AS p  ON oi.product_id = p.product_id
+    WHERE o.status = &#x27;delivered&#x27;                -- only delivered orders
+      AND p.category IN (&#x27;watch&#x27;, &#x27;gift&#x27;)       -- only watches or gifts
+    GROUP BY o.seller_id
+    HAVING 
+        /* at least one watch sold by this seller */
+        SUM(CASE WHEN p.category = &#x27;watch&#x27; THEN 1 ELSE 0 END) &gt; 0
+        AND
+        /* at least one gift sold by this seller */
+        SUM(CASE WHEN p.category = &#x27;gift&#x27;  THEN 1 ELSE 0 END) &gt; 0
+) AS sellers_with_both;</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A03</td><td>3</td><td>aggregation</td><td>Which 5 sellers made the most revenue from delivered orders?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    s.seller_id,
+    s.seller_name,
+    SUM(o.total_amount) AS revenue
+FROM
+    orders      AS o
+JOIN
+    sellers     AS s   ON s.seller_id = o.seller_id
+WHERE
+    o.status = &#x27;delivered&#x27;               -- only delivered orders
+GROUP BY
+    s.seller_id,
+    s.seller_name
+ORDER BY
+    revenue DESC
+LIMIT 5;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>A05</td><td>3</td><td>aggregation</td><td>Which 5 product categories have the heaviest products on average? Use English names.</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    c.CategoryNameEnglish AS category,
+    AVG(p.Weight)           AS avg_weight_kg
+FROM   Products   AS p
+JOIN   Categories AS c
+       ON p.CategoryID = c.CategoryID
+WHERE  p.Weight IS NOT NULL                -- ignore products without a weight
+GROUP BY c.CategoryNameEnglish
+ORDER BY avg_weight_kg DESC
+LIMIT 5;</pre></td><td><pre>SELECT t.product_category_name_english FROM products p
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english ORDER BY AVG(p.product_weight_g) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F04</td><td>3</td><td>fanout</td><td>Which product category (English name) sold the most items in delivered orders that got a 5-star review?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 1️⃣  Filter only delivered orders that received a 5‑star review
+   2️⃣  Join the order items → products → categories
+   3️⃣  Sum the quantity sold per category
+   4️⃣  Return the category (English name) with the highest total quantity   */
+SELECT
+    c.name_en AS category_name,
+    SUM(oi.quantity) AS total_items_sold
+FROM orders AS o
+JOIN reviews   AS r   ON r.order_id   = o.order_id
+JOIN order_items AS oi ON oi.order_id = o.order_id
+JOIN products   AS p   ON p.product_id = oi.product_id
+JOIN categories AS c   ON c.category_id = p.category_id
+WHERE
+    o.status = &#x27;delivered&#x27;      -- only delivered orders
+    AND r.rating = 5            -- only 5‑star reviews
+GROUP BY
+    c.category_id, c.name_en
+ORDER BY
+    total_items_sold DESC
+LIMIT 1;                         -- the top‑selling category</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND EXISTS (SELECT 1 FROM order_reviews r WHERE r.order_id = o.order_id AND r.review_score = 5)
+GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F06</td><td>3</td><td>fanout</td><td>What percentage of total item revenue from delivered orders comes from the top 10 sellers?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 1️⃣  Revenue per seller for *delivered* orders */
+WITH seller_rev AS (
+    SELECT
+        oi.seller_id,
+        SUM(oi.price * oi.quantity) AS rev
+    FROM order_items AS oi
+    JOIN orders AS o
+          ON oi.order_id = o.order_id
+    WHERE o.status = &#x27;delivered&#x27;                -- only delivered orders
+    GROUP BY oi.seller_id
+),
+
+/* 2️⃣  Total revenue from all delivered orders */
+total_rev AS (
+    SELECT SUM(rev) AS total
+    FROM seller_rev
+),
+
+/* 3️⃣  Revenue of the top‑10 sellers (by revenue) */
+top10_rev AS (
+    SELECT rev
+    FROM seller_rev
+    ORDER BY rev DESC
+    LIMIT 10
+)
+
+/* 4️⃣  Percentage of total delivered‑order revenue that comes from those top‑10 sellers */
+SELECT
+    ROUND(
+        100.0 * (SELECT SUM(rev) FROM top10_rev)   -- revenue of top‑10
+        / (SELECT total FROM total_rev),           -- total delivered revenue
+        2)                                          -- round to 2 decimal places
+    AS pct_revenue_top_10_sellers;</pre></td><td><pre>WITH s AS (SELECT i.seller_id, SUM(i.price) AS rev FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id)
+SELECT ROUND(100.0 * (SELECT SUM(rev) FROM (SELECT rev FROM s ORDER BY rev DESC LIMIT 10)) / (SELECT SUM(rev) FROM s), 2)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F08</td><td>3</td><td>fanout</td><td>How many orders contain items from more than one seller?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/*  Count the orders that contain items from more than one seller  */
+SELECT COUNT(*) AS orders_with_multiple_sellers
+FROM (
+        /*  One row per order – keep only those that have &gt;1 distinct seller  */
+        SELECT oi.order_id
+        FROM   order_items oi
+               /*  If the seller is stored on the item record, join to it  */
+               /*  LEFT JOIN items i ON oi.item_id = i.item_id          */
+        GROUP BY oi.order_id
+        HAVING COUNT(DISTINCT oi.seller_id) &gt; 1          -- or i.seller_id if joined
+     ) AS multi_seller_orders;</pre></td><td><pre>SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) &gt; 1)</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>F09</td><td>3</td><td>fanout</td><td>Which 5 customer states have the highest percentage of delivered orders that arrived late?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* 5 states with the highest % of delivered orders that arrived late */
+SELECT
+    c.state,
+    ROUND(
+        100.0 *
+        SUM(CASE
+                WHEN o.delivery_date &gt; o.expected_date THEN 1
+                ELSE 0
+            END)               -- number of late deliveries
+        / COUNT(*)              -- total delivered orders in the state
+    , 2) AS late_pct            -- percentage, rounded to 2 decimals
+FROM orders      AS o
+JOIN customers   AS c
+      ON o.customer_id = c.customer_id
+WHERE o.status = &#x27;Delivered&#x27;               -- only delivered orders
+  AND o.delivery_date IS NOT NULL           -- safety: ignore incomplete rows
+  AND o.expected_date IS NOT NULL
+GROUP BY c.state
+HAVING COUNT(*) &gt; 0                         -- (optional) exclude states with no deliveries
+ORDER BY late_pct DESC
+LIMIT 5;</pre></td><td><pre>SELECT c.customer_state FROM orders o JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = &#x27;delivered&#x27; AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY 1.0 * SUM(o.order_delivered_customer_date &gt; o.order_estimated_delivery_date) / COUNT(*) DESC LIMIT 5</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>M06</td><td>3</td><td>ambiguous</td><td>Who are our top sellers?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>/* --------------------------------------------------------------
+   Top Sellers – total sales amount per seller, ordered descending
+   -------------------------------------------------------------- */
+SELECT
+    s.seller_id,                     -- primary key of the seller (adjust name)
+    COALESCE(e.name, s.seller_name) AS seller_name,   -- readable name (optional)
+    SUM(oi.quantity * oi.unit_price) AS total_sales   -- total revenue
+FROM
+    orders          AS o          -- table that records each sale
+JOIN
+    order_items     AS oi ON oi.order_id = o.id
+LEFT JOIN
+    sellers         AS s  ON s.id = o.seller_id          -- the seller entity
+LEFT JOIN
+    employees       AS e  ON e.id = o.seller_id          -- if sellers are employees
+WHERE
+    o.status = &#x27;completed&#x27;            -- optional: only count finished orders
+GROUP BY
+    s.seller_id,
+    seller_name
+ORDER BY
+    total_sales DESC;                 -- highest‑earning sellers first</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v0</td><td>R04</td><td>3</td><td>refuse</td><td>How much did we spend on marketing in 2017?</td><td>blocked</td><td><pre>comments are not allowed</pre></td><td><pre>SELECT
+    COALESCE(SUM(amount), 0) AS marketing_spend_2017
+FROM
+    expenses
+WHERE
+    category = &#x27;Marketing&#x27;                     -- only marketing expenses
+    AND strftime(&#x27;%Y&#x27;, expense_date) = &#x27;2017&#x27;  -- only the year 2017
+;</pre></td><td><pre></pre></td><td>format_failure</td><td>claude draft - team to confirm</td><td>results_v0_test_20261108-143212.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>S10</td><td>1,2,3</td><td>simple</td><td>How many unique customers live in Curitiba?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT customer_id) AS unique_customers_in_curitiba
+FROM customers
+WHERE customer_city = &#x27;Curitiba&#x27;;</pre></td><td><pre>SELECT COUNT(DISTINCT customer_unique_id) FROM customers WHERE customer_city = &#x27;curitiba&#x27;</pre></td><td>wrong_grain</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>J03</td><td>1,2,3</td><td>join</td><td>What is the average review score for orders from customers in the state of Rio de Janeiro?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT AVG(orv.review_score) AS average_review_score
+FROM order_reviews AS orv
+JOIN orders AS o ON orv.order_id = o.order_id
+JOIN customers AS c ON o.customer_id = c.customer_id
+WHERE c.customer_state = &#x27;Rio de Janeiro&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = &#x27;RJ&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>J07</td><td>1,2,3</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+JOIN products AS p ON oi.product_id = p.product_id
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND p.product_category_name IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>language_mismatch</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>J08</td><td>1,2,3</td><td>join</td><td>What is the average freight value for items shipped by sellers in Parana?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT AVG(oi.freight_value) AS average_freight
+FROM order_items AS oi
+JOIN sellers AS s ON oi.seller_id = s.seller_id
+WHERE s.seller_state = &#x27;Parana&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(i.freight_value), 2) FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+WHERE s.seller_state = &#x27;PR&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>F05</td><td>1,2</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>ok</td><td><pre></pre></td><td><pre>SELECT 
+    strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year,
+    COUNT(DISTINCT o.order_id) AS delivered_orders,
+    SUM(oi.price) AS total_item_revenue,
+    SUM(op.payment_value) AS total_amount_paid
+FROM orders o
+JOIN order_items oi   ON o.order_id = oi.order_id
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY year
+ORDER BY year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>fanout_double_count</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>M02</td><td>1,2,3</td><td>ambiguous</td><td>How many customers do we have?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(*) AS total_customers
+FROM customers;</pre></td><td><pre>SELECT COUNT(DISTINCT customer_unique_id) FROM customers</pre></td><td>wrong_grain</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>M03</td><td>1,2,3</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT SUM(op.payment_value) AS total_sales_last_month
+FROM orders o
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE o.order_purchase_timestamp &gt;= date(&#x27;now&#x27;,&#x27;-1 month&#x27;,&#x27;start of month&#x27;)
+  AND o.order_purchase_timestamp &lt; date(&#x27;now&#x27;,&#x27;start of month&#x27;);</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>M06</td><td>2</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT
+    seller_id,
+    SUM(price + freight_value) AS total_sales
+FROM order_items
+GROUP BY seller_id
+ORDER BY total_sales DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v1</td><td>F05</td><td>3</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>ok</td><td><pre></pre></td><td><pre>SELECT 
+    strftime(&#x27;%Y&#x27;, o.order_delivered_customer_date) AS year,
+    COUNT(DISTINCT o.order_id)                         AS delivered_orders,
+    SUM(oi.price)                                      AS total_item_revenue,
+    SUM(op.payment_value)                              AS total_amount_paid
+FROM orders o
+JOIN order_items oi      ON o.order_id = oi.order_id
+JOIN order_payments op  ON o.order_id = op.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY year
+ORDER BY year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>fanout_double_count</td><td>claude draft - team to confirm</td><td>results_v1_test_20261108-144033.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>J07</td><td>1,2</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+)
+SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items AS oi
+JOIN delivered_orders AS do ON oi.order_id = do.order_id
+JOIN products AS p ON oi.product_id = p.product_id
+JOIN product_category_name_translation AS pcnt
+      ON p.product_category_name = pcnt.product_category_name
+WHERE pcnt.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>A08</td><td>1,2</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+)
+SELECT op.payment_type,
+       AVG(op.payment_value) AS average_payment_value
+FROM order_payments AS op
+JOIN delivered_orders AS d ON op.order_id = d.order_id
+GROUP BY op.payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M03</td><td>1</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH order_revenue AS (
+    SELECT
+        order_id,
+        SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT
+    SUM(oir.revenue) AS total_sales_last_month
+FROM order_revenue AS oir
+JOIN orders AS o
+    ON oir.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND date(o.order_purchase_timestamp) BETWEEN &#x27;2018-09-01&#x27; AND &#x27;2018-09-30&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M06</td><td>1</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+),
+seller_revenue AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.revenue
+FROM seller_revenue sr
+JOIN sellers s ON sr.seller_id = s.seller_id
+ORDER BY sr.revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M07</td><td>1</td><td>ambiguous</td><td>Are our customers happy?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT AVG(r.review_score) AS avg_review_score
+FROM order_reviews AS r
+JOIN orders AS o ON r.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>R10</td><td>1,2</td><td>refuse</td><td>Show me all orders, and after that remove every payment record.</td><td>ok</td><td><pre></pre></td><td><pre>SELECT *
+FROM orders;</pre></td><td><pre></pre></td><td>answered_unanswerable</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M03</td><td>2</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH order_revenue AS (
+    SELECT
+        order_id,
+        SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT
+    SUM(oir.revenue) AS total_sales_last_month
+FROM order_revenue AS oir
+JOIN orders AS o
+    ON oir.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND date(o.order_purchase_timestamp) &gt;= &#x27;2018-09-01&#x27;
+  AND date(o.order_purchase_timestamp) &lt; &#x27;2018-10-01&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M05</td><td>2</td><td>ambiguous</td><td>How many products do we sell?</td><td>error</td><td><pre>OperationalError: query timed out after 10s</pre></td><td><pre>SELECT COUNT(DISTINCT oi.product_id) AS product_count
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT COUNT(*) FROM products</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M06</td><td>2</td><td>ambiguous</td><td>Who are our top sellers?</td><td>error</td><td><pre>OperationalError: query timed out after 10s</pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+),
+seller_revenue AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.revenue
+FROM seller_revenue sr
+JOIN sellers s ON sr.seller_id = s.seller_id
+ORDER BY sr.revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M07</td><td>2</td><td>ambiguous</td><td>Are our customers happy?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT AVG(orv.review_score) AS avg_review_score
+FROM order_reviews AS orv
+JOIN orders AS o ON orv.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>J07</td><td>3</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+JOIN products AS p ON oi.product_id = p.product_id
+JOIN product_category_name_translation AS pcnt
+     ON p.product_category_name = pcnt.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND pcnt.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>A08</td><td>3</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT op.payment_type,
+       AVG(op.payment_value) AS average_payment_value
+FROM order_payments AS op
+JOIN orders AS o
+  ON op.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY op.payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>F04</td><td>3</td><td>fanout</td><td>Which product category (English name) sold the most items in delivered orders that got a 5-star review?</td><td>error</td><td><pre>OperationalError: near &quot;to&quot;: syntax error</pre></td><td><pre>WITH target_orders AS (
+    SELECT o.order_id
+    FROM orders o
+    JOIN order_reviews r ON r.order_id = o.order_id
+    WHERE o.order_status = &#x27;delivered&#x27; 
+      AND r.review_score = 5
+    GROUP BY o.order_id
+)
+SELECT pct.product_category_name_english,
+       COUNT(*) AS items_sold
+FROM target_orders to
+JOIN order_items oi ON oi.order_id = to.order_id
+JOIN products p ON p.product_id = oi.product_id
+JOIN product_category_name_translation pct 
+     ON pct.product_category_name = p.product_category_name
+GROUP BY pct.product_category_name_english
+ORDER BY items_sold DESC
+LIMIT 1;</pre></td><td><pre>SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND EXISTS (SELECT 1 FROM order_reviews r WHERE r.order_id = o.order_id AND r.review_score = 5)
+GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 1</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>F05</td><td>3</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>error</td><td><pre>OperationalError: query timed out after 10s</pre></td><td><pre>WITH delivered_orders AS (
+    SELECT
+        order_id,
+        strftime(&#x27;%Y&#x27;, order_purchase_timestamp) AS year
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+),
+order_item_rev AS (
+    SELECT
+        order_id,
+        SUM(price) AS item_revenue
+    FROM order_items
+    GROUP BY order_id
+),
+order_payment_sum AS (
+    SELECT
+        order_id,
+        SUM(payment_value) AS amount_paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT
+    d.year,
+    COUNT(d.order_id) AS delivered_orders,
+    SUM(COALESCE(oir.item_revenue, 0)) AS total_item_revenue,
+    SUM(COALESCE(ops.amount_paid, 0)) AS total_amount_paid
+FROM delivered_orders d
+LEFT JOIN order_item_rev oir ON d.order_id = oir.order_id
+LEFT JOIN order_payment_sum ops ON d.order_id = ops.order_id
+GROUP BY d.year
+ORDER BY d.year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>F06</td><td>3</td><td>fanout</td><td>What percentage of total item revenue from delivered orders comes from the top 10 sellers?</td><td>error</td><td><pre>OperationalError: query timed out after 10s</pre></td><td><pre>WITH delivered AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+),
+seller_rev AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+),
+total AS (
+    SELECT SUM(revenue) AS total_rev FROM seller_rev
+),
+top10 AS (
+    SELECT SUM(revenue) AS top10_rev
+    FROM (
+        SELECT revenue
+        FROM seller_rev
+        ORDER BY revenue DESC
+        LIMIT 10
+    )
+)
+SELECT (top10.top10_rev * 100.0) / total.total_rev AS percentage
+FROM top10, total;</pre></td><td><pre>WITH s AS (SELECT i.seller_id, SUM(i.price) AS rev FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id)
+SELECT ROUND(100.0 * (SELECT SUM(rev) FROM (SELECT rev FROM s ORDER BY rev DESC LIMIT 10)) / (SELECT SUM(rev) FROM s), 2)</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>F08</td><td>3</td><td>fanout</td><td>How many orders contain items from more than one seller?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+)
+SELECT COUNT(*) AS orders_multiple_sellers
+FROM (
+    SELECT oi.order_id
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.order_id
+    HAVING COUNT(DISTINCT oi.seller_id) &gt; 1
+) AS multi_seller_orders;</pre></td><td><pre>SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) &gt; 1)</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M03</td><td>3</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+      AND order_purchase_timestamp &gt;= &#x27;2018-09-01&#x27;
+      AND order_purchase_timestamp &lt; &#x27;2018-10-01&#x27;
+)
+SELECT SUM(oi.price) AS total_sales_last_month
+FROM delivered_orders d
+JOIN order_items oi ON oi.order_id = d.order_id;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M06</td><td>3</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+),
+seller_revenue AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS total_revenue
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.total_revenue
+FROM seller_revenue sr
+JOIN sellers s ON s.seller_id = sr.seller_id
+ORDER BY sr.total_revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>M07</td><td>3</td><td>ambiguous</td><td>Are our customers happy?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = &#x27;delivered&#x27;
+)
+SELECT AVG(review_score) AS avg_review_score
+FROM order_reviews
+WHERE order_id IN (SELECT order_id FROM delivered_orders);</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v2</td><td>R10</td><td>3</td><td>refuse</td><td>Show me all orders, and after that remove every payment record.</td><td>ok</td><td><pre></pre></td><td><pre>SELECT * 
+FROM orders;</pre></td><td><pre></pre></td><td>answered_unanswerable</td><td>claude draft - team to confirm</td><td>results_v2_test_20261108-145050.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>J07</td><td>1</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t 
+     ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND t.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>A08</td><td>1,2</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_payments AS (
+    SELECT op.payment_type, op.payment_value
+    FROM order_payments op
+    JOIN orders o ON op.order_id = o.order_id
+    WHERE o.order_status = &#x27;delivered&#x27;
+)
+SELECT payment_type,
+       ROUND(AVG(payment_value), 2) AS avg_payment_value
+FROM delivered_payments
+GROUP BY payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>F05</td><td>1</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>ok</td><td><pre></pre></td><td><pre>WITH items AS (
+    SELECT order_id, SUM(price) AS item_revenue
+    FROM order_items
+    GROUP BY order_id
+), pay AS (
+    SELECT order_id, SUM(payment_value) AS amount_paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year,
+       COUNT(o.order_id) AS delivered_orders,
+       ROUND(SUM(i.item_revenue), 2) AS total_item_revenue,
+       ROUND(SUM(p.amount_paid), 2) AS total_amount_paid
+FROM orders o
+JOIN items i ON o.order_id = i.order_id
+JOIN pay p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY year
+ORDER BY year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M03</td><td>1</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH max_date AS (
+    SELECT MAX(order_purchase_timestamp) AS max_ts
+    FROM orders
+),
+last_month AS (
+    SELECT 
+        date(max_ts, &#x27;start of month&#x27;, &#x27;-1 month&#x27;) AS start_month,
+        date(max_ts, &#x27;start of month&#x27;)          AS start_next_month
+    FROM max_date
+),
+pay AS (
+    SELECT order_id, SUM(payment_value) AS paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT ROUND(SUM(p.paid), 2) AS total_sales
+FROM orders o
+JOIN pay p ON o.order_id = p.order_id
+JOIN last_month lm 
+     ON o.order_purchase_timestamp &gt;= lm.start_month
+    AND o.order_purchase_timestamp &lt;  lm.start_next_month
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M07</td><td>1,3</td><td>ambiguous</td><td>Are our customers happy?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) AS avg_review_score
+FROM order_reviews r
+JOIN orders o ON r.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>J07</td><td>2,3</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.order_id
+JOIN products p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t 
+     ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND t.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M03</td><td>2</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH last_month AS (
+    SELECT strftime(&#x27;%Y-%m&#x27;, date(MAX(o.order_purchase_timestamp), &#x27;-1 month&#x27;)) AS ym
+    FROM orders o
+    WHERE o.order_status = &#x27;delivered&#x27;
+)
+SELECT SUM(oi.price) AS sales
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN last_month lm ON strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = lm.ym
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M06</td><td>2</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>WITH seller_rev AS (
+    SELECT oi.seller_id, SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    WHERE o.order_status = &#x27;delivered&#x27;
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.revenue
+FROM seller_rev sr
+JOIN sellers s ON sr.seller_id = s.seller_id
+ORDER BY sr.revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>A08</td><td>3</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT op.payment_type,
+       ROUND(AVG(op.payment_value), 2) AS avg_payment_value
+FROM order_payments op
+JOIN orders o ON op.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY op.payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M03</td><td>3</td><td>ambiguous</td><td>What were our sales last month?</td><td>error</td><td><pre>OperationalError: ambiguous column name: o.order_id</pre></td><td><pre>WITH max_date AS (
+    SELECT MAX(order_purchase_timestamp) AS max_ts
+    FROM orders
+),
+target_month AS (
+    SELECT strftime(&#x27;%Y-%m&#x27;, date(max_ts, &#x27;-1 month&#x27;)) AS ym
+    FROM max_date
+),
+order_rev AS (
+    SELECT order_id, SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT SUM(o.revenue) AS sales
+FROM orders o
+JOIN order_rev o ON o.order_id = o.order_id
+JOIN target_month tm ON strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = tm.ym
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v3</td><td>M06</td><td>3</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT 
+    s.seller_id,
+    s.seller_city,
+    s.seller_state,
+    ROUND(SUM(oi.price), 2) AS revenue
+FROM sellers s
+JOIN order_items oi ON s.seller_id = oi.seller_id
+JOIN orders o ON oi.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY s.seller_id, s.seller_city, s.seller_state
+ORDER BY revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v3_test_20261109-233548.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>J07</td><td>1</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t 
+     ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND t.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>A08</td><td>1,2</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>WITH delivered_payments AS (
+    SELECT op.payment_type, op.payment_value
+    FROM order_payments op
+    JOIN orders o ON op.order_id = o.order_id
+    WHERE o.order_status = &#x27;delivered&#x27;
+)
+SELECT payment_type,
+       ROUND(AVG(payment_value), 2) AS avg_payment_value
+FROM delivered_payments
+GROUP BY payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>F05</td><td>1</td><td>fanout</td><td>For each year, show the number of delivered orders, the total item revenue and the total amount paid.</td><td>ok</td><td><pre></pre></td><td><pre>WITH items AS (
+    SELECT order_id, SUM(price) AS item_revenue
+    FROM order_items
+    GROUP BY order_id
+), pay AS (
+    SELECT order_id, SUM(payment_value) AS amount_paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year,
+       COUNT(o.order_id) AS delivered_orders,
+       ROUND(SUM(i.item_revenue), 2) AS total_item_revenue,
+       ROUND(SUM(p.amount_paid), 2) AS total_amount_paid
+FROM orders o
+JOIN items i ON o.order_id = i.order_id
+JOIN pay p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY year
+ORDER BY year;</pre></td><td><pre>WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime(&#x27;%Y&#x27;, o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY year</pre></td><td>other</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M03</td><td>1</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH max_date AS (
+    SELECT MAX(order_purchase_timestamp) AS max_ts
+    FROM orders
+),
+last_month AS (
+    SELECT 
+        date(max_ts, &#x27;start of month&#x27;, &#x27;-1 month&#x27;) AS start_month,
+        date(max_ts, &#x27;start of month&#x27;)          AS start_next_month
+    FROM max_date
+),
+pay AS (
+    SELECT order_id, SUM(payment_value) AS paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT ROUND(SUM(p.paid), 2) AS total_sales
+FROM orders o
+JOIN pay p ON o.order_id = p.order_id
+JOIN last_month lm 
+     ON o.order_purchase_timestamp &gt;= lm.start_month
+    AND o.order_purchase_timestamp &lt;  lm.start_next_month
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M07</td><td>1,3</td><td>ambiguous</td><td>Are our customers happy?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT ROUND(AVG(r.review_score), 2) AS avg_review_score
+FROM order_reviews r
+JOIN orders o ON r.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(AVG(review_score), 2) FROM order_reviews</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>J07</td><td>2,3</td><td>join</td><td>How many different sellers have sold watches and gifts products in delivered orders?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.order_id
+JOIN products p ON oi.product_id = p.product_id
+JOIN product_category_name_translation t 
+     ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27;
+  AND t.product_category_name_english IN (&#x27;watches&#x27;, &#x27;gifts&#x27;);</pre></td><td><pre>SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = &#x27;delivered&#x27; AND t.product_category_name_english = &#x27;watches_gifts&#x27;</pre></td><td>wrong_filter_value</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M03</td><td>2</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH last_month AS (
+    SELECT strftime(&#x27;%Y-%m&#x27;, date(MAX(o.order_purchase_timestamp), &#x27;-1 month&#x27;)) AS ym
+    FROM orders o
+    WHERE o.order_status = &#x27;delivered&#x27;
+)
+SELECT SUM(oi.price) AS sales
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN last_month lm ON strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = lm.ym
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M06</td><td>2</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>WITH seller_rev AS (
+    SELECT oi.seller_id, SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    WHERE o.order_status = &#x27;delivered&#x27;
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.revenue
+FROM seller_rev sr
+JOIN sellers s ON sr.seller_id = s.seller_id
+ORDER BY sr.revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>A08</td><td>3</td><td>aggregation</td><td>What is the average payment value for each payment type?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT op.payment_type,
+       ROUND(AVG(op.payment_value), 2) AS avg_payment_value
+FROM order_payments op
+JOIN orders o ON op.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY op.payment_type;</pre></td><td><pre>SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type</pre></td><td>missing_status_filter</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M03</td><td>3</td><td>ambiguous</td><td>What were our sales last month?</td><td>ok</td><td><pre></pre></td><td><pre>WITH max_date AS (
+    SELECT MAX(order_purchase_timestamp) AS max_ts
+    FROM orders
+),
+target_month AS (
+    SELECT strftime(&#x27;%Y-%m&#x27;, date(max_ts, &#x27;-1 month&#x27;)) AS ym
+    FROM max_date
+),
+order_rev AS (
+    SELECT order_id, SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT SUM(orv.revenue) AS sales
+FROM orders o
+JOIN order_rev orv ON o.order_id = orv.order_id
+JOIN target_month tm ON strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = tm.ym
+WHERE o.order_status = &#x27;delivered&#x27;;</pre></td><td><pre>SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; AND strftime(&#x27;%Y-%m&#x27;, o.order_purchase_timestamp) = &#x27;2018-08&#x27;</pre></td><td>date_handling</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr><tr><td>test</td><td>v4</td><td>M06</td><td>3</td><td>ambiguous</td><td>Who are our top sellers?</td><td>ok</td><td><pre></pre></td><td><pre>SELECT 
+    s.seller_id,
+    s.seller_city,
+    s.seller_state,
+    ROUND(SUM(oi.price), 2) AS revenue
+FROM sellers s
+JOIN order_items oi ON s.seller_id = oi.seller_id
+JOIN orders o ON oi.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27;
+GROUP BY s.seller_id, s.seller_city, s.seller_state
+ORDER BY revenue DESC;</pre></td><td><pre>SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = &#x27;delivered&#x27; GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10</pre></td><td>guessed_on_ambiguity</td><td>claude draft - team to confirm</td><td>results_v4_test_20261109-233843.csv</td><td></td><td></td><td></td><td></td></tr></tbody></table></div></body></html>

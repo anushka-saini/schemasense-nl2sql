@@ -1,0 +1,97 @@
+﻿id,tier,question,version,run_id,status,generated_sql,explanation,result_first_5_rows,rater_name,understandable_1to5,useful_1to5,notes
+S07,simple,How many products have no category?,v4,v4_test_20261109-233843,ok,"SELECT COUNT(*) AS products_without_category
+FROM products
+WHERE product_category_name IS NULL
+   OR product_category_name = ''","Counts rows in the products table where the category field is missing (NULL or empty), indicating the product has no assigned category.","products_without_category
+610",,,,
+S10,simple,How many unique customers live in Curitiba?,v4,v4_test_20261109-233843,ok,"SELECT COUNT(DISTINCT customer_unique_id) AS unique_customers
+FROM customers
+WHERE customer_city = 'curitiba';",Counts distinct people (unique IDs) whose city is Curitiba.,"unique_customers
+1465",,,,
+J06,join,Which payment type is used most often for orders from customers in Minas Gerais?,v4,v4_test_20261109-233843,ok,"SELECT op.payment_type,
+       COUNT(*) AS usage_count
+FROM order_payments op
+JOIN orders o      ON op.order_id = o.order_id
+JOIN customers c   ON o.customer_id = c.customer_id
+WHERE c.customer_state = 'MG'
+GROUP BY op.payment_type
+ORDER BY usage_count DESC
+LIMIT 1;",Counts each payment type used in orders placed by customers whose state is Minas Gerais and returns the most frequently used type.,"payment_type,usage_count
+credit_card,9070",,,,
+J09,join,How many 1-star reviews were given for orders that were canceled?,v4,v4_test_20261109-233843,ok,"SELECT COUNT(*) AS one_star_canceled_reviews
+FROM order_reviews r
+JOIN orders o ON r.order_id = o.order_id
+WHERE r.review_score = 1
+  AND o.order_status = 'canceled';","Joins reviews to their orders, keeps only reviews with a 1‑star score for orders whose status is 'canceled', and counts them.","one_star_canceled_reviews
+422",,,,
+A01,aggregation,What was the total amount paid by customers for delivered orders purchased in 2018?,v4,v4_test_20261109-233843,ok,"WITH pay AS (
+    SELECT order_id, SUM(payment_value) AS paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT SUM(p.paid) AS total_paid
+FROM orders o
+JOIN pay p ON o.order_id = p.order_id
+WHERE o.order_status = 'delivered'
+  AND strftime('%Y', o.order_purchase_timestamp) = '2018';",Sums all customer payments for orders that were delivered and purchased during the year 2018.,"total_paid
+8452975.2",,,,
+A04,aggregation,What is the average number of installments for credit card payments?,v4,v4_test_20261109-233843,ok,"SELECT ROUND(AVG(payment_installments), 2) AS avg_installments
+FROM order_payments
+WHERE payment_type = 'credit_card';",Computes the average number of installments across all credit‑card payment records.,"avg_installments
+3.51",,,,
+F06,fanout,What percentage of total item revenue from delivered orders comes from the top 10 sellers?,v4,v4_test_20261109-233843,ok,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+),
+seller_rev AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+),
+total_rev AS (
+    SELECT SUM(revenue) AS total
+    FROM seller_rev
+),
+top10_rev AS (
+    SELECT SUM(revenue) AS top10
+    FROM (
+        SELECT revenue
+        FROM seller_rev
+        ORDER BY revenue DESC
+        LIMIT 10
+    )
+)
+SELECT ROUND((top10_rev.top10 / total_rev.total) * 100, 2) AS top10_percentage
+FROM top10_rev, total_rev;","Calculates total item revenue for delivered orders, sums revenue per seller, takes the top 10 sellers by that revenue, and returns their share of the total as a percentage.","top10_percentage
+13.27",,,,
+F08,fanout,How many orders contain items from more than one seller?,v4,v4_test_20261109-233843,ok,"WITH sellers_per_order AS (
+    SELECT order_id, COUNT(DISTINCT seller_id) AS seller_cnt
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT COUNT(*) AS orders_multiple_sellers
+FROM sellers_per_order
+WHERE seller_cnt > 1;",Counts orders that have items supplied by more than one distinct seller.,"orders_multiple_sellers
+1278",,,,
+M05,ambiguous,How many products do we sell?,v4,v4_test_20261109-233843,ok,"SELECT COUNT(*) AS product_count
+FROM products;","Counts the total number of product rows in the products table, representing how many distinct products are sold.","product_count
+32951",,,,
+M06,ambiguous,Who are our top sellers?,v4,v4_test_20261109-233843,ok,"SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       SUM(oi.price) AS revenue
+FROM order_items oi
+JOIN orders o      ON oi.order_id = o.order_id
+JOIN sellers s     ON oi.seller_id = s.seller_id
+WHERE o.order_status = 'delivered'
+GROUP BY s.seller_id
+ORDER BY revenue DESC
+LIMIT 5;",Calculates total sales revenue (sum of item prices) for each seller on delivered orders and returns the top five sellers by revenue.,"seller_id,seller_city,seller_state,revenue
+4869f7a5dfa277a7dca6462dcf3b52b2,guariba,SP,226987.93
+53243585a1d6dc2643021fd1853d8905,lauro de freitas,BA,217940.44
+4a3ca9315b744ce9f8e9374361493884,ibitinga,SP,196882.12
+fa1c13f2614d7b5c4749cbc52fecda94,sumare,SP,190917.14
+7c67e1448b00f6e969d365cea6b010ab,itaquaquecetuba,SP,186570.05",,,,
