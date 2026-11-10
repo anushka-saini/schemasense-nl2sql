@@ -1,0 +1,46 @@
+gold check run at 2026-11-10 05:25:17
+
+T2S01  1 row(s)  [[3277.0]]
+T2S02  1 row(s)  [[3301.0]]
+T2S03  1 row(s)  [[40977.0]]
+       alt1: 1 row(s) [[40968.0]]
+T2J01  1 row(s)  [[2697.0]]
+T2J02  3 row(s)  [['bed_bath_table'], ['sports_leisure'], ['furniture_decor']]
+T2J03  1 row(s)  [[4097.0]]
+T2A01  1 row(s)  [[3008.27]]
+T2A02  7 row(s)  [['0', 11960.0], ['1', 16196.0], ['2', 15963.0], ['3', 15552.0], ['4', 14761.0], ['...']]
+T2A03  1 row(s)  [[10.42]]
+T2F01  1 row(s)  [[2329807.64]]
+T2F02  1 row(s)  [[274.0]]
+T2F03  1 row(s)  [[59.28]]
+T2M01  1 row(s)  [['sao paulo']]
+       alt1: 1 row(s) [['sao paulo']]  (same as gold)
+T2M02  1 row(s)  [['SP']]
+       alt1: 1 row(s) [['SP']]  (same as gold)
+       alt2: 1 row(s) [['SP']]  (same as gold)
+       alt3: 1 row(s) [['SP']]  (same as gold)
+T2R01  REFUSE
+T2R02  REFUSE
+T2R03  REFUSE
+T2R04  REFUSE
+T2R05  REFUSE
+T2R06  REFUSE
+
+== overlap with v3 worked examples (word overlap >= 0.5) ==
+none found
+
+== overlap with the 60 dev/test questions (word overlap >= 0.5) ==
+none found
+
+== split ==
+simple       dev  0   test  0
+join         dev  0   test  0
+aggregation  dev  0   test  0
+fanout       dev  0   test  0
+ambiguous    dev  0   test  0
+refuse       dev  0   test  0
+total        dev  0   test  0
+verified: 0 of 20
+
+== gold queries that error or return nothing ==
+none

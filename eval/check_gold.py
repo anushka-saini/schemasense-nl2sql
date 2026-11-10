@@ -34,6 +34,11 @@ def v3_questions():
 
 
 def main():
+    # python eval/check_gold.py --set test2   checks eval/test2_set.json instead (log: logs/gold_check_test2.txt)
+    global TEST_SET
+    two = "--set" in sys.argv and sys.argv[sys.argv.index("--set") + 1] == "test2"
+    if two:
+        TEST_SET = ROOT / "eval" / "test2_set.json"
     items = json.loads(TEST_SET.read_text(encoding="utf-8"))
     lines = [f"gold check run at {datetime.now():%Y-%m-%d %H:%M:%S}", ""]
     problems = []
@@ -86,6 +91,21 @@ def main():
     if not hits:
         lines.append("none found")
 
+    if two:
+        # test2 must also be new compared with the 60 dev/test questions
+        lines += ["", "== overlap with the 60 dev/test questions (word overlap >= 0.5) =="]
+        old = json.loads((ROOT / "eval" / "test_set.json").read_text(encoding="utf-8"))
+        n = 0
+        for it in items:
+            for o in old:
+                a, b = words(o["question"]), words(it["question"])
+                j = len(a & b) / max(1, len(a | b))
+                if j >= 0.5:
+                    n += 1
+                    lines.append(f"WARNING {it['id']} ({j:.2f}) '{it['question']}'  ~  {o['id']} '{o['question']}'")
+        if not n:
+            lines.append("none found")
+
     c = Counter((it["tier"], it["split"]) for it in items)
     lines += ["", "== split =="]
     for t in dict.fromkeys(it["tier"] for it in items):
@@ -98,7 +118,7 @@ def main():
     lines += problems or ["none"]
     out = "\n".join(lines)
     print(out)
-    (config.LOGS / "gold_check.txt").write_text(out, encoding="utf-8")
+    (config.LOGS / ("gold_check_test2.txt" if two else "gold_check.txt")).write_text(out, encoding="utf-8")
 
 
 if __name__ == "__main__":

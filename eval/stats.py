@@ -43,8 +43,10 @@ def boot(per_q, b=B, seed=SEED):
 
 
 def ci_row(g, label):
-    g = g.assign(p=g["pass"].astype(str).str.lower() == "true")
+    g = g.assign(p=g["pass"].astype(str).str.lower() == "true",
+                 sp=g["strict_pass"].astype(str).str.lower() == "true")
     per_q = g.groupby("id")["p"].mean()
+    s_lo, s_hi = boot(g.groupby("id")["sp"].mean().to_numpy())
     rep = g.groupby("repeat")["p"].mean() * 100
     maj = int((per_q > 0.5).sum())
     lo, hi = boot(per_q.to_numpy())
@@ -52,6 +54,7 @@ def ci_row(g, label):
     return {"version": label, "model": g["model"].iloc[0], "questions": len(per_q), "repeats": g["repeat"].nunique(),
             "accuracy": round(100 * g["p"].mean(), 1), "boot_lo": lo, "boot_hi": hi,
             "majority_acc": round(100 * maj / len(per_q), 1), "wilson_lo": wlo, "wilson_hi": whi,
+            "strict_acc": round(100 * g["sp"].mean(), 1), "strict_lo": s_lo, "strict_hi": s_hi,
             "repeat_min": round(rep.min(), 1), "repeat_max": round(rep.max(), 1),
             "unstable_questions": int(((per_q > 0) & (per_q < 1)).sum()), "run_id": g["run_id"].iloc[0]}
 
@@ -63,6 +66,14 @@ def read_all(folder):
 
 def table(split):
     rows = []
+    if split == "test2":
+        # post-hoc check of v5 on 20 new questions (logs/test2/), kept apart from the main results
+        res = read_all(config.LOGS / "test2")
+        if len(res):
+            d = latest(res, split, config.MODEL)
+            for v in sorted(d["version"].unique()):
+                rows.append(ci_row(d[d["version"] == v], f"{v} (test2, post-hoc, exploratory)"))
+        return pd.DataFrame(rows)
     res = read_all(config.LOGS)
     for model in [config.MODEL] + sorted(set(res["model"]) - {config.MODEL}):
         d = latest(res, split, model)
@@ -111,6 +122,12 @@ def limitations(t):
         "- **Prompt text changes more than one thing at a time.** v2 adds the CREATE TABLE text and the business rules "
         "together, so their separate effects are not measured.",
         "- **v4 shares v3's first answer.** v4 differs from v3 only by the repair loop, so v3 vs v4 measures repair alone.",
+        "- **Strict vs execution accuracy.** Execution accuracy accepts extra columns (for example a count next to the "
+        "name that was asked for); strict accuracy also needs exactly the gold number of columns. The gap between the "
+        "two is answers that had the right rows plus extra columns, not wrong answers.",
+        "- **Query time limit and machine load.** Generated SQL is stopped after 10 seconds (a safety limit). Some "
+        "correct queries take about 4 seconds on an idle machine, so on a busy machine they can time out and count "
+        "as errors. See docs/report/dev_test_reversal.md for the v2 test rows where this happened.",
         "- **Execution accuracy can pass a wrong query** that happens to return the same rows as the gold query, "
         "and fails a correct query that formats a value differently (e.g. a percentage vs a fraction).",
     ]
@@ -119,7 +136,7 @@ def limitations(t):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", default="test", choices=["dev", "test"])
+    ap.add_argument("--split", default="test", choices=["dev", "test", "test2"])
     a = ap.parse_args()
     t = table(a.split)
     if t.empty:
