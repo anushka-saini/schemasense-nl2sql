@@ -3,7 +3,7 @@
 from html import escape
 
 # prompt version -> fixed chart colour (same order as chartCategoricalColors in .streamlit/config.toml)
-VERSION_COLORS = {"v0": "#3987e5", "v1": "#d95926", "v2": "#199e70", "v3": "#c98500", "v4": "#d55181"}
+VERSION_COLORS = {"v0": "#3987e5", "v1": "#d95926", "v2": "#199e70", "v3": "#c98500", "v4": "#d55181", "v5": "#008300"}
 
 CSS = """
 <style>

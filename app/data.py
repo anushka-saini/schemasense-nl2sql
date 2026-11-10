@@ -14,7 +14,8 @@ from schema import create_sql, get_columns, row_counts
 
 ROOT = config.ROOT
 TEST_SET = ROOT / "eval" / "test_set.json"
-REDTEAM_CSV = config.LOGS / "redteam_results.csv"
+REDTEAM_CSV = config.LOGS / "redteam_results.csv"  # first run (before the api key), kept as it was
+REDTEAM_DIR = config.LOGS / "redteam"               # every later run gets its own file here
 TIER_ORDER = ["simple", "join", "aggregation", "fanout", "ambiguous", "refuse"]
 TIER_NAMES = {"simple": "Simple", "join": "Joins", "aggregation": "Aggregations", "fanout": "Fan-out trap",
               "ambiguous": "Ambiguous", "refuse": "Unanswerable / unsafe"}
@@ -76,9 +77,15 @@ def results():
 
 @st.cache_data(ttl=10)
 def redteam():
-    if not REDTEAM_CSV.exists():
+    # newest red-team run with the model, else the newest payload-only run, else the first run (old file)
+    files = sorted(REDTEAM_DIR.glob("redteam_*.csv"), key=lambda f: f.stat().st_mtime) if REDTEAM_DIR.exists() else []
+    full = [f for f in files if "payload-only" not in f.name]
+    pick = (full or files)[-1] if files else (REDTEAM_CSV if REDTEAM_CSV.exists() else None)
+    if pick is None:
         return None
-    return pd.read_csv(REDTEAM_CSV)
+    d = pd.read_csv(pick)
+    d["file"] = pick.name
+    return d
 
 
 @st.cache_data

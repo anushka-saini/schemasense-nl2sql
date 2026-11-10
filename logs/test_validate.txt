@@ -1,4 +1,4 @@
-validator tests run at 2026-11-08 14:02:28
+validator tests run at 2026-11-10 00:31:37
 
 == 1. validator ==
 PASS  expect allow  simple select                                       -> ok
@@ -55,6 +55,6 @@ PASS  orders count unchanged (99441 -> 99441), evil.db created: False
 
 == 3. limits ==
 PASS  row limit: got 200 rows, truncated=True
-PASS  endless query stopped: OperationalError: query timed out after 2s after 2.001s
+PASS  endless query stopped: OperationalError: query timed out after 2s after 2.0s
 
 total checks failed: 0

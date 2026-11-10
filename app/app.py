@@ -20,6 +20,7 @@ from build_prompt import VERSIONS
 from pipeline import check_and_run, run_question
 from run_redteam import pipeline_layer, run_all
 from score import METRIC_HELP, same_result, score_item, summarize
+from stats import boot
 
 st.set_page_config(page_title="SchemaSense", page_icon=":material/database:", layout="wide")
 
@@ -332,8 +333,12 @@ def dashboard(df):
     for c, (v, m) in zip(cols, summ.items()):
         run = d[d["version"] == v]
         acc = "-" if m["execution_accuracy"] is None else f"{m['execution_accuracy']}%"
+        # 95% bootstrap interval over questions (eval/stats.py), api errors left out like in the score
+        ok = run[run["status"] != "llm_error"]
+        per_q = (ok["pass"].astype(str).str.lower() == "true").groupby(ok["id"]).mean().to_numpy()
+        ci = " · 95% CI {:.1f}–{:.1f}%".format(*boot(per_q)) if len(per_q) else ""
         c.markdown(ui.card(f"{v} · execution accuracy ({split})", acc,
-                           f"{run['id'].nunique()} questions × {run['repeat'].nunique()} repeat(s)"
+                           f"{run['id'].nunique()} questions × {run['repeat'].nunique()} repeat(s){ci}"
                            + (f" · {m['llm_errors']} API errors left out" if m["llm_errors"] else "")),
                    unsafe_allow_html=True)
 
@@ -414,8 +419,8 @@ with tabs[3]:
     top = st.columns([3, 1], vertical_alignment="bottom")
     top[0].markdown("#### Red-team attacks (docs/redteam.json)")
     if top[1].button("Run red-team set now", width="stretch",
-                     help="10 attacks through the full pipeline with the active prompt version, plus direct "
-                          "payload checks. Writes logs/redteam_results.csv."):
+                     help="The original 10 attacks (RT01-RT10) through the full pipeline with the active prompt "
+                          "version, plus direct payload checks. Writes a new file in logs/redteam/."):
         with st.spinner("Running 10 attacks..."):
             _, err = safe(run_all, st.session_state.version, st.session_state.offline, lambda *_: None)
         if err:
@@ -441,8 +446,8 @@ with tabs[3]:
         c[3].markdown(ui.card("Read-only DB alone", f"{(rt['readonly_blocks'].astype(str) == 'True').sum()} / {len(rt)}",
                               "validator skipped on purpose"), unsafe_allow_html=True)
         unchanged = str(rt.get("tables_unchanged", pd.Series(["?"])).iloc[0])
-        html(f'<div class="muted" style="margin:.6rem 0">Run at {rt["time"].max()} · all table row counts unchanged '
-             f'after the run: <b>{unchanged}</b></div>')
+        html(f'<div class="muted" style="margin:.6rem 0">Run at {rt["time"].max()} · file {rt["file"].iloc[0]} · '
+             f'{len(rt)} attacks · all table row counts unchanged after the run: <b>{unchanged}</b></div>')
 
         view = pd.DataFrame({
             "id": rt["id"], "type": rt["type"], "attack": rt["attack"],

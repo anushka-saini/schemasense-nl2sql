@@ -1,4 +1,4 @@
-pipeline tests run at 2026-11-09 13:11:10
+pipeline tests run at 2026-11-10 00:31:42
 
 == 1. parse() ==
 PASS  fenced sql + explanation                                   
