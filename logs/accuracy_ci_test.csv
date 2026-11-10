@@ -1,8 +1,11 @@
-version,model,questions,repeats,accuracy,boot_lo,boot_hi,majority_acc,wilson_lo,wilson_hi,repeat_min,repeat_max,unstable_questions,run_id
-v0,openai/gpt-oss-120b,40,3,7.5,0.0,17.5,7.5,2.6,19.9,7.5,7.5,0,v0_test_20261108-143212
-v1,openai/gpt-oss-120b,40,3,81.7,69.2,92.5,82.5,68.0,91.3,80.0,82.5,1,v1_test_20261108-144033
-v1,openai/gpt-oss-20b,40,1,57.5,42.5,72.5,57.5,42.2,71.5,57.5,57.5,0,v1_test_openai-gpt-oss-20b_20261108-143212
-v2,openai/gpt-oss-20b,40,1,82.5,70.0,92.5,82.5,68.0,91.3,82.5,82.5,0,v2_test_openai-gpt-oss-20b_20261108-143422
-v3,openai/gpt-oss-20b,40,1,92.5,82.5,100.0,92.5,80.1,97.4,92.5,92.5,0,v3_test_openai-gpt-oss-20b_20261108-143846
-v4,openai/gpt-oss-20b,40,1,95.0,87.5,100.0,95.0,83.5,98.6,95.0,95.0,0,v4_test_openai-gpt-oss-20b_20261108-144411
-v0 (lenient extractor),openai/gpt-oss-120b,40,3,10.0,2.5,20.0,10.0,4.0,23.1,10.0,10.0,0,v0_test_lenient_20261109-000135
+version,model,questions,repeats,accuracy,boot_lo,boot_hi,majority_acc,wilson_lo,wilson_hi,strict_acc,strict_lo,strict_hi,repeat_min,repeat_max,unstable_questions,run_id
+v0,openai/gpt-oss-120b,40,3,7.5,0.0,17.5,7.5,2.6,19.9,7.5,0.0,17.5,7.5,7.5,0,v0_test_20261108-143212
+v1,openai/gpt-oss-120b,40,3,81.7,69.2,92.5,82.5,68.0,91.3,66.7,52.5,80.8,80.0,82.5,1,v1_test_20261108-144033
+v2,openai/gpt-oss-120b,40,3,80.8,69.2,90.8,85.0,70.9,92.9,61.7,47.5,75.8,75.0,85.0,5,v2_test_20261108-145050
+v3,openai/gpt-oss-120b,40,3,88.3,78.3,96.7,87.5,73.9,94.5,62.5,47.5,76.7,87.5,90.0,3,v3_test_20261109-233548
+v4,openai/gpt-oss-120b,40,3,88.3,78.3,96.7,87.5,73.9,94.5,62.5,47.5,76.7,87.5,90.0,3,v4_test_20261109-233843
+v1,openai/gpt-oss-20b,40,1,57.5,42.5,72.5,57.5,42.2,71.5,45.0,30.0,60.0,57.5,57.5,0,v1_test_openai-gpt-oss-20b_20261108-143212
+v2,openai/gpt-oss-20b,40,1,82.5,70.0,92.5,82.5,68.0,91.3,62.5,47.5,77.5,82.5,82.5,0,v2_test_openai-gpt-oss-20b_20261108-143422
+v3,openai/gpt-oss-20b,40,1,92.5,82.5,100.0,92.5,80.1,97.4,67.5,52.5,82.5,92.5,92.5,0,v3_test_openai-gpt-oss-20b_20261108-143846
+v4,openai/gpt-oss-20b,40,1,95.0,87.5,100.0,95.0,83.5,98.6,70.0,55.0,82.5,95.0,95.0,0,v4_test_openai-gpt-oss-20b_20261108-144411
+v0 (lenient extractor),openai/gpt-oss-120b,40,3,10.0,2.5,20.0,10.0,4.0,23.1,10.0,2.5,20.0,10.0,10.0,0,v0_test_lenient_20261109-000135
