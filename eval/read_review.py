@@ -47,20 +47,27 @@ def report(d, name, key_cols):
 
 
 def main():
-    g = load("gold_review")
-    if g is not None:
-        report(g, "gold_review.csv", ["id", "split"])
+    found = 0
+    for name, test_file in [("gold_review", "eval/test_set.json"), ("gold_review_test2", "eval/test2_set.json")]:
+        g = load(name)
+        if g is None:
+            continue
+        found += 1
+        report(g, f"{name}.csv", ["id", "split"])
         ok = g[g[VERDICT] == "ok"]["id"].tolist()
         if ok:
             print(f"  marked ok ({len(ok)}): {', '.join(ok)}")
-            print("  a team member can now set \"verified\": true for these ids in eval/test_set.json by hand.\n")
-    l = load("labels_review")
-    if l is not None:
-        report(l, "labels_review.csv", ["split", "version", "id", "draft_label", "correct_label"])
+            print(f"  a team member can now set \"verified\": true for these ids in {test_file} by hand.\n")
+    for name in ["labels_review", "labels_review_test"]:
+        l = load(name)
+        if l is None:
+            continue
+        found += 1
+        report(l, f"{name}.csv", ["split", "version", "id", "draft_label", "correct_label"])
         fix = l[(l[VERDICT] == "fix") & (l["correct_label"].astype(str).str.strip() == "")]
         if len(fix):
             print(f"  {len(fix)} 'fix' row(s) have no correct_label yet\n")
-    if g is None and l is None:
+    if not found:
         sys.exit(1)
 
 

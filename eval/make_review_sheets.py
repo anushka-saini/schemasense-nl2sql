@@ -22,7 +22,9 @@ from run_sql import run
 
 OUT = ROOT / "review"
 ITEMS = json.loads((ROOT / "eval" / "test_set.json").read_text(encoding="utf-8"))
-BY_ID = {it["id"]: it for it in ITEMS}
+TEST2_FILE = ROOT / "eval" / "test2_set.json"  # 20 new questions for the post-hoc v5 check
+ITEMS2 = json.loads(TEST2_FILE.read_text(encoding="utf-8")) if TEST2_FILE.exists() else []
+BY_ID = {it["id"]: it for it in ITEMS + ITEMS2}
 REVIEW_COLS = ["reviewer", "verdict (ok/fix/unsure)", "notes"]
 
 
@@ -61,9 +63,9 @@ def preview(sql):
     return r["df"].head(5).to_csv(index=False, lineterminator="\n").strip(), len(r["df"])
 
 
-def gold_sheet():
+def gold_sheet(items=None):
     rows = []
-    for it in ITEMS:
+    for it in (ITEMS if items is None else items):
         p, n = preview(it.get("gold_sql"))
         rows.append({"id": it["id"], "tier": it["tier"], "split": it["split"], "question": it["question"],
                      "gold_sql": it.get("gold_sql", ""), "alt_sql": "\n---\n".join(it.get("alt_sql", [])),
@@ -73,9 +75,10 @@ def gold_sheet():
     return pd.DataFrame(rows)
 
 
-def labels_sheet():
+def labels_sheet(splits=("dev",)):
+    # labels_review.csv = dev (made first), labels_review_test.csv = test. separate files so a filled sheet is never touched
     parts = []
-    for split in ["dev", "test"]:
+    for split in splits:
         f = config.LOGS / f"error_labels_{split}.csv"
         if f.exists():
             parts.append(pd.read_csv(f).astype(object).fillna("").assign(split=split))
@@ -135,6 +138,15 @@ def main():
          "person would read it, and that the assumptions are ones the team agrees with. Only a person marks "
          "<code>verified: true</code> in eval/test_set.json.",
          {"gold_sql", "alt_sql", "gold_preview_first_5_rows"}),
+        ("gold_review_test2", lambda: gold_sheet(ITEMS2) if ITEMS2 else pd.DataFrame(), "Gold query review: test2",
+         "The 20 new questions in eval/test2_set.json (post-hoc v5 check), drafted by Claude and not verified. Same "
+         "columns as gold_review. Fill <b>reviewer</b>, <b>verdict</b> and <b>notes</b> in review/gold_review_test2.csv. "
+         "Only a person marks <code>verified: true</code> in eval/test2_set.json.",
+         {"gold_sql", "alt_sql", "gold_preview_first_5_rows"}),
+        ("labels_review_test", lambda: labels_sheet(("test",)), "Failure label review: held-out test",
+         "Same as labels_review, for the held-out test split. The draft label was written by Claude. Fill "
+         "<b>reviewer</b>, <b>verdict</b>, <b>correct_label</b> and <b>notes</b> in review/labels_review_test.csv.",
+         {"generated_sql", "gold_sql", "error"}),
         ("labels_review", labels_sheet, "Failure label review",
          "One row per distinct failed answer (same SQL in several repeats = one row). The draft label was written "
          "by Claude. Fill <b>reviewer</b>, <b>verdict</b> (ok / fix / unsure), <b>correct_label</b> (when fix, codes "
