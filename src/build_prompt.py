@@ -5,10 +5,11 @@ import re
 import config
 from schema import create_sql, names_only
 
-VERSIONS = ["v0", "v1", "v2", "v3", "v4"]
+# v5 = v3 + one rule (post-hoc, exploratory). only run on the new test2 split, see prompts/CHANGELOG.md
+VERSIONS = ["v0", "v1", "v2", "v3", "v4", "v5"]
 
 # which schema text each version gets (v0 gets none)
-SCHEMA_FORM = {"v0": None, "v1": "names", "v2": "create", "v3": "create", "v4": "create"}
+SCHEMA_FORM = {"v0": None, "v1": "names", "v2": "create", "v3": "create", "v4": "create", "v5": "create"}
 
 SLOT = re.compile(r"\{(schema|question|prompt|sql|error)\}")
 

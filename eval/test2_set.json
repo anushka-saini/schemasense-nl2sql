@@ -1,0 +1,377 @@
+[
+  {
+    "id": "T2S01",
+    "tier": "simple",
+    "question": "How many customers live in the state of Bahia?",
+    "gold_sql": "SELECT COUNT(DISTINCT customer_unique_id) FROM customers WHERE customer_state = 'BA'",
+    "alt_sql": [],
+    "expected": [
+      [
+        3277.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Customers = unique people (business rule A, same as M02/S10). State is a 2-letter code."
+  },
+  {
+    "id": "T2S02",
+    "tier": "simple",
+    "question": "How many products have at least 5 photos?",
+    "gold_sql": "SELECT COUNT(*) FROM products WHERE product_photos_qty >= 5",
+    "alt_sql": [],
+    "expected": [
+      [
+        3301.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on."
+  },
+  {
+    "id": "T2S03",
+    "tier": "simple",
+    "question": "How many reviews include a written comment message?",
+    "gold_sql": "SELECT COUNT(*) FROM order_reviews WHERE review_comment_message IS NOT NULL",
+    "alt_sql": [
+      "SELECT COUNT(*) FROM order_reviews WHERE review_comment_message IS NOT NULL AND TRIM(review_comment_message) <> ''"
+    ],
+    "expected": [
+      [
+        40977.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. 9 messages are only spaces; both readings accepted."
+  },
+  {
+    "id": "T2J01",
+    "tier": "join",
+    "question": "How many delivered orders were bought by customers living in Belo Horizonte?",
+    "gold_sql": "SELECT COUNT(*) FROM orders o JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'delivered' AND c.customer_city = 'belo horizonte'",
+    "alt_sql": [],
+    "expected": [
+      [
+        2697.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. City is lowercase without accents."
+  },
+  {
+    "id": "T2J02",
+    "tier": "join",
+    "question": "Which 3 product categories have the most products listed? Use English category names.",
+    "gold_sql": "SELECT t.product_category_name_english FROM products p JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 3",
+    "alt_sql": [],
+    "expected": [
+      [
+        "bed_bath_table"
+      ],
+      [
+        "sports_leisure"
+      ],
+      [
+        "furniture_decor"
+      ]
+    ],
+    "row_count": 3,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Counts products (catalogue), no order status involved."
+  },
+  {
+    "id": "T2J03",
+    "tier": "join",
+    "question": "How many items were sold in delivered orders to customers in the state of Santa Catarina?",
+    "gold_sql": "SELECT COUNT(*) FROM order_items i JOIN orders o ON i.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'delivered' AND c.customer_state = 'SC'",
+    "alt_sql": [],
+    "expected": [
+      [
+        4097.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. One order_items row = one unit sold."
+  },
+  {
+    "id": "T2A01",
+    "tier": "aggregation",
+    "question": "What is the average weight in grams of products in the furniture_decor category?",
+    "gold_sql": "SELECT ROUND(AVG(p.product_weight_g), 2) FROM products p JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name WHERE t.product_category_name_english = 'furniture_decor'",
+    "alt_sql": [],
+    "expected": [
+      [
+        3008.27
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on."
+  },
+  {
+    "id": "T2A02",
+    "tier": "aggregation",
+    "question": "How many orders were placed on each day of the week? Use 0 for Sunday.",
+    "gold_sql": "SELECT strftime('%w', order_purchase_timestamp) AS dow, COUNT(*) FROM orders GROUP BY dow",
+    "alt_sql": [],
+    "expected": [
+      [
+        "0",
+        11960.0
+      ],
+      [
+        "1",
+        16196.0
+      ],
+      [
+        "2",
+        15963.0
+      ],
+      [
+        "3",
+        15552.0
+      ],
+      [
+        "4",
+        14761.0
+      ],
+      [
+        "5",
+        14122.0
+      ],
+      [
+        "6",
+        10887.0
+      ]
+    ],
+    "row_count": 7,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. All statuses (orders placed, not sales)."
+  },
+  {
+    "id": "T2A03",
+    "tier": "aggregation",
+    "question": "On average, how many hours passed between purchase and approval, for orders that have an approval time?",
+    "gold_sql": "SELECT ROUND(AVG((julianday(order_approved_at) - julianday(order_purchase_timestamp)) * 24), 2) FROM orders WHERE order_approved_at IS NOT NULL",
+    "alt_sql": [],
+    "expected": [
+      [
+        10.42
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. All statuses with an approval time."
+  },
+  {
+    "id": "T2F01",
+    "tier": "fanout",
+    "question": "What is the total item revenue from delivered orders that were paid at least partly by boleto?",
+    "gold_sql": "SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id WHERE o.order_status = 'delivered' AND o.order_id IN (SELECT order_id FROM order_payments WHERE payment_type = 'boleto')",
+    "alt_sql": [],
+    "expected": [
+      [
+        2329807.64
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Trap: joining order_payments directly repeats items for orders with several payment rows."
+  },
+  {
+    "id": "T2F02",
+    "tier": "fanout",
+    "question": "How many delivered orders have more than one item and also more than one payment record?",
+    "gold_sql": "WITH i AS (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(*) > 1), p AS (SELECT order_id FROM order_payments GROUP BY order_id HAVING COUNT(*) > 1) SELECT COUNT(*) FROM orders o JOIN i ON o.order_id = i.order_id JOIN p ON o.order_id = p.order_id WHERE o.order_status = 'delivered'",
+    "alt_sql": [],
+    "expected": [
+      [
+        274.0
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Trap: counting rows after joining items and payments counts item x payment pairs, not orders."
+  },
+  {
+    "id": "T2F03",
+    "tier": "fanout",
+    "question": "Among delivered orders paid by credit card, what percentage of reviews gave 5 stars?",
+    "gold_sql": "SELECT ROUND(100.0 * SUM(r.review_score = 5) / COUNT(*), 2) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id WHERE o.order_status = 'delivered' AND o.order_id IN (SELECT order_id FROM order_payments WHERE payment_type = 'credit_card')",
+    "alt_sql": [],
+    "expected": [
+      [
+        59.28
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Over review rows. Trap: joining payments repeats reviews for orders with several card payment rows."
+  },
+  {
+    "id": "T2M01",
+    "tier": "ambiguous",
+    "question": "Which city do most of our customers come from?",
+    "gold_sql": "SELECT customer_city FROM customers GROUP BY customer_city ORDER BY COUNT(DISTINCT customer_unique_id) DESC LIMIT 1",
+    "alt_sql": [
+      "SELECT customer_city FROM customers GROUP BY customer_city ORDER BY COUNT(*) DESC LIMIT 1"
+    ],
+    "expected": [
+      [
+        "sao paulo"
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": true,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unique people (gold) or customer ids (alt). Refusal accepted."
+  },
+  {
+    "id": "T2M02",
+    "tier": "ambiguous",
+    "question": "Which state is our biggest market?",
+    "gold_sql": "SELECT customer_state FROM customers c JOIN orders o ON o.customer_id = c.customer_id GROUP BY customer_state ORDER BY COUNT(*) DESC LIMIT 1",
+    "alt_sql": [
+      "SELECT customer_state FROM customers GROUP BY customer_state ORDER BY COUNT(DISTINCT customer_unique_id) DESC LIMIT 1",
+      "SELECT c.customer_state FROM order_items i JOIN orders o ON i.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'delivered' GROUP BY c.customer_state ORDER BY SUM(i.price) DESC LIMIT 1",
+      "SELECT c.customer_state FROM order_payments p JOIN orders o ON p.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'delivered' GROUP BY c.customer_state ORDER BY SUM(p.payment_value) DESC LIMIT 1"
+    ],
+    "expected": [
+      [
+        "SP"
+      ]
+    ],
+    "row_count": 1,
+    "refuse_ok": true,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Vague measure. Gold = most orders; alts = most people, most delivered revenue, most paid. Refusal accepted."
+  },
+  {
+    "id": "T2R01",
+    "tier": "refuse",
+    "question": "How much commission did each seller pay to the marketplace?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no commission or fee column."
+  },
+  {
+    "id": "T2R02",
+    "tier": "refuse",
+    "question": "How many of our customers are older than 60?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no age or birth date."
+  },
+  {
+    "id": "T2R03",
+    "tier": "refuse",
+    "question": "What is the current stock level of each product?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no inventory data."
+  },
+  {
+    "id": "T2R04",
+    "tier": "refuse",
+    "question": "How many times was each product viewed on the website before it was bought?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no page-view data."
+  },
+  {
+    "id": "T2R05",
+    "tier": "refuse",
+    "question": "What discount percentage was applied to each order?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no discount column. Treating voucher payments as a discount is an approximation and fails."
+  },
+  {
+    "id": "T2R06",
+    "tier": "refuse",
+    "question": "What is the return rate for each product category?",
+    "gold_sql": null,
+    "alt_sql": [],
+    "expected": "REFUSE",
+    "row_count": null,
+    "refuse_ok": false,
+    "unsafe": false,
+    "split": "test2",
+    "verified": false,
+    "notes": "Drafted by Claude on 2026-11-09 after prompts/v5.txt was written; not tuned on. Unanswerable: no returns data. Using canceled or unavailable orders as returns is an approximation and fails."
+  }
+]

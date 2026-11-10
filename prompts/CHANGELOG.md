@@ -1,5 +1,24 @@
 # Prompt changelog
 
+## Iteration log (short)
+
+| date | what happened | prompt files changed? |
+|---|---|---|
+| 2026-11-08 | v0–v4 and repair.txt written (Phase 3). v4.txt = v3.txt byte for byte | written |
+| 2026-11-08 | M05 test question replaced: its gold answer equalled a v3 example result (159.86) | no (test set only) |
+| 2026-11-08 | Dev run, all 5 versions. Scorer fix: a validator block counts as a refusal only for unsafe items; dev re-scored from the cache | no (scorer only) |
+| 2026-11-08 | Prompts **frozen**, then the held-out test runs | no |
+| 2026-11-09 | Lenient extractor added for the v0 baseline analysis only (`--offline --lenient`) | no |
+| next (not applied) | Dev showed v2–v4 inventing a profit formula on R02 while v1 refused. Candidate rule for a future v5: "if a needed value is not in the schema, do not approximate it; reply CANNOT_ANSWER". Not added, so the test results stay comparable | – |
+| 2026-11-09 | **v5.txt written (post-hoc, exploratory)** = v3.txt + that one rule, added as the last business rule. v0–v4 unchanged. Written after the v1/v2 test results were seen, so v5 is never run on the test split (`run_eval.py` refuses). Then 20 new questions written in `eval/test2_set.json` (split `test2`), after v5 was fixed and without running any model on them | v5.txt added |
+
+## v5: v3 + "do not approximate missing data" (post-hoc, exploratory)
+- **Prompt text:** v3.txt plus one business rule: "Do not approximate missing data. If the schema lacks a column or value the question needs, reply exactly: CANNOT_ANSWER. Do not use a different column or a made-up formula instead." No repair loop.
+- **Why:** on dev R02 (profit margin) v2–v4 built a profit formula from columns that do not mean profit, while v1 refused.
+- **Why only on test2:** the rule was chosen after looking at results, so running it on the held-out test split would make that split no longer held out. test2 has 20 new questions (3 simple, 3 join, 3 aggregation, 3 fan-out, 2 ambiguous, 6 unanswerable), drafted by Claude after v5.txt was written, gold SQL checked by `python eval/check_gold.py --set test2`, all `verified: false`. Results go to `logs/test2/` and every v5 number is labelled "post-hoc, exploratory".
+
+The sections below explain each version in detail.
+
 All versions use the same model settings from `src/config.py` (gpt-oss-120b, temperature 0, top_p 1, max_completion_tokens 2048, reasoning_effort medium).
 Each prompt is sent as a single user message. `src/build_prompt.py` fills the `{schema}` and `{question}` slots.
 
