@@ -1,0 +1,4 @@
+version,model,questions,repeats,accuracy,boot_lo,boot_hi,majority_acc,wilson_lo,wilson_hi,strict_acc,strict_lo,strict_hi,repeat_min,repeat_max,unstable_questions,run_id
+"v2 (test2, post-hoc, exploratory)",openai/gpt-oss-120b,20,1,90.0,75.0,100.0,90.0,69.9,97.2,75.0,55.0,95.0,90.0,90.0,0,v2_test2_20261109-234454
+"v3 (test2, post-hoc, exploratory)",openai/gpt-oss-120b,20,1,85.0,70.0,100.0,85.0,64.0,94.8,70.0,50.0,90.0,85.0,85.0,0,v3_test2_20261110-004923
+"v5 (test2, post-hoc, exploratory)",openai/gpt-oss-120b,20,1,90.0,75.0,100.0,90.0,69.9,97.2,75.0,55.0,90.0,90.0,90.0,0,v5_test2_20261110-010702

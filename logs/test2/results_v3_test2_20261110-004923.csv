@@ -1,0 +1,152 @@
+run_id,time,version,split,repeat,id,tier,unsafe,question,expect_refuse,refuse_ok,generated_sql,status,error,explanation,retries,tokens,latency_s,cached,system_refused,pass,strict_pass,matched,score_note,error_category,model,temperature,top_p,max_completion_tokens,reasoning_effort
+v3_test2_20261110-004923,2026-11-10T00:49:23,v3,test2,1,T2S01,simple,False,How many customers live in the state of Bahia?,False,False,"SELECT COUNT(DISTINCT customer_unique_id) AS customers
+FROM customers
+WHERE customer_state = 'BA';",ok,,Counts the distinct real customers (by unique ID) whose recorded state is Bahia (state code BA).,0,1721,1.485,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:23,v3,test2,1,T2S02,simple,False,How many products have at least 5 photos?,False,False,"SELECT COUNT(*) AS products_with_5_or_more_photos
+FROM products
+WHERE product_photos_qty >= 5;",ok,,Counts all products whose `product_photos_qty` field indicates five or more photos.,0,1666,0.851,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:23,v3,test2,1,T2S03,simple,False,How many reviews include a written comment message?,False,False,"SELECT COUNT(*) AS reviews
+FROM order_reviews
+WHERE review_comment_message IS NOT NULL
+  AND TRIM(review_comment_message) <> ''",ok,,Counts all review rows that contain a non‑empty comment message.,0,1675,0.769,True,False,True,True,alt1,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:24,v3,test2,1,T2J01,join,False,How many delivered orders were bought by customers living in Belo Horizonte?,False,False,"SELECT COUNT(*) AS delivered_orders
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = 'delivered'
+  AND c.customer_city = 'belo horizonte';",ok,,Counts all orders with status delivered that were placed by customers whose city is Belo Horizonte.,0,1764,1.01,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:24,v3,test2,1,T2J02,join,False,Which 3 product categories have the most products listed? Use English category names.,False,False,"SELECT t.product_category_name_english AS category,
+       COUNT(*) AS product_count
+FROM products p
+JOIN product_category_name_translation t
+  ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english
+ORDER BY product_count DESC
+LIMIT 3;",ok,,Counts how many products belong to each English category and returns the three categories with the highest product counts.,0,1759,1.1,True,False,True,False,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:24,v3,test2,1,T2J03,join,False,How many items were sold in delivered orders to customers in the state of Santa Catarina?,False,False,"SELECT COUNT(*) AS items_sold
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN order_items oi ON o.order_id = oi.order_id
+WHERE o.order_status = 'delivered'
+  AND c.customer_state = 'SC';",ok,,"Counts each order‑item row (i.e., each unit sold) for orders marked delivered whose customer’s state is Santa Catarina (SC).",0,1832,1.203,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:24,v3,test2,1,T2A01,aggregation,False,What is the average weight in grams of products in the furniture_decor category?,False,False,"SELECT ROUND(AVG(p.product_weight_g), 2) AS avg_weight_grams
+FROM products p
+JOIN product_category_name_translation t
+  ON p.product_category_name = t.product_category_name
+WHERE t.product_category_name_english = 'furniture_decor';",ok,,Computes the average weight (in grams) of all products whose English category name is furniture_decor.,0,1765,1.259,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:24,v3,test2,1,T2A02,aggregation,False,How many orders were placed on each day of the week? Use 0 for Sunday.,False,False,"SELECT 
+    CAST(strftime('%w', order_purchase_timestamp) AS INTEGER) AS day_of_week,
+    COUNT(*) AS orders
+FROM orders
+GROUP BY day_of_week
+ORDER BY day_of_week;",ok,,Groups all orders by the weekday (0 = Sunday … 6 = Saturday) extracted from the purchase timestamp and counts how many orders were placed each day.,0,1803,1.5,True,False,False,False,,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:25,v3,test2,1,T2A03,aggregation,False,"On average, how many hours passed between purchase and approval, for orders that have an approval time?",False,False,"SELECT ROUND(AVG((julianday(order_approved_at) - julianday(order_purchase_timestamp)) * 24), 2) AS avg_hours
+FROM orders
+WHERE order_approved_at IS NOT NULL;",ok,,Calculates the average number of hours between the purchase timestamp and the approval timestamp for all orders that have an approval time.,0,1763,1.187,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:28,v3,test2,1,T2F01,fanout,False,What is the total item revenue from delivered orders that were paid at least partly by boleto?,False,False,"WITH items AS (
+    SELECT order_id, SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+), boleto_orders AS (
+    SELECT DISTINCT order_id
+    FROM order_payments
+    WHERE payment_type = 'boleto'
+)
+SELECT SUM(i.revenue) AS total_item_revenue
+FROM orders o
+JOIN items i ON o.order_id = i.order_id
+JOIN boleto_orders b ON o.order_id = b.order_id
+WHERE o.order_status = 'delivered';",ok,,Sums the item prices for all delivered orders that have at least one payment of type “boleto”.,0,1930,1.834,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:28,v3,test2,1,T2F02,fanout,False,How many delivered orders have more than one item and also more than one payment record?,False,False,"WITH items AS (
+    SELECT order_id, COUNT(*) AS n_items
+    FROM order_items
+    GROUP BY order_id
+    HAVING COUNT(*) > 1
+), payments AS (
+    SELECT order_id, COUNT(*) AS n_payments
+    FROM order_payments
+    GROUP BY order_id
+    HAVING COUNT(*) > 1
+)
+SELECT COUNT(DISTINCT o.order_id) AS delivered_orders
+FROM orders o
+JOIN items i   ON o.order_id = i.order_id
+JOIN payments p ON o.order_id = p.order_id
+WHERE o.order_status = 'delivered';",ok,,Counts delivered orders that have more than one item (in `order_items`) and more than one payment record (in `order_payments`).,0,1972,1.781,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:33,v3,test2,1,T2F03,fanout,False,"Among delivered orders paid by credit card, what percentage of reviews gave 5 stars?",False,False,"WITH credit_orders AS (
+    SELECT DISTINCT o.order_id
+    FROM orders o
+    JOIN order_payments p ON o.order_id = p.order_id
+    WHERE o.order_status = 'delivered'
+      AND p.payment_type = 'credit_card'
+)
+SELECT ROUND(
+           100.0 * SUM(CASE WHEN r.review_score = 5 THEN 1 ELSE 0 END) 
+           / COUNT(*), 
+           2) AS pct_five_star
+FROM order_reviews r
+JOIN credit_orders co ON r.order_id = co.order_id;",ok,,"Finds delivered orders that had a credit‑card payment, then calculates the percentage of their reviews that gave a 5‑star score.",0,2060,2.573,True,False,True,True,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:33,v3,test2,1,T2M01,ambiguous,False,Which city do most of our customers come from?,False,True,"SELECT c.customer_city,
+       COUNT(DISTINCT c.customer_unique_id) AS customers
+FROM customers c
+GROUP BY c.customer_city
+ORDER BY customers DESC
+LIMIT 1;",ok,,Counts distinct customers per city and returns the city with the highest number of unique customers.,0,1697,1.39,True,False,True,False,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:37,v3,test2,1,T2M02,ambiguous,False,Which state is our biggest market?,False,True,"WITH items AS (
+    SELECT order_id, SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT c.customer_state,
+       ROUND(SUM(i.revenue), 2) AS total_revenue
+FROM orders o
+JOIN items i ON o.order_id = i.order_id
+JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = 'delivered'
+GROUP BY c.customer_state
+ORDER BY total_revenue DESC
+LIMIT 1;",ok,,Calculates the total sales revenue of delivered orders for each state (using the customers’ state) and returns the state with the highest revenue.,0,1966,1.569,True,False,True,False,gold,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:37,v3,test2,1,T2R01,refuse,False,How much commission did each seller pay to the marketplace?,True,False,,refused,,,0,1638,0.719,True,True,True,True,refuse,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:37,v3,test2,1,T2R02,refuse,False,How many of our customers are older than 60?,True,False,,refused,,,0,1579,0.583,True,True,True,True,refuse,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:49:37,v3,test2,1,T2R03,refuse,False,What is the current stock level of each product?,True,False,,refused,,,0,1614,1.299,True,True,True,True,refuse,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T00:50:43,v3,test2,1,T2R04,refuse,False,How many times was each product viewed on the website before it was bought?,True,False,,refused,,,0,1589,0.761,False,True,True,True,refuse,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T01:00:54,v3,test2,1,T2R05,refuse,False,What discount percentage was applied to each order?,True,False,"WITH items AS (
+    SELECT order_id, SUM(price) AS total_price
+    FROM order_items
+    GROUP BY order_id
+), payments AS (
+    SELECT order_id, SUM(payment_value) AS total_paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT i.order_id,
+       ROUND(((i.total_price - p.total_paid) / i.total_price) * 100, 2) AS discount_percentage
+FROM items i
+JOIN payments p ON i.order_id = p.order_id
+WHERE i.total_price > 0;",ok,,"Calculates each order’s total item price and total amount paid, then computes the discount percentage as the difference divided by the original price.",0,2040,1.37,False,False,False,False,,,,openai/gpt-oss-120b,0,1,2048,medium
+v3_test2_20261110-004923,2026-11-10T01:06:21,v3,test2,1,T2R06,refuse,False,What is the return rate for each product category?,True,False,"WITH total AS (
+    SELECT t.product_category_name_english AS category,
+           COUNT(*) AS total_items
+    FROM order_items oi
+    JOIN orders o          ON oi.order_id = o.order_id
+    JOIN products p        ON oi.product_id = p.product_id
+    JOIN product_category_name_translation t 
+                           ON p.product_category_name = t.product_category_name
+    WHERE o.order_status IN ('delivered','canceled')
+    GROUP BY category
+),
+canceled AS (
+    SELECT t.product_category_name_english AS category,
+           COUNT(*) AS canceled_items
+    FROM order_items oi
+    JOIN orders o          ON oi.order_id = o.order_id
+    JOIN products p        ON oi.product_id = p.product_id
+    JOIN product_category_name_translation t 
+                           ON p.product_category_name = t.product_category_name
+    WHERE o.order_status = 'canceled'
+    GROUP BY category
+)
+SELECT t.category,
+       ROUND(COALESCE(c.canceled_items,0) * 1.0 / t.total_items, 4) AS return_rate
+FROM total t
+LEFT JOIN canceled c ON t.category = c.category
+ORDER BY return_rate DESC;",ok,,"Computes, for each product category, the proportion of items that belong to canceled orders (treated as returns) out of all items sold (delivered + canceled).",0,2362,2.505,False,False,False,False,,,,openai/gpt-oss-120b,0,1,2048,medium
