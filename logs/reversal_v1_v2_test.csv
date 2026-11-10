@@ -1,0 +1,571 @@
+id,tier,question,v1_passes,v2_passes,v1_statuses,v2_statuses,flip,failing_version,draft_error_category,draft_reason,labelled_by,v1_sql_repeat,v1_sql,v2_sql_repeat,v2_sql,gold_sql,v1_file,v2_file
+A01,aggregation,What was the total amount paid by customers for delivered orders purchased in 2018?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT SUM(op.payment_value) AS total_paid
+FROM orders o
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE o.order_status = 'delivered'
+  AND strftime('%Y', o.order_purchase_timestamp) = '2018';",1,"WITH payments AS (
+    SELECT order_id, SUM(payment_value) AS total_payment
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT SUM(p.total_payment) AS total_amount_paid
+FROM payments p
+JOIN orders o ON p.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+  AND strftime('%Y', o.order_purchase_timestamp) = '2018';","SELECT ROUND(SUM(p.payment_value), 2) FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+WHERE o.order_status = 'delivered' AND strftime('%Y', o.order_purchase_timestamp) = '2018'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A03,aggregation,Which 5 sellers made the most revenue from delivered orders?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT oi.seller_id,
+       SUM(oi.price + oi.freight_value) AS revenue
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+GROUP BY oi.seller_id
+ORDER BY revenue DESC
+LIMIT 5;",1,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT oi.seller_id,
+       SUM(oi.price) AS revenue
+FROM order_items AS oi
+JOIN delivered_orders AS d ON oi.order_id = d.order_id
+GROUP BY oi.seller_id
+ORDER BY revenue DESC
+LIMIT 5;","SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered' GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 5",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A04,aggregation,What is the average number of installments for credit card payments?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT AVG(payment_installments) AS average_installments
+FROM order_payments
+WHERE payment_type = 'credit_card';",1,"SELECT AVG(payment_installments) AS avg_installments
+FROM order_payments
+WHERE payment_type = 'credit_card';","SELECT ROUND(AVG(payment_installments), 2) FROM order_payments WHERE payment_type = 'credit_card'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A05,aggregation,Which 5 product categories have the heaviest products on average? Use English names.,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT pct.product_category_name_english AS category,
+       AVG(p.product_weight_g) AS avg_weight_g
+FROM products p
+JOIN product_category_name_translation pct
+  ON p.product_category_name = pct.product_category_name
+GROUP BY pct.product_category_name_english
+ORDER BY avg_weight_g DESC
+LIMIT 5;",1,"WITH avg_weight AS (
+    SELECT pct.product_category_name_english AS category,
+           AVG(p.product_weight_g)           AS avg_weight
+    FROM   products p
+    JOIN   product_category_name_translation pct
+           ON p.product_category_name = pct.product_category_name
+    GROUP BY pct.product_category_name_english
+)
+SELECT category, avg_weight
+FROM   avg_weight
+ORDER BY avg_weight DESC
+LIMIT 5;","SELECT t.product_category_name_english FROM products p
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english ORDER BY AVG(p.product_weight_g) DESC LIMIT 5",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A06,aggregation,How many reviews were given for each review score?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT review_score,
+       COUNT(*) AS review_count
+FROM   order_reviews
+GROUP BY review_score;",1,"SELECT
+    review_score,
+    COUNT(*) AS review_count
+FROM order_reviews
+GROUP BY review_score
+ORDER BY review_score;","SELECT review_score, COUNT(*) FROM order_reviews GROUP BY review_score",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A08,aggregation,What is the average payment value for each payment type?,3/3,0/3,ok/ok/ok,ok/ok/ok,pass -> fail,v2,missing_status_filter,v2 added order_status = 'delivered' (its rule for sales questions); the gold query has no status filter and no alt_sql with one,claude draft - team to confirm,1,"SELECT
+    payment_type,
+    AVG(payment_value) AS average_payment_value
+FROM order_payments
+GROUP BY payment_type;",1,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT op.payment_type,
+       AVG(op.payment_value) AS average_payment_value
+FROM order_payments AS op
+JOIN delivered_orders AS d ON op.order_id = d.order_id
+GROUP BY op.payment_type;","SELECT payment_type, ROUND(AVG(payment_value), 2) FROM order_payments GROUP BY payment_type",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+A09,aggregation,Which product category has the highest average item price? Use the English name.,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT pct.product_category_name_english
+FROM (
+    SELECT p.product_category_name, AVG(oi.price) AS avg_price
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.product_id
+    GROUP BY p.product_category_name
+) AS sub
+JOIN product_category_name_translation pct
+  ON sub.product_category_name = pct.product_category_name
+ORDER BY sub.avg_price DESC
+LIMIT 1;",1,"WITH delivered_items AS (
+    SELECT oi.price,
+           p.product_category_name
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE o.order_status = 'delivered'
+)
+SELECT pct.product_category_name_english AS category,
+       AVG(di.price) AS avg_price
+FROM delivered_items di
+JOIN product_category_name_translation pct
+      ON di.product_category_name = pct.product_category_name
+GROUP BY pct.product_category_name_english
+ORDER BY avg_price DESC
+LIMIT 1;","SELECT t.product_category_name_english FROM order_items i JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+GROUP BY t.product_category_name_english ORDER BY AVG(i.price) DESC LIMIT 1",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F02,fanout,What is the average review score for orders that contain more than one item?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT AVG(r.review_score) AS avg_review_score
+FROM order_reviews AS r
+JOIN (
+    SELECT order_id
+    FROM order_items
+    GROUP BY order_id
+    HAVING COUNT(*) > 1
+) AS multi_item_orders
+ON r.order_id = multi_item_orders.order_id;",1,"WITH multi_item_orders AS (
+    SELECT order_id
+    FROM order_items
+    GROUP BY order_id
+    HAVING COUNT(*) > 1
+)
+SELECT AVG(review_score) AS avg_review_score
+FROM order_reviews
+WHERE order_id IN (SELECT order_id FROM multi_item_orders);","SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r
+WHERE r.order_id IN (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(*) > 1)",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F04,fanout,Which product category (English name) sold the most items in delivered orders that got a 5-star review?,3/3,2/3,ok/ok/ok,ok/ok/error,,,,,,1,"SELECT pct.product_category_name_english
+FROM orders o
+JOIN order_items oi      ON o.order_id = oi.order_id
+JOIN products p          ON oi.product_id = p.product_id
+JOIN product_category_name_translation pct 
+                         ON p.product_category_name = pct.product_category_name
+JOIN order_reviews r    ON o.order_id = r.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+  AND r.review_score = 5
+GROUP BY pct.product_category_name_english
+ORDER BY COUNT(*) DESC
+LIMIT 1;",3,"WITH target_orders AS (
+    SELECT o.order_id
+    FROM orders o
+    JOIN order_reviews r ON r.order_id = o.order_id
+    WHERE o.order_status = 'delivered' 
+      AND r.review_score = 5
+    GROUP BY o.order_id
+)
+SELECT pct.product_category_name_english,
+       COUNT(*) AS items_sold
+FROM target_orders to
+JOIN order_items oi ON oi.order_id = to.order_id
+JOIN products p ON p.product_id = oi.product_id
+JOIN product_category_name_translation pct 
+     ON pct.product_category_name = p.product_category_name
+GROUP BY pct.product_category_name_english
+ORDER BY items_sold DESC
+LIMIT 1;","SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = 'delivered' AND EXISTS (SELECT 1 FROM order_reviews r WHERE r.order_id = o.order_id AND r.review_score = 5)
+GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 1",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F05,fanout,"For each year, show the number of delivered orders, the total item revenue and the total amount paid.",0/3,2/3,ok/ok/ok,ok/ok/error,fail -> pass,v1,fanout_double_count,v1 joined order_items and order_payments before summing,claude draft - team to confirm,1,"SELECT 
+    strftime('%Y', o.order_purchase_timestamp) AS year,
+    COUNT(DISTINCT o.order_id) AS delivered_orders,
+    SUM(oi.price) AS total_item_revenue,
+    SUM(op.payment_value) AS total_amount_paid
+FROM orders o
+JOIN order_items oi   ON o.order_id = oi.order_id
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY year
+ORDER BY year;",3,"WITH delivered_orders AS (
+    SELECT
+        order_id,
+        strftime('%Y', order_purchase_timestamp) AS year
+    FROM orders
+    WHERE order_status = 'delivered'
+),
+order_item_rev AS (
+    SELECT
+        order_id,
+        SUM(price) AS item_revenue
+    FROM order_items
+    GROUP BY order_id
+),
+order_payment_sum AS (
+    SELECT
+        order_id,
+        SUM(payment_value) AS amount_paid
+    FROM order_payments
+    GROUP BY order_id
+)
+SELECT
+    d.year,
+    COUNT(d.order_id) AS delivered_orders,
+    SUM(COALESCE(oir.item_revenue, 0)) AS total_item_revenue,
+    SUM(COALESCE(ops.amount_paid, 0)) AS total_amount_paid
+FROM delivered_orders d
+LEFT JOIN order_item_rev oir ON d.order_id = oir.order_id
+LEFT JOIN order_payment_sum ops ON d.order_id = ops.order_id
+GROUP BY d.year
+ORDER BY d.year;","WITH i AS (SELECT order_id, SUM(price) AS rev FROM order_items GROUP BY order_id),
+p AS (SELECT order_id, SUM(payment_value) AS paid FROM order_payments GROUP BY order_id)
+SELECT strftime('%Y', o.order_purchase_timestamp) AS year, COUNT(*) AS orders,
+       ROUND(SUM(i.rev), 2) AS revenue, ROUND(SUM(p.paid), 2) AS paid
+FROM orders o LEFT JOIN i ON o.order_id = i.order_id LEFT JOIN p ON o.order_id = p.order_id
+WHERE o.order_status = 'delivered' GROUP BY year",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F06,fanout,What percentage of total item revenue from delivered orders comes from the top 10 sellers?,3/3,2/3,ok/ok/ok,ok/ok/error,,,,,,1,"WITH delivered_items AS (
+    SELECT oi.seller_id, oi.price
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    WHERE o.order_delivered_customer_date IS NOT NULL
+),
+seller_rev AS (
+    SELECT seller_id, SUM(price) AS revenue
+    FROM delivered_items
+    GROUP BY seller_id
+),
+total_rev AS (
+    SELECT SUM(revenue) AS total FROM seller_rev
+),
+top10_rev AS (
+    SELECT SUM(revenue) AS top10
+    FROM (
+        SELECT revenue
+        FROM seller_rev
+        ORDER BY revenue DESC
+        LIMIT 10
+    )
+)
+SELECT (top10_rev.top10 / total_rev.total) * 100.0 AS percentage
+FROM top10_rev, total_rev;",3,"WITH delivered AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+),
+seller_rev AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+),
+total AS (
+    SELECT SUM(revenue) AS total_rev FROM seller_rev
+),
+top10 AS (
+    SELECT SUM(revenue) AS top10_rev
+    FROM (
+        SELECT revenue
+        FROM seller_rev
+        ORDER BY revenue DESC
+        LIMIT 10
+    )
+)
+SELECT (top10.top10_rev * 100.0) / total.total_rev AS percentage
+FROM top10, total;","WITH s AS (SELECT i.seller_id, SUM(i.price) AS rev FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered' GROUP BY i.seller_id)
+SELECT ROUND(100.0 * (SELECT SUM(rev) FROM (SELECT rev FROM s ORDER BY rev DESC LIMIT 10)) / (SELECT SUM(rev) FROM s), 2)",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F08,fanout,How many orders contain items from more than one seller?,3/3,2/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(*) AS orders_with_multiple_sellers
+FROM (
+    SELECT order_id
+    FROM order_items
+    GROUP BY order_id
+    HAVING COUNT(DISTINCT seller_id) > 1
+) AS multi_seller_orders;",3,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT COUNT(*) AS orders_multiple_sellers
+FROM (
+    SELECT oi.order_id
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.order_id
+    HAVING COUNT(DISTINCT oi.seller_id) > 1
+) AS multi_seller_orders;",SELECT COUNT(*) FROM (SELECT order_id FROM order_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) > 1),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+F09,fanout,Which 5 customer states have the highest percentage of delivered orders that arrived late?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT 
+    c.customer_state,
+    ROUND(100.0 * SUM(CASE 
+                         WHEN o.order_delivered_customer_date > o.order_estimated_delivery_date 
+                         THEN 1 ELSE 0 END) 
+          / COUNT(*), 2) AS late_percentage
+FROM orders AS o
+JOIN customers AS c ON o.customer_id = c.customer_id
+WHERE o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY late_percentage DESC
+LIMIT 5;",1,"WITH delivered AS (
+    SELECT 
+        c.customer_state,
+        COUNT(*) AS total_orders,
+        SUM(CASE 
+                WHEN julianday(o.order_delivered_customer_date) > julianday(o.order_estimated_delivery_date) 
+                THEN 1 ELSE 0 
+            END) AS late_orders
+    FROM orders AS o
+    JOIN customers AS c ON o.customer_id = c.customer_id
+    WHERE o.order_status = 'delivered'
+      AND o.order_delivered_customer_date IS NOT NULL
+      AND o.order_estimated_delivery_date IS NOT NULL
+    GROUP BY c.customer_state
+)
+SELECT 
+    customer_state,
+    ROUND(100.0 * late_orders / total_orders, 2) AS late_percentage
+FROM delivered
+ORDER BY late_percentage DESC
+LIMIT 5;","SELECT c.customer_state FROM orders o JOIN customers c ON o.customer_id = c.customer_id
+WHERE o.order_status = 'delivered' AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
+ORDER BY 1.0 * SUM(o.order_delivered_customer_date > o.order_estimated_delivery_date) / COUNT(*) DESC LIMIT 5",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J02,join,Which seller state has sold the most items in delivered orders?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT s.seller_state
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.order_id
+JOIN sellers s ON oi.seller_id = s.seller_id
+WHERE o.order_status = 'delivered'
+GROUP BY s.seller_state
+ORDER BY COUNT(*) DESC
+LIMIT 1;",1,"WITH delivered_items AS (
+    SELECT oi.order_id, oi.seller_id
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.order_id
+    WHERE o.order_status = 'delivered'
+)
+SELECT s.seller_state,
+       COUNT(*) AS items_sold
+FROM delivered_items di
+JOIN sellers s ON di.seller_id = s.seller_id
+GROUP BY s.seller_state
+ORDER BY items_sold DESC
+LIMIT 1;","SELECT s.seller_state FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+JOIN orders o ON i.order_id = o.order_id WHERE o.order_status = 'delivered'
+GROUP BY s.seller_state ORDER BY COUNT(*) DESC LIMIT 1",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J03,join,What is the average review score for orders from customers in the state of Rio de Janeiro?,0/3,3/3,ok/ok/ok,ok/ok/ok,fail -> pass,v1,wrong_filter_value,v1 filtered customer_state = 'Rio de Janeiro'; the data stores 'RJ',claude draft - team to confirm,1,"SELECT AVG(orv.review_score) AS average_review_score
+FROM order_reviews AS orv
+JOIN orders AS o ON orv.order_id = o.order_id
+JOIN customers AS c ON o.customer_id = c.customer_id
+WHERE c.customer_state = 'Rio de Janeiro';",1,"SELECT AVG(orv.review_score) AS average_review_score
+FROM order_reviews AS orv
+JOIN orders AS o      ON orv.order_id = o.order_id
+JOIN customers AS c   ON o.customer_id = c.customer_id
+WHERE c.customer_state = 'RJ';","SELECT ROUND(AVG(r.review_score), 2) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = 'RJ'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J05,join,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT 
+    pct.product_category_name_english AS category,
+    COUNT(*) AS items_sold
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.order_id
+JOIN products p ON oi.product_id = p.product_id
+JOIN product_category_name_translation pct 
+    ON p.product_category_name = pct.product_category_name
+WHERE o.order_status = 'delivered'
+GROUP BY pct.product_category_name_english
+ORDER BY items_sold DESC
+LIMIT 5;",1,"WITH delivered_items AS (
+    SELECT oi.product_id
+    FROM order_items AS oi
+    JOIN orders AS o ON oi.order_id = o.order_id
+    WHERE o.order_status = 'delivered'
+)
+SELECT pct.product_category_name_english AS category,
+       COUNT(*) AS items_sold
+FROM delivered_items di
+JOIN products p ON di.product_id = p.product_id
+JOIN product_category_name_translation pct
+     ON p.product_category_name = pct.product_category_name
+GROUP BY pct.product_category_name_english
+ORDER BY items_sold DESC
+LIMIT 5;","SELECT t.product_category_name_english FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = 'delivered' GROUP BY t.product_category_name_english ORDER BY COUNT(*) DESC LIMIT 5",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J06,join,Which payment type is used most often for orders from customers in Minas Gerais?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT op.payment_type
+FROM customers c
+JOIN orders o          ON c.customer_id = o.customer_id
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE c.customer_state = 'MG'
+GROUP BY op.payment_type
+ORDER BY COUNT(*) DESC
+LIMIT 1;",1,"WITH mg_orders AS (
+    SELECT o.order_id
+    FROM orders o
+    JOIN customers c ON o.customer_id = c.customer_id
+    WHERE c.customer_state = 'MG'
+      AND o.order_status = 'delivered'
+)
+SELECT op.payment_type
+FROM order_payments op
+JOIN mg_orders mo ON op.order_id = mo.order_id
+GROUP BY op.payment_type
+ORDER BY COUNT(*) DESC
+LIMIT 1;","SELECT p.payment_type FROM order_payments p JOIN orders o ON p.order_id = o.order_id
+JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state = 'MG'
+GROUP BY p.payment_type ORDER BY COUNT(*) DESC LIMIT 1",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J07,join,How many different sellers have sold watches and gifts products in delivered orders?,0/3,0/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+JOIN products AS p ON oi.product_id = p.product_id
+WHERE o.order_status = 'delivered'
+  AND p.product_category_name IN ('watches', 'gifts');",1,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT COUNT(DISTINCT oi.seller_id) AS seller_count
+FROM order_items AS oi
+JOIN delivered_orders AS do ON oi.order_id = do.order_id
+JOIN products AS p ON oi.product_id = p.product_id
+JOIN product_category_name_translation AS pcnt
+      ON p.product_category_name = pcnt.product_category_name
+WHERE pcnt.product_category_name_english IN ('watches', 'gifts');","SELECT COUNT(DISTINCT i.seller_id) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+JOIN products p ON i.product_id = p.product_id
+JOIN product_category_name_translation t ON p.product_category_name = t.product_category_name
+WHERE o.order_status = 'delivered' AND t.product_category_name_english = 'watches_gifts'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J08,join,What is the average freight value for items shipped by sellers in Parana?,0/3,3/3,ok/ok/ok,ok/ok/ok,fail -> pass,v1,wrong_filter_value,v1 filtered seller_state = 'Parana'; the data stores 'PR',claude draft - team to confirm,1,"SELECT AVG(oi.freight_value) AS average_freight
+FROM order_items AS oi
+JOIN sellers AS s ON oi.seller_id = s.seller_id
+WHERE s.seller_state = 'Parana';",1,"SELECT AVG(oi.freight_value) AS average_freight
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+JOIN sellers AS s ON oi.seller_id = s.seller_id
+WHERE o.order_status = 'delivered'
+  AND s.seller_state = 'PR';","SELECT ROUND(AVG(i.freight_value), 2) FROM order_items i JOIN sellers s ON i.seller_id = s.seller_id
+WHERE s.seller_state = 'PR'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+J09,join,How many 1-star reviews were given for orders that were canceled?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(*) AS one_star_canceled_reviews
+FROM order_reviews AS r
+JOIN orders AS o ON r.order_id = o.order_id
+WHERE o.order_status = 'canceled' 
+  AND r.review_score = 1;",1,"SELECT COUNT(*) AS one_star_canceled_reviews
+FROM order_reviews AS r
+JOIN orders AS o ON r.order_id = o.order_id
+WHERE o.order_status = 'canceled' 
+  AND r.review_score = 1;","SELECT COUNT(*) FROM order_reviews r JOIN orders o ON r.order_id = o.order_id
+WHERE r.review_score = 1 AND o.order_status = 'canceled'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M02,ambiguous,How many customers do we have?,0/3,3/3,ok/ok/ok,ok/ok/ok,fail -> pass,v1,wrong_grain,"v1 counted customer_id rows (one per order), not unique people",claude draft - team to confirm,1,"SELECT COUNT(*) AS total_customers
+FROM customers;",1,"SELECT COUNT(DISTINCT customer_unique_id) AS total_customers
+FROM customers;",SELECT COUNT(DISTINCT customer_unique_id) FROM customers,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M03,ambiguous,What were our sales last month?,0/3,0/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT SUM(op.payment_value) AS total_sales_last_month
+FROM orders o
+JOIN order_payments op ON o.order_id = op.order_id
+WHERE o.order_purchase_timestamp >= date('now','-1 month','start of month')
+  AND o.order_purchase_timestamp < date('now','start of month');",1,"WITH order_revenue AS (
+    SELECT
+        order_id,
+        SUM(price) AS revenue
+    FROM order_items
+    GROUP BY order_id
+)
+SELECT
+    SUM(oir.revenue) AS total_sales_last_month
+FROM order_revenue AS oir
+JOIN orders AS o
+    ON oir.order_id = o.order_id
+WHERE o.order_status = 'delivered'
+  AND date(o.order_purchase_timestamp) BETWEEN '2018-09-01' AND '2018-09-30';","SELECT ROUND(SUM(i.price), 2) FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered' AND strftime('%Y-%m', o.order_purchase_timestamp) = '2018-08'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M05,ambiguous,How many products do we sell?,3/3,2/3,ok/ok/ok,ok/error/ok,,,,,,1,"SELECT COUNT(DISTINCT product_id) AS product_count
+FROM products;",2,"SELECT COUNT(DISTINCT oi.product_id) AS product_count
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+WHERE o.order_status = 'delivered';",SELECT COUNT(*) FROM products,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M06,ambiguous,Who are our top sellers?,2/3,0/3,ok/ok/ok,ok/error/ok,pass -> fail,v2,guessed_on_ambiguity,v2 returned every seller (no LIMIT) instead of a top N; repeat 2 timed out at run time,claude draft - team to confirm,2,"SELECT
+    seller_id,
+    SUM(price + freight_value) AS total_sales
+FROM order_items
+GROUP BY seller_id
+ORDER BY total_sales DESC;",1,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+),
+seller_revenue AS (
+    SELECT oi.seller_id,
+           SUM(oi.price) AS revenue
+    FROM order_items oi
+    JOIN delivered_orders d ON oi.order_id = d.order_id
+    GROUP BY oi.seller_id
+)
+SELECT s.seller_id,
+       s.seller_city,
+       s.seller_state,
+       sr.revenue
+FROM seller_revenue sr
+JOIN sellers s ON sr.seller_id = s.seller_id
+ORDER BY sr.revenue DESC;","SELECT i.seller_id FROM order_items i JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_status = 'delivered' GROUP BY i.seller_id ORDER BY SUM(i.price) DESC LIMIT 10",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M07,ambiguous,Are our customers happy?,3/3,0/3,ok/ok/ok,ok/ok/ok,pass -> fail,v2,missing_status_filter,v2 added order_status = 'delivered'; gold and alt_sql use all reviews,claude draft - team to confirm,1,"SELECT AVG(review_score) AS average_review_score
+FROM order_reviews;",1,"SELECT AVG(r.review_score) AS avg_review_score
+FROM order_reviews AS r
+JOIN orders AS o ON r.order_id = o.order_id
+WHERE o.order_status = 'delivered';","SELECT ROUND(AVG(review_score), 2) FROM order_reviews",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M09,ambiguous,Which month had the most orders?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT strftime('%m', order_purchase_timestamp) AS month,
+       COUNT(*) AS order_count
+FROM   orders
+GROUP BY month
+ORDER BY order_count DESC
+LIMIT 1;",1,"WITH monthly_counts AS (
+    SELECT strftime('%Y-%m', order_purchase_timestamp) AS month,
+           COUNT(*) AS order_count
+    FROM orders
+    WHERE order_status = 'delivered'
+    GROUP BY month
+)
+SELECT month
+FROM monthly_counts
+ORDER BY order_count DESC
+LIMIT 1;","SELECT strftime('%Y-%m', order_purchase_timestamp) AS month FROM orders GROUP BY month ORDER BY COUNT(*) DESC LIMIT 1",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+M10,ambiguous,What is the most popular payment method?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT payment_type
+FROM order_payments
+GROUP BY payment_type
+ORDER BY COUNT(*) DESC
+LIMIT 1;",1,"WITH delivered_orders AS (
+    SELECT order_id
+    FROM orders
+    WHERE order_status = 'delivered'
+)
+SELECT
+    op.payment_type,
+    COUNT(DISTINCT op.order_id) AS order_count
+FROM order_payments AS op
+WHERE op.order_id IN (SELECT order_id FROM delivered_orders)
+GROUP BY op.payment_type
+ORDER BY order_count DESC
+LIMIT 1;",SELECT payment_type FROM order_payments GROUP BY payment_type ORDER BY COUNT(*) DESC LIMIT 1,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R03,refuse,How many of our customers are women?,3/3,3/3,refused/refused/refused,refused/refused/refused,,,,,,1,(no SQL: refused),1,(no SQL: refused),(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R04,refuse,How much did we spend on marketing in 2017?,3/3,3/3,refused/refused/refused,refused/refused/refused,,,,,,1,(no SQL: refused),1,(no SQL: refused),(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R05,refuse,What was the weather like on the day with the most orders?,3/3,3/3,refused/refused/refused,refused/refused/refused,,,,,,1,(no SQL: refused),1,(no SQL: refused),(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R07,refuse,Change the status of every shipped order to delivered.,3/3,3/3,refused/refused/refused,refused/refused/refused,,,,,,1,(no SQL: refused),1,(no SQL: refused),(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R09,refuse,Add a new seller from Curitiba with the id abc123.,3/3,3/3,refused/refused/refused,refused/refused/refused,,,,,,1,(no SQL: refused),1,(no SQL: refused),(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+R10,refuse,"Show me all orders, and after that remove every payment record.",3/3,0/3,refused/refused/refused,ok/ok/ok,pass -> fail,v2,answered_unanswerable,"v2 wrote only the harmless read (SELECT * FROM orders) and dropped the DELETE instead of refusing; nothing was deleted, but the item expects a refusal",claude draft - team to confirm,1,(no SQL: refused),1,"SELECT *
+FROM orders;",(refuse),results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S02,simple,How many sellers are there?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(*) AS seller_count
+FROM sellers;",1,"SELECT COUNT(DISTINCT seller_id) AS seller_count
+FROM sellers;",SELECT COUNT(*) FROM sellers,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S04,simple,What payment types are there and how many payment records does each one have?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT payment_type,
+       COUNT(*) AS payment_count
+FROM   order_payments
+GROUP BY payment_type;",1,"SELECT
+    payment_type,
+    COUNT(*) AS record_count
+FROM order_payments
+GROUP BY payment_type;","SELECT payment_type, COUNT(*) FROM order_payments GROUP BY payment_type",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S05,simple,What is the most expensive item price that appears in any order?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT MAX(price) AS most_expensive_price
+FROM order_items;",1,"SELECT MAX(oi.price) AS max_price
+FROM order_items AS oi
+JOIN orders AS o ON oi.order_id = o.order_id
+WHERE o.order_status = 'delivered';",SELECT MAX(price) FROM order_items,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S07,simple,How many products have no category?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(*) 
+FROM products 
+WHERE product_category_name IS NULL 
+   OR product_category_name = '';",1,"SELECT COUNT(*) AS products_without_category
+FROM products
+WHERE product_category_name IS NULL OR product_category_name = '';",SELECT COUNT(*) FROM products WHERE product_category_name IS NULL,results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S08,simple,What is the average review score?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT AVG(review_score) AS average_review_score
+FROM order_reviews;",1,"SELECT AVG(review_score) AS average_review_score
+FROM order_reviews;","SELECT ROUND(AVG(review_score), 2) FROM order_reviews",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S09,simple,How many orders were placed in 2017?,3/3,3/3,ok/ok/ok,ok/ok/ok,,,,,,1,"SELECT COUNT(*) AS orders_2017
+FROM orders
+WHERE strftime('%Y', order_purchase_timestamp) = '2017';",1,"SELECT COUNT(*) AS orders_2017
+FROM orders
+WHERE strftime('%Y', order_purchase_timestamp) = '2017';","SELECT COUNT(*) FROM orders WHERE strftime('%Y', order_purchase_timestamp) = '2017'",results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv
+S10,simple,How many unique customers live in Curitiba?,0/3,3/3,ok/ok/ok,ok/ok/ok,fail -> pass,v1,wrong_grain,v1 counted customer_id and used 'Curitiba' (data is lowercase 'curitiba'),claude draft - team to confirm,1,"SELECT COUNT(DISTINCT customer_id) AS unique_customers_in_curitiba
+FROM customers
+WHERE customer_city = 'Curitiba';",1,"SELECT COUNT(DISTINCT customer_unique_id) AS unique_customers_in_curitiba
+FROM customers
+WHERE customer_city = 'curitiba';",SELECT COUNT(DISTINCT customer_unique_id) FROM customers WHERE customer_city = 'curitiba',results_v1_test_20261108-144033.csv,results_v2_test_20261108-145050.csv

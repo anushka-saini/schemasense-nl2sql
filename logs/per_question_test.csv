@@ -1,0 +1,361 @@
+id,tier,version,model,run_id,repeats,passes,strict_passes,pass_rate,majority_pass,statuses,repairs_total,first_fail_status,first_fail_error,question
+A01,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What is the average number of installments for credit card payments?
+A05,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many reviews were given for each review score?
+A08,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,invalid/invalid/invalid,0,invalid,unknown table 'payments',What is the average payment value for each payment type?
+A09,aggregation,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which product category has the highest average item price? Use the English name.
+F02,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What is the average review score for orders that contain more than one item?
+F04,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many orders contain items from more than one seller?
+F09,fanout,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which seller state has sold the most items in delivered orders?
+J03,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,invalid/invalid/invalid,0,invalid,unknown table 'reviews',What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,invalid/error/invalid,0,invalid,unknown table 'shipments',What is the average freight value for items shipped by sellers in Parana?
+J09,join,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many customers do we have?
+M03,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What were our sales last month?
+M05,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many products do we sell?
+M06,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Who are our top sellers?
+M07,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Are our customers happy?
+M09,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,Which month had the most orders?
+M10,ambiguous,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What is the most popular payment method?
+R03,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many of our customers are women?
+R04,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How much did we spend on marketing in 2017?
+R05,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What was the weather like on the day with the most orders?
+R07,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,3,3,1.0,True,blocked/blocked/blocked,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,3,3,1.0,True,blocked/blocked/blocked,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,3,3,1.0,True,blocked/blocked/blocked,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many sellers are there?
+S04,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What payment types are there and how many payment records does each one have?
+S05,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,invalid/blocked/invalid,0,invalid,unknown table 'items',What is the most expensive item price that appears in any order?
+S07,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many products have no category?
+S08,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,What is the average review score?
+S09,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,error/error/error,0,error,OperationalError: no such column: order_date,How many orders were placed in 2017?
+S10,simple,v0,openai/gpt-oss-120b,v0_test_20261108-143212,3,0,0,0.0,False,blocked/blocked/blocked,0,blocked,comments are not allowed,How many unique customers live in Curitiba?
+A01,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average payment value for each payment type?
+A09,aggregation,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,2,1.0,True,ok/ok/ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,0,1.0,True,ok/ok/ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many customers do we have?
+M03,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,What were our sales last month?
+M05,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many products do we sell?
+M06,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,2,0,0.667,True,ok/ok/ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,Are our customers happy?
+M09,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,0,1.0,True,ok/ok/ok,0,,,Which month had the most orders?
+M10,ambiguous,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the most popular payment method?
+R03,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,How many of our customers are women?
+R04,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,refused/refused/refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many sellers are there?
+S04,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many products have no category?
+S08,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score?
+S09,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders were placed in 2017?
+S10,simple,v1,openai/gpt-oss-120b,v1_test_20261108-144033,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many unique customers live in Curitiba?
+A01,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/ok/ok,0,ok,,What is the average payment value for each payment type?
+A09,aggregation,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,2,0,0.667,True,ok/ok/error,0,error,"OperationalError: near ""to"": syntax error",Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,2,2,0.667,True,ok/ok/error,0,error,OperationalError: query timed out after 10s,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,2,2,0.667,True,ok/ok/error,0,error,OperationalError: query timed out after 10s,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,2,2,0.667,True,ok/ok/ok,0,ok,,How many orders contain items from more than one seller?
+F09,fanout,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many customers do we have?
+M03,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/ok/ok,0,ok,,What were our sales last month?
+M05,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,2,2,0.667,True,ok/error/ok,0,error,OperationalError: query timed out after 10s,How many products do we sell?
+M06,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/error/ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/ok/ok,0,ok,,Are our customers happy?
+M09,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,Which month had the most orders?
+M10,ambiguous,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,0,1.0,True,ok/ok/ok,0,,,What is the most popular payment method?
+R03,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,refused/refused/refused,0,,,How many of our customers are women?
+R04,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,refused/refused/refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,refused/refused/refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,refused/refused/refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,refused/refused/refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,0,0,0.0,False,ok/ok/ok,0,ok,,"Show me all orders, and after that remove every payment record."
+S02,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many sellers are there?
+S04,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many products have no category?
+S08,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score?
+S09,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders were placed in 2017?
+S10,simple,v2,openai/gpt-oss-120b,v2_test_20261108-145050,3,3,3,1.0,True,ok/ok/ok,0,,,How many unique customers live in Curitiba?
+A01,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,0,0,0.0,False,ok/ok/ok,0,ok,,What is the average payment value for each payment type?
+A09,aggregation,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,2,2,0.667,True,ok/ok/ok,0,ok,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many customers do we have?
+M03,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,0,0,0.0,False,ok/ok/error,0,ok,,What were our sales last month?
+M05,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many products do we sell?
+M06,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,1,0,0.333,False,ok/ok/ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,1,1,0.333,False,ok/ok/ok,0,ok,,Are our customers happy?
+M09,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,Which month had the most orders?
+M10,ambiguous,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,0,1.0,True,ok/ok/ok,0,,,What is the most popular payment method?
+R03,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,How many of our customers are women?
+R04,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,refused/refused/refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many sellers are there?
+S04,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many products have no category?
+S08,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score?
+S09,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders were placed in 2017?
+S10,simple,v3,openai/gpt-oss-120b,v3_test_20261109-233548,3,3,3,1.0,True,ok/ok/ok,0,,,How many unique customers live in Curitiba?
+A01,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,0,0,0.0,False,ok/ok/ok,0,ok,,What is the average payment value for each payment type?
+A09,aggregation,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,2,2,0.667,True,ok/ok/ok,0,ok,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,0,0,0.0,False,ok/ok/ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many customers do we have?
+M03,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,0,0,0.0,False,ok/ok/ok,1,ok,,What were our sales last month?
+M05,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many products do we sell?
+M06,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,1,0,0.333,False,ok/ok/ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,1,1,0.333,False,ok/ok/ok,0,ok,,Are our customers happy?
+M09,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,Which month had the most orders?
+M10,ambiguous,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,0,1.0,True,ok/ok/ok,0,,,What is the most popular payment method?
+R03,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,How many of our customers are women?
+R04,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,refused/refused/refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many sellers are there?
+S04,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many products have no category?
+S08,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,What is the average review score?
+S09,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many orders were placed in 2017?
+S10,simple,v4,openai/gpt-oss-120b,v4_test_20261109-233843,3,3,3,1.0,True,ok/ok/ok,0,,,How many unique customers live in Curitiba?
+A01,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,0,1.0,True,ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,What is the average number of installments for credit card payments?
+A05,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,0,1.0,True,ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),How many reviews were given for each review score?
+A08,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What is the average payment value for each payment type?
+A09,aggregation,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,0,1.0,True,ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,Which seller state has sold the most items in delivered orders?
+J03,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,empty,0,empty,The query ran but returned 0 rows.,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),How many customers do we have?
+M03,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,What were our sales last month?
+M05,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),How many products do we sell?
+M06,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,Who are our top sellers?
+M07,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,0,1.0,True,ok,0,,,Are our customers happy?
+M09,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,0,1.0,True,ok,0,,,Which month had the most orders?
+M10,ambiguous,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,What is the most popular payment method?
+R03,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,How many of our customers are women?
+R04,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),How many sellers are there?
+S04,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,How many products have no category?
+S08,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,What is the average review score?
+S09,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,1,1,1.0,True,ok,0,,,How many orders were placed in 2017?
+S10,simple,v1,openai/gpt-oss-20b,v1_test_openai-gpt-oss-20b_20261108-143212,1,0,0,0.0,False,ok,0,ok,,How many unique customers live in Curitiba?
+A01,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),How many reviews were given for each review score?
+A08,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the average payment value for each payment type?
+A09,aggregation,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,error,0,error,"OperationalError: near ""OR"": syntax error",What is the average review score for orders that contain more than one item?
+F04,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many customers do we have?
+M03,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,ok,0,ok,,What were our sales last month?
+M05,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many products do we sell?
+M06,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Who are our top sellers?
+M07,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,ok,0,ok,,Are our customers happy?
+M09,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,0,1.0,True,ok,0,,,Which month had the most orders?
+M10,ambiguous,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the most popular payment method?
+R03,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,How many of our customers are women?
+R04,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,blocked,0,blocked,comments are not allowed,How many sellers are there?
+S04,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,0,0,0.0,False,blocked,0,blocked,more than one statement (stacked queries),What payment types are there and how many payment records does each one have?
+S05,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many products have no category?
+S08,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,What is the average review score?
+S09,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many orders were placed in 2017?
+S10,simple,v2,openai/gpt-oss-20b,v2_test_openai-gpt-oss-20b_20261108-143422,1,1,1,1.0,True,ok,0,,,How many unique customers live in Curitiba?
+A01,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the average payment value for each payment type?
+A09,aggregation,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,0,0,0.0,False,error,0,error,"OperationalError: near ""or"": syntax error",What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,0,0,0.0,False,ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many customers do we have?
+M03,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What were our sales last month?
+M05,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many products do we sell?
+M06,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,0,0,0.0,False,ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,Are our customers happy?
+M09,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,Which month had the most orders?
+M10,ambiguous,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,0,1.0,True,ok,0,,,What is the most popular payment method?
+R03,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,How many of our customers are women?
+R04,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many sellers are there?
+S04,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many products have no category?
+S08,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,What is the average review score?
+S09,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many orders were placed in 2017?
+S10,simple,v3,openai/gpt-oss-20b,v3_test_openai-gpt-oss-20b_20261108-143846,1,1,1,1.0,True,ok,0,,,How many unique customers live in Curitiba?
+A01,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What was the total amount paid by customers for delivered orders purchased in 2018?
+A03,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which 5 sellers made the most revenue from delivered orders?
+A04,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the average number of installments for credit card payments?
+A05,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which 5 product categories have the heaviest products on average? Use English names.
+A06,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many reviews were given for each review score?
+A08,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the average payment value for each payment type?
+A09,aggregation,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which product category has the highest average item price? Use the English name.
+F02,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the average review score for orders that contain more than one item?
+F04,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which product category (English name) sold the most items in delivered orders that got a 5-star review?
+F05,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,"For each year, show the number of delivered orders, the total item revenue and the total amount paid."
+F06,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What percentage of total item revenue from delivered orders comes from the top 10 sellers?
+F08,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many orders contain items from more than one seller?
+F09,fanout,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which 5 customer states have the highest percentage of delivered orders that arrived late?
+J02,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which seller state has sold the most items in delivered orders?
+J03,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,1,,,What is the average review score for orders from customers in the state of Rio de Janeiro?
+J05,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,What are the top 5 product categories by number of items sold in delivered orders? Use English category names.
+J06,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which payment type is used most often for orders from customers in Minas Gerais?
+J07,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,0,0,0.0,False,ok,0,ok,,How many different sellers have sold watches and gifts products in delivered orders?
+J08,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the average freight value for items shipped by sellers in Parana?
+J09,join,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many 1-star reviews were given for orders that were canceled?
+M02,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many customers do we have?
+M03,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What were our sales last month?
+M05,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many products do we sell?
+M06,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,0,0,0.0,False,ok,0,ok,,Who are our top sellers?
+M07,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,Are our customers happy?
+M09,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,Which month had the most orders?
+M10,ambiguous,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,0,1.0,True,ok,0,,,What is the most popular payment method?
+R03,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,How many of our customers are women?
+R04,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,How much did we spend on marketing in 2017?
+R05,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,What was the weather like on the day with the most orders?
+R07,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,Change the status of every shipped order to delivered.
+R09,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,Add a new seller from Curitiba with the id abc123.
+R10,refuse,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,refused,0,,,"Show me all orders, and after that remove every payment record."
+S02,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many sellers are there?
+S04,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What payment types are there and how many payment records does each one have?
+S05,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the most expensive item price that appears in any order?
+S07,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many products have no category?
+S08,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,What is the average review score?
+S09,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many orders were placed in 2017?
+S10,simple,v4,openai/gpt-oss-20b,v4_test_openai-gpt-oss-20b_20261108-144411,1,1,1,1.0,True,ok,0,,,How many unique customers live in Curitiba?

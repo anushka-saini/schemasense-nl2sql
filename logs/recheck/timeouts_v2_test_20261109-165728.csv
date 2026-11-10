@@ -1,0 +1,5 @@
+rechecked_at,file,id,repeat,original_time,original_error,limit_s,ok_now,seconds_now,error_now,matches_gold_now
+2026-11-09T16:57:04,results_v2_test_20261108-145050.csv,M05,2,2026-11-08T21:55:21,OperationalError: query timed out after 10s,10,True,1.06,,False
+2026-11-09T16:57:11,results_v2_test_20261108-145050.csv,M06,2,2026-11-08T21:55:33,OperationalError: query timed out after 10s,10,True,2.98,,False
+2026-11-09T16:57:20,results_v2_test_20261108-145050.csv,F05,3,2026-11-09T13:01:41,OperationalError: query timed out after 10s,10,True,4.26,,True
+2026-11-09T16:57:28,results_v2_test_20261108-145050.csv,F06,3,2026-11-09T13:01:54,OperationalError: query timed out after 10s,10,True,4.34,,True
